@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('users', function(Blueprint $table){
             $table->id()->autoIncrement();
-            $table->string('mail');
-            $table->string('password', 255);
+            $table->string('name', 255);
+            $table->string('forname', 255);
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
             $table->string('phone_country', 4);
             $table->string('phone_number', 15);
             $table->char('gender');

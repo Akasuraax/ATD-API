@@ -25,6 +25,7 @@ return new class extends Migration
             $table->date('birth_date');
             $table->text('address');
             $table->string('zipcode', 5);
+            $table->char('status');
             $table->boolean('ban');
             $table->boolean('notification');
             $table->boolean('archive');

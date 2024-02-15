@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
     Route::prefix('/signIn')->group(function (){
-        Route::post('/volunteer', function (Request $request) {
+        Route::post('/volunteer', function (    Request $request) {
             return app(AuthController::class)->register($request, 2);
         });
         Route::post('/beneficiary', function (Request $request) {

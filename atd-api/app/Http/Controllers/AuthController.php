@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -19,20 +20,24 @@ class AuthController extends Controller
 
     public function register(Request $request, int $role)
     {
-        $fields = $request->validate([
-            'name' => 'required|string|max:255',
-            'forname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'phone_country' => 'nullable|string|max:4',
-            'phone_number' => 'nullable|string|max:15',
-            'gender' => 'required|string|max:1',
-            'birth_date' => 'required|date',
-            'address' => 'required|string',
-            'zipcode' => 'required|string|max:5',
-            'siret_number' => 'nullable|string|max:14',
-            'compagny' => 'nullable|string'
-        ]);
+        try {
+            $fields = $request->validate([
+                'name' => 'required|string|max:255',
+                'forname' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+                'phone_country' => 'nullable|string|max:4',
+                'phone_number' => 'nullable|string|max:15',
+                'gender' => 'required|string|max:1',
+                'birth_date' => 'required|date',
+                'address' => 'required|string',
+                'zipcode' => 'required|string|max:5',
+                'siret_number' => 'nullable|string|max:14',
+                'compagny' => 'nullable|string'
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         if ($role == 2 || $role == 3) {
             $user = User::create([

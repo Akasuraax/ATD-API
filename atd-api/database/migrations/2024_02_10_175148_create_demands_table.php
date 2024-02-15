@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->text('description');
             $table->char('status');
-            $table->integer('id_type')->nullable(false);
+            $table->integer('id_type');
             $table->foreign('id_type')->references('id')->on('types')->onDelete('restrict');
             $table->boolean('archive');
             $table->timestamps();

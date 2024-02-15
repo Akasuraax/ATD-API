@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('title', 255);
+            $table->text('description');
             $table->char('type');
             $table->char('status');
             $table->char('severity');

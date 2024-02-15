@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('can_have_circuits', function (Blueprint $table) {
-            $table->integer('id_journey')->nullable(false);
-            $table->integer('id_activity')->nullable(false);
+            $table->integer('id_journey');
+            $table->integer('id_activity');
             $table->foreign('id_journey')->references('id')->on('journeys')->onDelete('restrict');
             $table->foreign('id_activity')->references('id')->on('activities')->onDelete('restrict');
             $table->primary(['id_journey', 'id_activity']);

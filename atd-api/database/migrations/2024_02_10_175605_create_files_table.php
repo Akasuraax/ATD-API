@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255);
             $table->text('link');
-            $table->integer('id_user');
+            $table->integer('id_user')->nullable();
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
             $table->boolean('archive');
             $table->timestamps();

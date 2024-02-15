@@ -1,11 +1,6 @@
 <?php
 
-use App\Models\Partner;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Casts\Json;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Volunteer\UserController;
-use App\Http\Controllers\Volunteer\PartnerController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,7 +15,13 @@ use Illuminate\Support\Facades\Route;
 */
 
     Route::prefix('/signIn')->group(function (){
-        Route::post('/volunteer', [UserController::class, 'createUser']);
-    Route::post('/beneficiary', [UserController::class, 'createUser']);
-    Route::post('/partner', [PartnerController::class, 'createPartner']);
+
+        Route::post('/volunteer', [UserController::class, 'createVolunteer']);
+        Route::post('/beneficiary', [UserController::class, 'createUser']);
+        Route::post('/partner', [UserController::class, 'createPartner']);
 });
+
+       Route::get('/user', [UserController::class, 'getUsers']);
+
+
+    Route::post('/login', [UserController::class, 'login']);

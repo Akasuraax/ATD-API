@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sends', function (Blueprint $table) {
-            $table->integer('id_user')->nullable(false);
+            $table->integer('id_user');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
-            $table->integer('id_ticket')->nullable(false);
+            $table->integer('id_ticket');
             $table->foreign('id_ticket')->references('id')->on('tickets')->onDelete('restrict');
             $table->primary(['id_user', 'id_ticket']);
             $table->boolean('archive');

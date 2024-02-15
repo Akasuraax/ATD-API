@@ -16,8 +16,8 @@ return new class extends Migration
             $table->char('checking');
             $table->boolean('archive');
             $table->timestamps();
-            $table->integer('id_volunteer')->nullable(false);
-            $table->integer('id_beneficiary')->nullable(false);
+            $table->integer('id_volunteer');
+            $table->integer('id_beneficiary');
             $table->foreign('id_volunteer')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('id_beneficiary')->references('id')->on('users')->onDelete('restrict');
         });

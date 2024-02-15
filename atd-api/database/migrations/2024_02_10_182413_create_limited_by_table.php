@@ -15,8 +15,8 @@ return new class extends Migration
             $table->integer('max');
             $table->integer('min');
             $table->integer('count');
-            $table->integer('id_role')->nullable(false);
-            $table->integer('id_activity')->nullable(false);
+            $table->integer('id_role');
+            $table->integer('id_activity');
             $table->foreign('id_role')->references('id')->on('roles')->onDelete('restrict');
             $table->foreign('id_activity')->references('id')->on('activities')->onDelete('restrict');
             $table->primary(['id_role', 'id_activity']);

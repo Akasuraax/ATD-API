@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('drives', function (Blueprint $table) {
-            $table->integer('id_journey')->nullable(false);
-            $table->integer('id_vehicle')->nullable(false);
+            $table->integer('id_journey');
+            $table->integer('id_vehicle');
             $table->foreign('id_journey')->references('id')->on('journeys')->onDelete('restrict');
             $table->foreign('id_vehicle')->references('id')->on('vehicles')->onDelete('restrict');
             $table->primary(['id_journey', 'id_vehicle']);

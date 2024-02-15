@@ -16,8 +16,8 @@ return new class extends Migration
             $table->text('description');
             $table->boolean('archive');
             $table->timestamps();
-            $table->integer('id_user')->nullable(false);
-            $table->integer('id_ticket')->nullable(false);
+            $table->integer('id_user');
+            $table->integer('id_ticket');
             $table->foreign('id_ticket')->references('id')->on('tickets')->onDelete('restrict');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
         });

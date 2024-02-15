@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->string('title', 255);
             $table->string('description', 255);
-            $table->text('address');
-            $table->string('zipcode',5);
+            $table->text('address')->nullable();
+            $table->string('zipcode',5)->nullable();
             $table->dateTime('start_date');
             $table->dateTime('end_date');
-            $table->integer('donation');
-            $table->integer('id_user')->nullable(false);
+            $table->integer('donation')->nullable();
+            $table->integer('id_user');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
             $table->boolean('archive');
             $table->timestamps();

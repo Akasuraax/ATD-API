@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('types', function (Blueprint $table) {
             $table->id()->autoIncrement();
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->boolean('access_to_warehouse');
             $table->boolean('access_to_journey');
             $table->boolean('archive');

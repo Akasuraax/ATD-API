@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('activity_files', function (Blueprint $table) {
-            $table->integer('id_file')->nullable(false);
-            $table->integer('id_activity')->nullable(false);
+            $table->integer('id_file');
+            $table->integer('id_activity');
             $table->foreign('id_file')->references('id')->on('files')->onDelete('restrict');
             $table->foreign('id_activity')->references('id')->on('activities')->onDelete('restrict');
             $table->primary(['id_file', 'id_activity']);

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Model
+class User extends Authenticatable
 {
-    use HasFactory;
+    use HasApiTokens, HasFactory, Notifiable;
     protected $fillable = [
         'name',
         'forname',
@@ -20,6 +22,8 @@ class User extends Model
         'birth_date',
         'address',
         'zipcode',
+        'siret_number',
+        'compagny',
         'status',
         'ban',
         'notification',
@@ -27,7 +31,7 @@ class User extends Model
     ];
 
     protected $guarded = [
-
+        'id'
     ];
 
     /**

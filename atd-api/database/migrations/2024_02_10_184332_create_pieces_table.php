@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->dateTime('expired_date');
             $table->integer('weight');
-            $table->integer('id_warehouse')->nullable(false);
-            $table->integer('id_product')->nullable(false);
+            $table->integer('id_warehouse');
+            $table->integer('id_product');
             $table->foreign('id_warehouse')->references('id')->on('warehouses')->onDelete('restrict');
             $table->foreign('id_product')->references('id')->on('products')->onDelete('restrict');
             $table->boolean('archive');

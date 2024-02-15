@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('address');
             $table->string('zipcode', 5);
             $table->dateTime('time');
-            $table->integer('id_journey')->nullable(false);
+            $table->integer('id_journey');
             $table->foreign('id_journey')->references('id')->on('journeys')->onDelete('restrict');
             $table->boolean('archive');
             $table->timestamps();

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('participates', function (Blueprint $table) {
             $table->integer('count');
-            $table->integer('id_user')->nullable(false);
-            $table->integer('id_activity')->nullable(false);
+            $table->integer('id_user');
+            $table->integer('id_activity');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('id_activity')->references('id')->on('activities')->onDelete('restrict');
             $table->primary(['id_user', 'id_activity']);

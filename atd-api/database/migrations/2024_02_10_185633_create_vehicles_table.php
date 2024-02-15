@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('license_plate', 9);
             $table->float('average_consumption');
             $table->char('fuel_type');
-            $table->integer('id_annexe')->nullable(false);
+            $table->integer('id_annexe');
             $table->foreign('id_annexe')->references('id')->on('annexes')->onDelete('restrict');
             $table->boolean('archive');
             $table->timestamps();

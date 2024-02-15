@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name', 255);
             $table->text('address');
             $table->string('zipcode', 5);
-            $table->dateTime('time');
             $table->boolean('archive');
             $table->timestamps();
         });

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('have_roles', function (Blueprint $table) {
-            $table->integer('id_user')->nullable(false);
-            $table->integer('id_role')->nullable(false);
+            $table->integer('id_user');
+            $table->integer('id_role');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('id_role')->references('id')->on('roles')->onDelete('restrict');
             $table->primary(['id_user', 'id_role']);

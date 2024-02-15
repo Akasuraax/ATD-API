@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('contains', function (Blueprint $table) {
             $table->integer('count');
-            $table->integer('id_recipe')->nullable(false);
-            $table->integer('id_activity')->nullable(false);
+            $table->integer('id_recipe');
+            $table->integer('id_activity');
             $table->foreign('id_recipe')->references('id')->on('recipes')->onDelete('restrict');
             $table->foreign('id_activity')->references('id')->on('activities')->onDelete('restrict');
             $table->primary(['id_recipe', 'id_activity']);

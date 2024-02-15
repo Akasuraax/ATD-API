@@ -10,21 +10,25 @@ use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
-    public function createTicket(Request $request): string
+    public function createTicket(Request $request)
     {
         $validatedData = $request->validate([
             'title' => 'required|string',
             'description' => 'required|string',
             'type' => 'required|int',
         ]);
-            $validatedData['status'] = 0;
-            $validatedData['severity'] = 1;
-            $validatedData['archive'] = false;
 
-            $ticket = Ticket::create($validatedData);
+            $ticket = Ticket::create([
+                'title' => $validatedData['title'],
+                'description' => $validatedData['description'],
+                'type' => $validatedData['type'],
+                'status' => '0',
+                'severity' => '1',
+                'archive' => false,
+            ]);
 
             $response = [
-                'ticket' => $ticket,
+                'ticket' => $ticket
             ];
 
             return Response($response, 201);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -38,4 +39,8 @@ use App\Http\Controllers\TypeController;
         Route::delete('/{id}', [TypeController::class, 'deleteType']);
         Route::patch('/{id}', [TypeController::class, 'updateType']);
     });
-
+Route::prefix('/ticket')->group(function () {
+    Route::post('/', function (Request $request) {
+        return app(TicketController::class)->createTicket($request);
+    });
+});

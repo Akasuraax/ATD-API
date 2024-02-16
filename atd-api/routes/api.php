@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +26,4 @@ use Illuminate\Support\Facades\Route;
 
 
     Route::post('/login', [UserController::class, 'login']);
+    Route::post('/type', [TypeController::class, 'createType']);

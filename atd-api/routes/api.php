@@ -30,5 +30,7 @@ use App\Http\Controllers\TypeController;
     Route::prefix('/type')->group(function(){
         Route::post('/', [TypeController::class, 'createType']);
         Route::get('/', [TypeController::class, 'getTypes']);
+        Route::delete('/{id}', [TypeController::class, 'deleteType']);
+        Route::patch('/{id}', [TypeController::class, 'updateType']);
     });
 

@@ -38,4 +38,52 @@ class TypeController extends Controller
     public function getTypes(){
         return Type::all();
     }
+
+    public function deleteType($id){
+        $type = Type::find($id);
+
+        if($type){
+            $type->delete();
+            $response = [
+                'message'=>'Deleted !'
+            ];
+            $status = 200;
+        }else{
+            $response = [
+                'message'=>'Your element doesn\'t exists'
+            ];
+            $status = 404;
+        }
+
+        return Response($response, $status);
+    }
+
+    public function updateType($id, Request $request){
+        $type = Type::find($id);
+        if($type){
+            $requestData = $request->all();
+            foreach($requestData as $key => $value){
+                if(in_array($key, $type->getFillable())){
+                    $type->$key = $value;
+                }
+            }
+            $type->save();
+
+            $response = [
+                'type' => $type
+            ];
+            
+            $status = 200;
+        }else{
+            $response = [
+                'message'=>'Your element doesn\'t exist'
+            ];
+            $status = 404;
+        }
+
+        return response()->json($response, $status);
+    }
+
+
+
 }

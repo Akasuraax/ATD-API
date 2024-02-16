@@ -18,7 +18,7 @@ class AuthController extends Controller
         $this->now = Carbon::now();
     }
 
-    public function register(Request $request, int $role)
+    public function register(Request $request, int $role) : Response
     {
         try {
             $fields = $request->validate([
@@ -51,10 +51,6 @@ class AuthController extends Controller
                 'birth_date' => $fields['birth_date'],
                 'address' => $fields['address'],
                 'zipcode' => $fields['zipcode'],
-                'status' => '0',
-                'ban' => false,
-                'notification' => true,
-                'archive' => false
             ]);
         } else {
             $user = User::create([
@@ -70,24 +66,15 @@ class AuthController extends Controller
                 'zipcode' => $fields['zipcode'],
                 'siret_number' => $fields['siret_number'],
                 'compagny' => $fields['compagny'],
-                'status' => '0',
-                'ban' => false,
-                'notification' => true,
-                'archive' => false
             ]);
         }
-        DB::table('have_roles')->insert([
-            'id_user' => $user->id,
-            'id_role' => $role,
-            'archive' => false,
-            'created_at' => $this->now,
-            'updated_at' => $this->now
-        ]);
+        //add MtM in have_roles
+        $user->roles()->attach($role);
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        //$token = $user->createToken('myapptoken')->plainTextToken;
         $response = [
             'user' => $user,
-            'token' => $token
+            //'token' => $token
         ];
 
         return Response($response, 201);

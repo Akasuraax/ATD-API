@@ -63,4 +63,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'have_roles', 'id_user', 'id_role');
     }
 
+
+    public function tickets()
+    {
+        return $this->belongsToMany(Ticket::class, 'sends', 'id_user', 'id_ticket')
+            ->withPivot('archive');
+    }
 }

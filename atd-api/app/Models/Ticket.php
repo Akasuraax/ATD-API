@@ -17,5 +17,11 @@ class Ticket extends Model
         'severity',
         'archive'
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user')
+            ->withPivot('archive');
+    }
 }
 

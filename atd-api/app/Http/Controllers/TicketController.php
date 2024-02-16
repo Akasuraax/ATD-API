@@ -16,21 +16,29 @@ class TicketController extends Controller
             'title' => 'required|string',
             'description' => 'required|string',
             'type' => 'required|int',
+            'userId' => 'required|int',
         ]);
 
             $ticket = Ticket::create([
                 'title' => $validatedData['title'],
                 'description' => $validatedData['description'],
                 'type' => $validatedData['type'],
-                'status' => '0',
-                'severity' => '1',
+                'status' => 0,
+                'severity' => 1,
                 'archive' => false,
             ]);
+
+            $ticket->users()->attach($validatedData['userId'],['archive' => false]);
 
             $response = [
                 'ticket' => $ticket
             ];
 
             return Response($response, 201);
+    }
+
+    public function getTickets(Request $request) {
+
+        $ticket = Ticket::where('champ', '=', 'valeur')->get();
     }
 }

@@ -36,14 +36,14 @@ class TypeController extends Controller
     }
 
     public function getTypes(){
-        return Type::all();
+        return Type::select('name','description','access_to_warehouse', 'access_to_journey', 'archive')->get();
     }
 
     public function deleteType($id){
         $type = Type::find($id);
 
         if($type){
-            $type->delete();
+            $type->update(['archive' => true]);
             $response = [
                 'message'=>'Deleted !'
             ];
@@ -72,7 +72,7 @@ class TypeController extends Controller
             $response = [
                 'type' => $type
             ];
-            
+
             $status = 200;
         }else{
             $response = [

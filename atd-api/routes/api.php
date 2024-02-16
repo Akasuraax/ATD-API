@@ -39,6 +39,7 @@ use App\Http\Controllers\TypeController;
         Route::delete('/{id}', [TypeController::class, 'deleteType']);
         Route::patch('/{id}', [TypeController::class, 'updateType']);
     });
+
 Route::prefix('/ticket')->group(function () {
     Route::post('/', [TicketController::class, 'createTicket']);
 });

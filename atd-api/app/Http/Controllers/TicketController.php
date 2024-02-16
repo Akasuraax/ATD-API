@@ -7,28 +7,34 @@ use Illuminate\Http\Response;
 
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class TicketController extends Controller
 {
     public function createTicket(Request $request)
     {
+
+    try {
         $validatedData = $request->validate([
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'type' => 'required|int',
+            'ticket.title' => 'required|string',
+            'ticket.description' => 'required|string',
+            'ticket.type' => 'required|int',
             'userId' => 'required|int',
         ]);
+    } catch (ValidationException $e) {
+        return response()->json(['errors' => $e->errors()], 422);
+    }
 
             $ticket = Ticket::create([
-                'title' => $validatedData['title'],
-                'description' => $validatedData['description'],
-                'type' => $validatedData['type'],
+                'title' => $validatedData['ticket']['title'],
+                'description' => $validatedData['ticket']['description'],
+                'type' => $validatedData['ticket']['type'],
                 'status' => 0,
                 'severity' => 1,
                 'archive' => false,
             ]);
 
-            $ticket->users()->attach($validatedData['userId'],['archive' => false]);
+            $ticket->users()->attach($validatedData['userId']);
 
             $response = [
                 'ticket' => $ticket

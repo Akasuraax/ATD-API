@@ -13,7 +13,8 @@ class Type extends Model
       'name',
       'description',
       'access_to_warehouse',
-      'access_to_journey'
+      'access_to_journey',
+      'archive'
     ];
 
     protected $guarded = [

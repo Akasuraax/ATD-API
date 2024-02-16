@@ -14,7 +14,6 @@ class TypeController extends Controller
                 'description' => 'nullable|string',
                 'access_to_warehouse' => 'boolean',
                 'access_to_journey' => 'boolean',
-                'archive'
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);

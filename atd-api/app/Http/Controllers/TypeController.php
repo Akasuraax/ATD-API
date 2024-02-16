@@ -3,17 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Type;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
-
 class TypeController extends Controller
 {
     public function createType(Request $request){
-        $validateData = $request->validate([
-            'name' => 'required|string|max:128',
-            'description' => 'nullable|string',
-            'access_to_warehouse' => 'boolean',
-            'access_to_journey' => 'boolean',
-        ]);
+        try {
+            $validateData = $request->validate([
+                'name' => 'required|string|max:128',
+                'description' => 'nullable|string',
+                'access_to_warehouse' => 'boolean',
+                'access_to_journey' => 'boolean',
+                'archive'
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         $type = Type::create([
             'name' => $validateData['name'],

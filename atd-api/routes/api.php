@@ -26,4 +26,9 @@ use App\Http\Controllers\TypeController;
 
 
     Route::post('/login', [UserController::class, 'login']);
-    Route::post('/type', [TypeController::class, 'createType']);
+
+    Route::prefix('/type')->group(function(){
+        Route::post('/', [TypeController::class, 'createType']);
+        Route::get('/', [TypeController::class, 'getTypes']);
+    });
+

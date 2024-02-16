@@ -34,4 +34,8 @@ class TypeController extends Controller
         return Response($response, 201);
 
     }
+
+    public function getTypes(){
+        return Type::all();
+    }
 }

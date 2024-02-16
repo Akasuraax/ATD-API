@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('id_product');
             $table->foreign('id_warehouse')->references('id')->on('warehouses')->onDelete('restrict');
             $table->foreign('id_product')->references('id')->on('products')->onDelete('restrict');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

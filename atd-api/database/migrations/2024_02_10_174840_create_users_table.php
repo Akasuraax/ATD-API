@@ -21,16 +21,16 @@ return new class extends Migration
             $table->rememberToken();
             $table->string('phone_country', 4)->nullable();
             $table->string('phone_number', 15)->nullable();
-            $table->char('gender');
+            $table->integer('gender');
             $table->date('birth_date');
             $table->text('address');
             $table->string('zipcode', 5);
             $table->string('siret_number', 14)->nullable();
             $table->string('compagny')->nullable();
-            $table->char('status');
-            $table->boolean('ban');
-            $table->boolean('notification');
-            $table->boolean('archive');
+            $table->integer('status')->default(0);
+            $table->boolean('ban')->default(false);
+            $table->boolean('notification')->default(false);
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

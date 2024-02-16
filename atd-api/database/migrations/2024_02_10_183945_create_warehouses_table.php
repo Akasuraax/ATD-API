@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('address');
             $table->string('zipcode', 5);
             $table->integer('capacity');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

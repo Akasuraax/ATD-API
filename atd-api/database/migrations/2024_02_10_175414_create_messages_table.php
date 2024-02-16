@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->text('description');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
             $table->integer('id_user');
             $table->integer('id_ticket');

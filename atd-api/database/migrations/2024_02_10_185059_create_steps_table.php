@@ -18,7 +18,7 @@ return new class extends Migration
             $table->dateTime('time');
             $table->integer('id_journey');
             $table->foreign('id_journey')->references('id')->on('journeys')->onDelete('restrict');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

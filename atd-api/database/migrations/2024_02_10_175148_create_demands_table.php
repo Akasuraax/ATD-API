@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('demands', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->text('description');
-            $table->char('status');
+            $table->integer('status')->default(0);
             $table->integer('id_type');
             $table->foreign('id_type')->references('id')->on('types')->onDelete('restrict');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);;
             $table->timestamps();
         });
     }

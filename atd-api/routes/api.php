@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\AnnexesController;
 use \App\Http\Controllers\WarehouseController;
 /*
 |--------------------------------------------------------------------------
@@ -52,3 +53,10 @@ use \App\Http\Controllers\WarehouseController;
        Route::delete('/{id}', [WarehouseController::class, 'deleteWarehouse']);
        Route::patch('/{id}', [WarehouseController::class, 'updateWarehouse']);
     });
+    Route::prefix('/annexe')->group(function(){
+        Route::post('/', [AnnexesController::class, 'createAnnexes']);
+        Route::get('/', [AnnexesController::class, 'getAnnexes']);
+        Route::delete('/{id}', [AnnexesController::class, 'deleteAnnexes']);
+        Route::patch('/{id}', [AnnexesController::class, 'updateAnnexes']);
+    });
+

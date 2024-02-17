@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Annexe;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+class AnnexesController extends Controller
+{
+    public function createAnnexes(Request $request){
+        try{
+            $validateData = $request->validate([
+                'name' => 'required|string|max:255',
+                'address' => 'required|string',
+                'zipcode' => 'required|digits:5|integer'
+            ]);
+        }catch(ValidationException $e){
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $annexe = Annexe::create([
+            'name' => $validateData['name'],
+            'address' => $validateData['address'],
+            'zipcode' => $validateData['zipcode']
+        ]);
+
+        $response = [
+            'annexe' => $annexe
+        ];
+
+        return Response($response, 201);
+    }
+
+    public function getAnnexes(){
+        return Annexe::select('name', 'address', 'zipcode', 'archive')->where('archive', false)->get();
+    }
+
+    public function deleteAnnexes($id){
+        $annexe = Annexe::find($id);
+
+        if(!$annexe->archive){
+            $annexe->archive = true;
+            $annexe->save();
+            $response = [
+                'message'=>'Deleted !'
+            ];
+            $status = 200;
+        }else{
+            $response = [
+                'message'=>'Your element doesn\'t exists'
+            ];
+            $status = 404;
+        }
+
+        return Response($response, $status);
+    }
+
+    public function updateAnnexes($id, Request $request){
+        $annexe = Annexe::find($id);
+
+        if(!$annexe->archive){
+            $requestData = $request->all();
+            foreach($requestData as $key => $value){
+                if(in_array($key, $annexe->getFillable())){
+                    $annexe->$key = $value;
+                }
+            }
+            $annexe->save();
+            $response = [
+                'type' => $annexe
+            ];
+
+            $status = 200;
+        }else{
+            $response = [
+                'message'=>'Your element doesn\'t exists'
+            ];
+            $status = 404;
+        }
+
+        return Response($response, $status);
+    }
+}

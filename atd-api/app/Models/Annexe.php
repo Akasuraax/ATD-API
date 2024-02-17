@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Annexe extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'address',
+        'zipcode'
+    ];
 }

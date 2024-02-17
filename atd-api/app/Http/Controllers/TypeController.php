@@ -42,7 +42,7 @@ class TypeController extends Controller
     public function deleteType($id){
         $type = Type::find($id);
 
-        if($type){
+        if(!$type->archive){
             $type->update(['archive' => true]);
             $response = [
                 'message'=>'Deleted !'
@@ -60,7 +60,7 @@ class TypeController extends Controller
 
     public function updateType($id, Request $request){
         $type = Type::find($id);
-        if($type){
+        if(!$type->archive){
             $requestData = $request->all();
             foreach($requestData as $key => $value){
                 if(in_array($key, $type->getFillable())){

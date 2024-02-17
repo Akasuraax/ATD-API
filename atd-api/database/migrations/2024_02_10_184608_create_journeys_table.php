@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('distance');
             $table->integer('cost');
             $table->integer('fuel_cost');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

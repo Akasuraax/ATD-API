@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('id_ticket');
             $table->foreign('id_ticket')->references('id')->on('tickets')->onDelete('restrict');
             $table->primary(['id_user', 'id_ticket']);
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

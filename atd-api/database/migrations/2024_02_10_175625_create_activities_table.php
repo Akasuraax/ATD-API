@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('donation')->nullable();
             $table->integer('id_user');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

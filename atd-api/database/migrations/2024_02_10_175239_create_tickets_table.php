@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->string('title', 255);
             $table->text('description');
-            $table->char('type');
-            $table->char('status');
-            $table->char('severity');
-            $table->boolean('archive');
+            $table->integer('type');
+            $table->integer('status')->default(0);
+            $table->integer('severity')->default(0);
+            $table->boolean('archive')->default(false);;
             $table->timestamps();
         });
     }

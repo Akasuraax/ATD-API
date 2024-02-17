@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->boolean('access_to_warehouse');
             $table->boolean('access_to_journey');
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);;
             $table->timestamps();
         });
     }

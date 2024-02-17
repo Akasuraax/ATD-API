@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('id_role')->references('id')->on('roles')->onDelete('restrict');
             $table->primary(['id_user', 'id_role']);
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

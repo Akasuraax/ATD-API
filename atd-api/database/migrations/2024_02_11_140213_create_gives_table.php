@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreign('id_product')->references('id')->on('products')->onDelete('restrict');
             $table->foreign('id_activity')->references('id')->on('activities')->onDelete('restrict');
             $table->primary(['id_product', 'id_activity']);
-            $table->boolean('archive');
+            $table->boolean('archive')->default(false);
             $table->timestamps();
         });
     }

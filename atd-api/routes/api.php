@@ -6,7 +6,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
-
+use \App\Http\Controllers\WarehouseController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,4 +44,11 @@ use App\Http\Controllers\TypeController;
         Route::get('/mine', [TicketController::class, 'getMyTickets']);
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
         Route::post('/', [TicketController::class, 'createTicket']);
+    });
+
+    Route::prefix('/warehouse')->group(function(){
+       Route::post('/', [WarehouseController::class, 'createWarehouse']);
+       Route::get('/', [WarehouseController::class, 'getWarehouse']);
+       Route::delete('/{id}', [WarehouseController::class, 'deleteWarehouse']);
+       Route::patch('/{id}', [WarehouseController::class, 'updateWarehouse']);
     });

@@ -24,7 +24,6 @@ class TypeController extends Controller
             'description' => $validateData['description'],
             'access_to_warehouse' => $validateData['access_to_warehouse'],
             'access_to_journey' => $validateData['access_to_journey'],
-            'archive' => false
         ]);
 
         $response = [

@@ -14,4 +14,5 @@ class Annexe extends Model
         'address',
         'zipcode'
     ];
+
 }

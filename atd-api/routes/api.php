@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\AnnexesController;
 use \App\Http\Controllers\WarehouseController;
+use App\Http\Controllers\VehicleController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -54,9 +55,16 @@ use \App\Http\Controllers\WarehouseController;
        Route::patch('/{id}', [WarehouseController::class, 'updateWarehouse']);
     });
     Route::prefix('/annexe')->group(function(){
-        Route::post('/', [AnnexesController::class, 'createAnnexes']);
+        Route::post('/', [AnnexesController::class, 'createAnnexe']);
         Route::get('/', [AnnexesController::class, 'getAnnexes']);
-        Route::delete('/{id}', [AnnexesController::class, 'deleteAnnexes']);
-        Route::patch('/{id}', [AnnexesController::class, 'updateAnnexes']);
+        Route::delete('/{id}', [AnnexesController::class, 'deleteAnnexe']);
+        Route::patch('/{id}', [AnnexesController::class, 'updateAnnexe']);
+    });
+
+    Route::prefix('/vehicle')->group(function(){
+        Route::post('/', [VehicleController::class, 'createVehicle']);
+        Route::get('/', [VehicleController::class, 'getVehicles']);
+        Route::delete('/{id}', [VehicleController::class, 'deleteVehicle']);
+        Route::patch('/{id}', [VehicleController::class, 'updateVehicle']);
     });
 

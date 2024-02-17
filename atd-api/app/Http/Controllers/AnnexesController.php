@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
 
 class AnnexesController extends Controller
 {
-    public function createAnnexes(Request $request){
+    public function createAnnexe(Request $request){
         try{
             $validateData = $request->validate([
                 'name' => 'required|string|max:255',
@@ -36,30 +36,26 @@ class AnnexesController extends Controller
         return Annexe::select('name', 'address', 'zipcode', 'archive')->where('archive', false)->get();
     }
 
-    public function deleteAnnexes($id){
+    public function deleteAnnexe($id){
         $annexe = Annexe::find($id);
 
-        if(!$annexe->archive){
+        if ($annexe && !$annexe->archive) {
             $annexe->archive = true;
             $annexe->save();
-            $response = [
-                'message'=>'Deleted !'
-            ];
+            $response = ['message' => 'Deleted!'];
             $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
+        } else {
+            $response = ['message' => 'Your element doesn\'t exist'];
             $status = 404;
         }
 
         return Response($response, $status);
     }
 
-    public function updateAnnexes($id, Request $request){
+    public function updateAnnexe($id, Request $request){
         $annexe = Annexe::find($id);
 
-        if(!$annexe->archive){
+        if($annexe && !$annexe->archive){
             $requestData = $request->all();
             foreach($requestData as $key => $value){
                 if(in_array($key, $annexe->getFillable())){

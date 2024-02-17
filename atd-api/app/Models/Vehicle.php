@@ -16,4 +16,5 @@ class Vehicle extends Model
         'fuel_type',
         'id_annexe'
     ];
+
 }

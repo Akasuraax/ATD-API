@@ -54,7 +54,7 @@ class VehicleController extends Controller
     public function deleteVehicle($id){
         $vehicle = Vehicle::find($id);
 
-        if($vehicle ){
+        if($vehicle && !$vehicle->archive){
             $vehicle->archive = true;
             $vehicle->save();
 

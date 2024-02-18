@@ -78,7 +78,6 @@ class AnnexesController extends Controller
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
-
             foreach($requestData as $key => $value){
                 if(in_array($key, $annexe->getFillable()))
                     $annexe->$key = $value;

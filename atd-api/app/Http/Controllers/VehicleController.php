@@ -43,7 +43,7 @@ class VehicleController extends Controller
 
 
     public function getVehicles(){
-        return Vehicle::select('name', 'license_plate', 'average_consumption', 'fuel_type', 'id_annexe')->where('archive', false)->get();
+        return Vehicle::select('name', 'license_plate', 'average_consumption', 'fuel_type', 'id_annexe', 'archive')->where('archive', false)->get();
     }
 
     public function deleteVehicle($id){

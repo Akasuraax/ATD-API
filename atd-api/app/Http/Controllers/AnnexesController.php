@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Annexe;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -42,7 +43,19 @@ class AnnexesController extends Controller
         if ($annexe && !$annexe->archive) {
             $annexe->archive = true;
             $annexe->save();
+
+            $vehicles = Vehicle::where('id_annexe', $annexe->id)->where('archive', false)->get();
             $response = ['message' => 'Deleted!'];
+
+            if($vehicles) {
+                foreach ($vehicles as $vehicle) {
+                    $vehicle->archive = true;
+                    $vehicle->save();
+                }
+
+                $response[] = ['notice' => 'You still have some vehicles inside your annex; they have been archived.'];
+            }
+
             $status = 200;
         } else {
             $response = ['message' => 'Your element doesn\'t exist'];

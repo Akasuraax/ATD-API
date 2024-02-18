@@ -69,11 +69,19 @@ class AnnexesController extends Controller
         $annexe = Annexe::find($id);
 
         if($annexe && !$annexe->archive){
-            $requestData = $request->all();
+            try{
+                $requestData = $request->validate([
+                    'name' => 'string|max:255',
+                    'address' => 'string',
+                    'zipcode' => 'digits:5|integer'
+                ]);
+            }catch(ValidationException $e){
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+
             foreach($requestData as $key => $value){
-                if(in_array($key, $annexe->getFillable())){
+                if(in_array($key, $annexe->getFillable()))
                     $annexe->$key = $value;
-                }
             }
             $annexe->save();
             $response = [

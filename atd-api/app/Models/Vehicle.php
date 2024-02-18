@@ -17,4 +17,8 @@ class Vehicle extends Model
         'id_annexe'
     ];
 
+    public function journeys(){
+        return $this->belongsToMany(Journey::class, 'drives', 'id_vehicle', 'id_journey')->withPivot('archive');
+    }
 }
+

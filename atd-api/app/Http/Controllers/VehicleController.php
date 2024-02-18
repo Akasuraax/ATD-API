@@ -15,7 +15,7 @@ class VehicleController extends Controller
             $validateData = $request->validate([
                 'name' => 'string|required|max:255',
                 'license_plate' => 'string|required|max:9',
-                'average_consumption' => 'required',
+                'average_consumption' => 'required|numeric',
                 'fuel_type' => 'string|required',
                 'id_annexe' => 'required|int'
             ]);
@@ -43,7 +43,10 @@ class VehicleController extends Controller
 
 
     public function getVehicles(){
-        return Vehicle::select('name', 'license_plate', 'average_consumption', 'fuel_type', 'id_annexe', 'archive')->where('archive', false)->get();
+        return Vehicle::select('vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'vehicles.id_annexe', 'annexes.name as annexe_name','vehicles.archive')
+            ->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')
+            ->where('vehicles.archive', false)
+            ->get();
     }
 
     public function deleteVehicle($id){
@@ -66,18 +69,27 @@ class VehicleController extends Controller
         $vehicle = Vehicle::find($id);
 
         if($vehicle && !$vehicle->archive){
-            $requestData = $request->all();
+            try{
+                $requestData = $request->validate([
+                'name' => 'string|max:255',
+                'license_plate' => 'string|max:9',
+                'average_consumption' => 'numeric',
+                'fuel_type' => 'string',
+                'id_annexe' => 'int'
+            ]);
+            }catch(ValidationException $e){
+                return response()->json(['errors' => $e->errors()], 422);
+            }
             foreach($requestData as $key => $value){
-                if(in_array($key, $vehicle->getFillable())){
+                if(in_array($key, $vehicle->getFillable()))
                     $vehicle->$key = $value;
-                }
             }
             if(!Annexe::find($vehicle->id_annexe) || Annexe::find($vehicle->id_annexe)->archive)
                 return Response(['message'=>'The annex you selected doesn\'t exist!'], 404);
 
             $vehicle->save();
             $response = [
-                'type' => $vehicle
+                'vehicle' => $vehicle
             ];
 
             $status = 200;

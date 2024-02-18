@@ -9,6 +9,8 @@ use App\Http\Controllers\TypeController;
 use App\Http\Controllers\AnnexesController;
 use \App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\JourneyController;
+use App\Http\Controllers\DrivesController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -67,4 +69,13 @@ use App\Http\Controllers\VehicleController;
         Route::delete('/{id}', [VehicleController::class, 'deleteVehicle']);
         Route::patch('/{id}', [VehicleController::class, 'updateVehicle']);
     });
+
+    Route::prefix('/journey')->group(function(){
+        Route::post('/', [JourneyController::class, 'createJourney']);
+        Route::get('/', [JourneyController::class, 'getJourneys']);
+        Route::delete('/{id}', [JourneyController::class, 'deleteJourney']);
+        Route::patch('/{id}', [JourneyController::class, 'updateJourney']);
+    });
+
+    Route::get('/drives', [DrivesController::class, 'getDrives']);
 

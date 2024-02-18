@@ -29,11 +29,7 @@ class TicketController extends Controller
                 'title' => $validatedData['ticket']['title'],
                 'description' => $validatedData['ticket']['description'],
                 'type' => $validatedData['ticket']['type'],
-                'status' => 0,
-                'severity' => 1,
-                'archive' => false,
             ]);
-
             $ticket->users()->attach($validatedData['userId']);
 
             $response = [
@@ -45,6 +41,8 @@ class TicketController extends Controller
 
     public function getTickets(Request $request) {
 
-        $ticket = Ticket::where('champ', '=', 'valeur')->get();
+        $ticket = Ticket::where('archive', '=', 'false')->get();
+
+        return Response($ticket, 200);
     }
 }

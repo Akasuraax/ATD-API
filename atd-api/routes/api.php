@@ -42,4 +42,6 @@ use App\Http\Controllers\TypeController;
 
 Route::prefix('/ticket')->group(function () {
     Route::post('/', [TicketController::class, 'createTicket']);
+
+    Route::get('/', [TicketController::class, 'getTickets']);
 });

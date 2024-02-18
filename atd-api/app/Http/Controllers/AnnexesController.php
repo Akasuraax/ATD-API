@@ -34,7 +34,7 @@ class AnnexesController extends Controller
     }
 
     public function getAnnexes(){
-        return Annexe::select('name', 'address', 'zipcode', 'archive')->where('archive', false)->get();
+        return Annexe::select('id', 'name', 'address', 'zipcode', 'archive')->where('archive', false)->get();
     }
 
     public function deleteAnnexe($id){

@@ -37,7 +37,7 @@ class TypeController extends Controller
     public function getTypes()
     {
 
-        return Type::select('name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')->where('archive', false)->get();
+        return Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')->where('archive', false)->get();
     }
     public function deleteType($id){
         $type = Type::find($id);

@@ -45,7 +45,7 @@ class VehicleController extends Controller
 
 
     public function getVehicles(){
-        return Vehicle::select('vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'vehicles.id_annexe', 'annexes.name as annexe_name','vehicles.archive')
+        return Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'vehicles.id_annexe', 'annexes.name as annexe_name','vehicles.archive')
             ->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')
             ->where('vehicles.archive', false)
             ->get();

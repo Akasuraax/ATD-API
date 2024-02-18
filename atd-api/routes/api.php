@@ -11,6 +11,7 @@ use \App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\DrivesController;
+use App\Http\Controllers\StepController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -78,4 +79,12 @@ use App\Http\Controllers\DrivesController;
     });
 
     Route::get('/drives', [DrivesController::class, 'getDrives']);
+
+    Route::prefix('step')->group(function(){
+       Route::post('/', [StepController::class, 'createStep']);
+       Route::get('/', [StepController::class, 'getSteps']);
+       Route::get('/{id}', [StepController::class, 'getJourneySteps']);
+       Route::delete('/{id}', [StepController::class, 'deleteStep']);
+       Route::patch('/{id}', [StepController::class, 'updateStep']);
+    });
 

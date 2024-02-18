@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Annexe;
+use App\Models\Drives;
+use App\Models\Journey;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -52,10 +54,29 @@ class VehicleController extends Controller
     public function deleteVehicle($id){
         $vehicle = Vehicle::find($id);
 
-        if($vehicle && !$vehicle->archive){
+        if($vehicle ){
             $vehicle->archive = true;
             $vehicle->save();
+
+            $drives = Drives::where('id_vehicle', $id)->get();
             $response = ['message'=>'Deleted !'];
+
+            if($drives){
+                foreach ($drives as $drive) {
+                    Drives::where('id_vehicle', $drive->id_vehicle)->update(['archive' => true]);
+
+                    $journeys = Journey::where('id', $drive->id_journey)->get();
+
+                        foreach($journeys as $journey){
+                            $journey->archive = true;
+                            $journey->save();
+                        }
+
+                    $response[] = ['notice' => 'Some journeys were attached to the vehicle, they have been archived.'];
+
+                }
+            }
+
             $status = 200;
         }else{
             $response = ['message'=>'Your element doesn\'t exists'];

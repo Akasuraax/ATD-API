@@ -37,13 +37,13 @@ class WarehouseController extends Controller
     }
 
     public function getWarehouse(){
-        return Warehouse::select('name', 'address', 'zipcode', 'capacity', 'archive')->where('archive', false)->get();
+        return Warehouse::select('id', 'name', 'address', 'zipcode', 'capacity', 'archive')->where('archive', false)->get();
     }
 
     public function deleteWarehouse($id){
         $warehouse = Warehouse::find($id);
 
-        if($warehouse){
+        if($warehouse && !$warehouse->archive){
             $warehouse->archive = true;
             $warehouse->save();
             $response = [
@@ -62,12 +62,21 @@ class WarehouseController extends Controller
 
     public function updateWarehouse($id, Request $request){
         $warehouse = Warehouse::find($id);
-        if($warehouse){
-            $requestData = $request->all();
+        if($warehouse && !$warehouse->archive){
+            try{
+                $requestData = $request->validate([
+                    'name' => 'string|max:255',
+                    'address' => 'string',
+                    'zipcode' => 'digits:5|integer',
+                    'capacity' => 'integer'
+                ]);
+            }catch(ValidationException $e){
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+
             foreach($requestData as $key => $value){
-                if(in_array($key, $warehouse->getFillable())){
+                if(in_array($key, $warehouse->getFillable()))
                     $warehouse->$key = $value;
-                }
             }
             $warehouse->save();
 

@@ -6,12 +6,13 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AnnexesController;
-use \App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\DrivesController;
 use App\Http\Controllers\StepController;
+use App\Http\Controllers\WarehouseController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -88,3 +89,11 @@ use App\Http\Controllers\StepController;
        Route::patch('/{id}', [StepController::class, 'updateStep']);
     });
 
+
+    Route::prefix('/product')->group(function (){
+        Route::post('/', [ProductController::class, 'createProduct']);
+        Route::get('/', [ProductController::class, 'getProducts']);
+        Route::get('/{id}', [ProductController::class, 'getProduct']);
+        Route::delete('/{id}', [ProductController::class, 'deleteProduct']);
+        Route::patch('/{id}', [ProductController::class, 'updateProduct']);
+    });

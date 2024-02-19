@@ -13,6 +13,7 @@ use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\DrivesController;
 use App\Http\Controllers\StepController;
 use App\Http\Controllers\WarehouseController;
+use App\Http\Controllers\PieceController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -96,4 +97,12 @@ use App\Http\Controllers\WarehouseController;
         Route::get('/{id}', [ProductController::class, 'getProduct']);
         Route::delete('/{id}', [ProductController::class, 'deleteProduct']);
         Route::patch('/{id}', [ProductController::class, 'updateProduct']);
+    });
+
+    Route::prefix('/piece')->group(function (){
+        Route::post('/', [PieceController::class, 'createPiece']);
+        Route::get('/', [PieceController::class, 'getPieces']);
+        Route::get('/{id}', [PieceController::class, 'getPiece']);
+        Route::delete('/{id}', [PieceController::class, 'deletePiece']);
+        Route::patch('/{id}', [PieceController::class, 'updatePiece']);
     });

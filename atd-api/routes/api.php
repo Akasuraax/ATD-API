@@ -18,15 +18,18 @@ use App\Http\Controllers\TypeController;
 */
 
     Route::prefix('/signIn')->group(function (){
-        Route::post('/volunteer', [UserController::class, 'createVolunteer']);
-        Route::post('/beneficiary', [UserController::class, 'createUser']);
-        Route::post('/partner', [UserController::class, 'createPartner']);
-});
+        Route::post('/volunteer', function (Request $request) {
+            return app(UserController::class)->register($request, 2);
+        });
+        Route::post('/beneficiary', function (Request $request) {
+            return app(UserController::class)->register($request, 3);
+        });
+        Route::post('/partner', function (Request $request) {
+            return app(UserController::class)->register($request, 4);
+        });
+    });
 
-       Route::get('/user', [UserController::class, 'getUsers']);
-
-
-    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/logIn', [AuthController::class, 'logIn']);
 
     Route::prefix('/type')->group(function(){
         Route::post('/', [TypeController::class, 'createType']);

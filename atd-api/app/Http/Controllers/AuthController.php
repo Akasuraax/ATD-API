@@ -7,76 +7,48 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Mockery\Exception;
 
 class AuthController extends Controller
 {
-    private Carbon $now;
 
-    public function __construct(){
-        $this->now = Carbon::now();
-    }
-
-    public function register(Request $request, int $role) : JsonResponse
+    public function logIn(Request $request) : JsonResponse
     {
+
         try {
             $fields = $request->validate([
-                'name' => 'required|string|max:255',
-                'forname' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8',
-                'phone_country' => 'nullable|string|max:4',
-                'phone_number' => 'nullable|string|max:15',
-                'gender' => 'required|string|max:1',
-                'birth_date' => 'required|date',
-                'address' => 'required|string',
-                'zipcode' => 'required|string|max:5',
-                'siret_number' => 'nullable|string|max:14',
-                'compagny' => 'nullable|string'
+                'email' => 'required|email',
+                'password' => 'required|string'
             ]);
-        } catch (ValidationException $e) {
+        }catch (ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if ($role == 2 || $role == 3) {
-            $user = User::create([
-                'name' => $fields['name'],
-                'forname' => $fields['forname'],
-                'email' => $fields['email'],
-                'password' => $fields['password'],
-                'phone_country' => $fields['phone_country'],
-                'phone_number' => $fields['phone_number'],
-                'gender' => $fields['gender'],
-                'birth_date' => $fields['birth_date'],
-                'address' => $fields['address'],
-                'zipcode' => $fields['zipcode'],
-            ]);
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+
+            $user = Auth::user();
+            $token = (new TokenController)->encodeToken($user->id);
+
+            User::where('id', $user->id)->update(['remember_token' => $token]);
+            $response = response()->json([
+                'message' => 'Logged in successfully'
+            ], 200);
+
+            $response->header('Authorization', $token);
+
+            return $response;
+
         } else {
-            $user = User::create([
-                'name' => $fields['name'],
-                'forname' => $fields['forname'],
-                'email' => $fields['email'],
-                'password' => $fields['password'],
-                'phone_country' => $fields['phone_country'],
-                'phone_number' => $fields['phone_number'],
-                'gender' => $fields['gender'],
-                'birth_date' => $fields['birth_date'],
-                'address' => $fields['address'],
-                'zipcode' => $fields['zipcode'],
-                'siret_number' => $fields['siret_number'],
-                'compagny' => $fields['compagny'],
-            ]);
+            return response()->json(['message' => 'Email or password is wrong'], 401);
         }
-        //add MtM in have_roles
-        $user->roles()->attach($role);
-
-        $response = [
-            'user' => $user,
-        ];
-
-        return response()->json($response, 201);
     }
+
+
 }
 

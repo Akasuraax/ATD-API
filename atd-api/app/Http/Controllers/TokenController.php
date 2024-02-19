@@ -1,12 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-require 'vendor/autoload.php';
-
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Http\Request;
-use FireBase\JWT\JWT;
-use FireBase\JWT\Key;
 use Spatie\Backtrace\Arguments\Reducers\StdClassArgumentReducer;
+
 
 class TokenController extends Controller
 {

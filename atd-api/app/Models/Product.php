@@ -13,4 +13,8 @@ class Product extends Model
         'name'
     ];
 
+    public function recipes(){
+        return $this->belongsToMany(Recipe::class, 'makes', 'id_product', 'id_recipe')->withPivot('archive', 'count');
+    }
+
 }

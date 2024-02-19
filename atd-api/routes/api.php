@@ -14,6 +14,7 @@ use App\Http\Controllers\DrivesController;
 use App\Http\Controllers\StepController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\PieceController;
+use App\Http\Controllers\RecipeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -105,4 +106,12 @@ use App\Http\Controllers\PieceController;
         Route::get('/{id}', [PieceController::class, 'getPiece']);
         Route::delete('/{id}', [PieceController::class, 'deletePiece']);
         Route::patch('/{id}', [PieceController::class, 'updatePiece']);
+    });
+
+    Route::prefix('/recipe')->group(function (){
+        Route::post('/', [RecipeController::class, 'createRecipe']);
+        Route::get('/', [RecipeController::class, 'getRecipes']);
+        Route::get('/{id}', [RecipeController::class, 'getRecipe']);
+        Route::delete('/{id}', [RecipeController::class, 'deleteRecipe']);
+        Route::patch('/{id}', [RecipeController::class, 'updateRecipe']);
     });

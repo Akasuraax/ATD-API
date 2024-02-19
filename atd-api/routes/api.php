@@ -30,6 +30,7 @@ use App\Http\Controllers\TypeController;
     });
 
     Route::post('/logIn', [AuthController::class, 'logIn']);
+    Route::get('/logOut', [AuthController::class, 'logOut']);
 
     Route::prefix('/type')->group(function(){
         Route::post('/', [TypeController::class, 'createType']);

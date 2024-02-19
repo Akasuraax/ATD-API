@@ -33,7 +33,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
 
             $user = Auth::user();
-            $token = (new TokenController)->encodeToken($user->id);
+            $token = TokenController::encodeToken($user->id);
 
             User::where('id', $user->id)->update(['remember_token' => $token]);
             $response = response()->json([
@@ -49,6 +49,21 @@ class AuthController extends Controller
         }
     }
 
+    public function logOut(Request $request) : JsonResponse
+    {
+        $token = $request->header('Authorization');
+        $id = TokenController::decodeToken($token)->id;
+
+        User::where('id', $id)->update(['remember_token' => NULL]);
+
+        $response = response()->json([
+            'message' => 'Logged out successfully'
+        ], 200);
+
+        $response->header('Authorization', NULL);
+
+        return $response;
+    }
 
 }
 

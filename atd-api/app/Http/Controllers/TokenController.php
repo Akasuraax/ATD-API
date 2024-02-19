@@ -9,7 +9,7 @@ use Spatie\Backtrace\Arguments\Reducers\StdClassArgumentReducer;
 
 class TokenController extends Controller
 {
-    public function encodeToken(int $id) : string
+    public static function encodeToken(int $id) : string
     {
         $secKey = 'chipichipichapachapadubidubidabadaba';
         $payload = [
@@ -20,7 +20,7 @@ class TokenController extends Controller
         return JWT::encode($payload, $secKey, 'HS256');
     }
 
-    public function decodeToken(string $token): \stdClass
+    public static function decodeToken(string $token): \stdClass
     {
       return JWT::decode($token, new Key('chipichipichapachapadubidubidabadaba', 'HS256'));
     }

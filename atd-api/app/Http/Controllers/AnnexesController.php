@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Annexe;
 use App\Models\Vehicle;
+use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -47,13 +48,12 @@ class AnnexesController extends Controller
             $vehicles = Vehicle::where('id_annexe', $annexe->id)->where('archive', false)->get();
             $response = ['message' => 'Deleted!'];
 
-            if($vehicles) {
+            if(!$vehicles->isEmpty()) {
                 foreach ($vehicles as $vehicle) {
-                    $vehicle->archive = true;
-                    $vehicle->save();
+                    $service = new DeleteService();
+                    $service->deleteVehicleService($vehicle->id);
                 }
-
-                $response[] = ['notice' => 'You still have some vehicles inside your annex; they have been archived.'];
+                $response[] = ['notice' => 'You still have some vehicles inside your annex; they have been archived, everything linked to the vehicle will also be archived.'];
             }
 
             $status = 200;

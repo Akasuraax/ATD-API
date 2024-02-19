@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Journey;
 use App\Models\Step;
+use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -68,21 +69,8 @@ class StepController extends Controller
     }
 
     public function deleteStep($id){
-        $step = Step::find($id);
-        if($step && !$step->archive) {
-            $step->archive = true;
-            $step->save();
-
-            $response = ['message' => 'Deleted!'];
-            $status = 200;
-        } else
-        {
-            $response = ['message' => 'Your element doesn\'t exist'];
-            $status = 404;
-        }
-
-        return Response($response, $status);
-
+        $service = new DeleteService();
+        return $service->deleteStepService($id);
     }
 
     public function updateStep($id, Request $request){

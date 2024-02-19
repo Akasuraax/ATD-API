@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Journey;
 use App\Models\Vehicle;
-use App\Models\Drives;
+use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -56,20 +56,8 @@ class JourneyController extends Controller
     }
 
     public function deleteJourney($id){
-        $journey = Journey::find($id);
-
-        if($journey && !$journey->archive){
-            $journey->archive = true;
-            $journey->save();
-
-            $response = ['message'=>'Deleted !'];
-            $status = 200;
-        }else{
-            $response = ['message'=>'Your element doesn\'t exists'];
-            $status = 404;
-        }
-
-        return Response($response, $status);
+        $service = new DeleteService();
+        return $service->deleteJourneyService($id);
     }
 
     public function updateJourney($id, Request $request){

@@ -11,16 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('demands', function (Blueprint $table) {
-            $table->id()->autoIncrement();
-            $table->text('description');
-            $table->integer('status')->default(0);
+        Schema::table('users', function (Blueprint $table) {
             $table->integer('id_user');
-            $table->integer('id_type');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
-            $table->foreign('id_type')->references('id')->on('types')->onDelete('restrict');
-            $table->boolean('archive')->default(false);;
-            $table->timestamps();
         });
     }
 
@@ -29,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('demands');
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
     }
 };

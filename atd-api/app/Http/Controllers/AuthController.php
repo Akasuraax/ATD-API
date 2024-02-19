@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -18,7 +19,7 @@ class AuthController extends Controller
         $this->now = Carbon::now();
     }
 
-    public function register(Request $request, int $role) : Response
+    public function register(Request $request, int $role) : JsonResponse
     {
         try {
             $fields = $request->validate([
@@ -71,13 +72,11 @@ class AuthController extends Controller
         //add MtM in have_roles
         $user->roles()->attach($role);
 
-        //$token = $user->createToken('myapptoken')->plainTextToken;
         $response = [
             'user' => $user,
-            //'token' => $token
         ];
 
-        return Response($response, 201);
+        return response()->json($response, 201);
     }
 }
 

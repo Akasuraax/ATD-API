@@ -41,7 +41,9 @@ class TicketController extends Controller
 
     public function getTickets(Request $request) {
 
-        $ticket = Ticket::where('archive', '=', 'false')->get();
+        $ticket = Ticket::where('archive', '=', 'false')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
         return Response($ticket, 200);
     }

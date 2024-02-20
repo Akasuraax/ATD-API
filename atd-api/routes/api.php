@@ -32,6 +32,7 @@ use App\Http\Controllers\TypeController;
 
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
+    Route::get('/user', [UserController::class, 'getUsers']);
 
     Route::prefix('/type')->group(function(){
         Route::post('/', [TypeController::class, 'createType']);

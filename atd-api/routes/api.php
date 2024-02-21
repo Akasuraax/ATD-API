@@ -28,9 +28,9 @@ use App\Http\Controllers\TypeController;
             return app(UserController::class)->register($request, 4);
         });
     });
-    //pour du test
-    Route::get('/user', [UserController::class], 'getUsers');
-    //
+
+    Route::get('/user', [UserController::class, 'getUser'])->middleware('authorization');
+
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut']);
 
@@ -40,14 +40,4 @@ use App\Http\Controllers\TypeController;
         Route::delete('/{id}', [TypeController::class, 'deleteType']);
         Route::patch('/{id}', [TypeController::class, 'updateType']);
     });
-
-        Route::post('/volunteer', function (    Request $request) {
-            return app(AuthController::class)->register($request, 2);
-        });
-        Route::post('/beneficiary', function (Request $request) {
-            return app(AuthController::class)->register($request, 3);
-        });
-        Route::post('/partner', function (Request $request) {
-            return app(AuthController::class)->register($request, 4);
-        });
 

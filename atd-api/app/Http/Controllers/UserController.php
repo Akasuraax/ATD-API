@@ -20,10 +20,20 @@ class UserController extends Controller
             $page = $request->input('page', 1);
             $field = $request->input('field', "id");
             $sort = $request->input('sort', "asc");
+            $field = "users." . $field;
 
-            $users = User::orderBy($field,$sort)
+            $users = User::Select('*')
+                            ->join('have_roles', 'users.id', '=', 'have_roles.id_user')
+                            ->join('roles', 'have_roles.id_role', '=', 'roles.id')
+                            ->orderBy($field,$sort)
                             ->paginate($perPage, ['*'], 'page', $page+1);
 
             return $users;
+
+    /*>join('drives', 'journeys.id', '=', 'drives.id_journey')
+    ->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')
+    ->where('journeys.archive', false)
+    ->get(); */
+
         }
 }

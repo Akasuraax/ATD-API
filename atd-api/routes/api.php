@@ -28,7 +28,9 @@ use App\Http\Controllers\TypeController;
             return app(UserController::class)->register($request, 4);
         });
     });
-
+    //pour du test
+    Route::get('/user', [UserController::class], 'getUsers');
+    //
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut']);
 

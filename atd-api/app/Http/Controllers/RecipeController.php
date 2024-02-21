@@ -104,6 +104,43 @@ class RecipeController extends Controller
         return Response($response, $status);
     }
 
+    public function deleteRecipeProduct($id, Request $request)
+    {
+        $recipe = Recipe::find($id);
+
+        try {
+            $validateData = $request->validate([
+                'listProducts' => 'array|required'
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        if ($recipe && !$recipe->archive) {
+            $makes = Make::where('id_recipe', $id)->get();
+            if (!$makes->isEmpty()) {
+                foreach ($makes as $make) {
+                    foreach ($validateData['listProducts'] as $productId) {
+                        if ($make->id_product == $productId && $make->id_recipe == $id) {
+                            $recipe->products()->detach($productId);
+                        }
+                    }
+                }
+                $response = ['message' => 'Deleted successfully'];
+                $status = 200;
+            }else {
+                $response = ['message' => 'Product not found or archived'];
+                $status = 404;
+            }
+        } else {
+            $response = ['message' => 'Product not found or archived'];
+            $status = 404;
+        }
+
+        return response()->json($response, $status);
+    }
+
+
     public function updateRecipe($id, Request $request)
     {
         $recipe = Recipe::find($id);
@@ -124,20 +161,19 @@ class RecipeController extends Controller
                     $recipe->$key = $value;
                 }
             }
-            
+
             if (isset($requestData['listProduct'])) {
                 foreach ($requestData['listProduct'] as $productId => $count) {
                     if (!Product::find($productId) || Product::find($productId)->archive) {
                         return response()->json(['message' => 'The product with the id ' . $productId . ' doesn\'t exist'], 404);
                     }
-
-                    Make::where('id_recipe', $id)->update(['id_product' => $productId, 'count' => $count]);
+                    $existingMake = Make::where('id_product', $productId)->where('id_recipe', $id)->first();
+                    if ($existingMake) Make::where('id_recipe', $id)->where('id_product', $productId)->update(['count' => $count]);
+                    else $recipe->products()->attach($productId, ['archive' => false, 'count' => $count]);
                 }
-
             }
 
             $recipe->save();
-
             $response = [
                 'recipe' => $recipe
             ];

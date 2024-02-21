@@ -113,5 +113,6 @@ use App\Http\Controllers\RecipeController;
         Route::get('/', [RecipeController::class, 'getRecipes']);
         Route::get('/{id}', [RecipeController::class, 'getRecipe']);
         Route::delete('/{id}', [RecipeController::class, 'deleteRecipe']);
+        Route::delete('/{id}/product', [RecipeController::class, 'deleteRecipeProduct']);
         Route::patch('/{id}', [RecipeController::class, 'updateRecipe']);
     });

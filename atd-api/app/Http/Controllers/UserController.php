@@ -23,8 +23,7 @@ class UserController extends Controller
             $field = "users." . $field;
 
             $users = User::Select('*')
-                            ->join('have_roles', 'users.id', '=', 'have_roles.id_user')
-                            ->join('roles', 'have_roles.id_role', '=', 'roles.id')
+                            ->with('roles')
                             ->orderBy($field,$sort)
                             ->paginate($perPage, ['*'], 'page', $page+1);
 

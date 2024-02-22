@@ -39,30 +39,24 @@ class AnnexesController extends Controller
     }
 
     public function deleteAnnexe($id){
-        $annexe = Annexe::find($id);
-
-        if ($annexe && !$annexe->archive) {
+        try{
+            $annexe = Annexe::find($id);
+            if(!$annexe || $annexe->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $annexe->archive = true;
-            $annexe->save();
 
             $vehicles = Vehicle::where('id_annexe', $annexe->id)->where('archive', false)->get();
-            $response = ['message' => 'Deleted!'];
-
             if(!$vehicles->isEmpty()) {
                 foreach ($vehicles as $vehicle) {
                     $service = new DeleteService();
                     $service->deleteVehicleService($vehicle->id);
                 }
-                $response[] = ['notice' => 'You still have some vehicles inside your annex; they have been archived, everything linked to the vehicle will also be archived.'];
             }
-
-            $status = 200;
-        } else {
-            $response = ['message' => 'Your element doesn\'t exist'];
-            $status = 404;
+            $annexe->save();
+            return response()->json(['message' => 'Deleted successfully, everything linked to the annexe was also deleted.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
     public function updateAnnexe($id, Request $request){

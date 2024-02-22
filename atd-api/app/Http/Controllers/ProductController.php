@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Make;
 use App\Models\Piece;
 use App\Models\Product;
-use App\Services\DeleteServiceWarehouse;
+use App\Services\DeleteService;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -42,36 +42,29 @@ class ProductController extends Controller
     }
 
     public function deleteProduct($id){
-        $product = Product::find($id);
-        $service = new DeleteServiceWarehouse();
-
-        if($product && !$product->archive){
+        try{
+            $product = Product::find($id);
+            $service = new DeleteService();
+            if(!$product || $product->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $product->archive = true;
-            $product->save();
 
             $pieces = Piece::where('id_product', $id)->where('archive', false)->get();
-            $response = [ 'message'=>'Deleted !'];
-
             if(!$pieces->isEmpty()){
                 foreach($pieces as $piece)
                     $service->deletePieceService($piece->id);
-                $response[] = ['notice' => 'The pieces linked to the product have been archived.'];
             }
 
             $makes = Make::where('id_product', $id)->where('archive', false)->get();
-            if(!$makes->isEmpty()){
-                foreach($makes as $make)
-                    $service->deleteMakesService($make->id, 'id_product');
+            if(!$makes->isEmpty()) {
+                foreach ($makes as $make)
+                    Make::where('id_product', $make->id_product)->update(['archive' => true]);
             }
-            $status = 200;
-         }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
+            $product->save();
+            return response()->json(['message' => 'Deleted successfully, everything linked to the product was deleted.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
     public function updateProduct($id, Request $request){

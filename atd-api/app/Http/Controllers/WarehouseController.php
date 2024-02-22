@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Piece;
 use App\Models\Warehouse;
-use App\Services\DeleteServiceWarehouse;
+use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -43,33 +43,25 @@ class WarehouseController extends Controller
     }
 
     public function deleteWarehouse($id){
-        $warehouse = Warehouse::find($id);
+        try{
+            $warehouse = Warehouse::find($id);
 
-        if($warehouse && !$warehouse->archive){
+            if(!$warehouse || $warehouse->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $warehouse->archive = true;
-            $warehouse->save();
 
             $pieces = Piece::where('id_warehouse', $id)->where('archive', false)->get();
-            $response = [
-                'message'=>'Deleted !'
-            ];
-
             if(!$pieces->isEmpty()){
                 foreach($pieces as $piece) {
-                    $service = new DeleteServiceWarehouse();
+                    $service = new DeleteService();
                     $service->deletePieceService($piece->id);
                 }
-                $response[] = ['notice' => 'The pieces inside the warehouse have been archived.'];
             }
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
+            $warehouse->save();
+            return response()->json(['message' => 'Deleted successfully, everything linked to the warehouse was also deleted.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
     public function updateWarehouse($id, Request $request){

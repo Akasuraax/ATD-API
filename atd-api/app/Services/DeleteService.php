@@ -3,22 +3,23 @@
 namespace App\Services;
 
 use App\Models\Journey;
+use App\Models\Make;
+use App\Models\Piece;
 use App\Models\Step;
 use App\Models\Vehicle;
 use App\Models\Drives;
 use http\Env\Response;
+use Illuminate\Validation\ValidationException;
 
 Class DeleteService{
     public function deleteVehicleService($id){
-        $vehicle = Vehicle::find($id);
-
-        if($vehicle && !$vehicle->archive){
+        try {
+            $vehicle = Vehicle::find($id);
+            if(!$vehicle || $vehicle->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $vehicle->archive = true;
-            $vehicle->save();
 
             $drives = Drives::where('id_vehicle', $id)->get();
-            $response = ['message'=>'Deleted !'];
-
             if(!$drives->isEmpty()){
                 foreach ($drives as $drive) {
                     Drives::where('id_vehicle', $drive->id_vehicle)->update(['archive' => true]);
@@ -27,60 +28,76 @@ Class DeleteService{
                         $service = new DeleteService();
                         $service->deleteJourneyService($journey->id);
                     }
-
-                    $response[] = ['notice' => 'The vehicle you had still have journeys, they have been deleted'];
                 }
             }
-            $status = 200;
-        }else{
-            $response = ['message'=>'Your element doesn\'t exists'];
-            $status = 404;
+            $vehicle->save();
+            return response()->json(['message' => 'Deleted successfully, everything linked to the vehicle was also deleted.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-        return Response($response, $status);
     }
 
     public function deleteJourneyService($id){
-        $journey = Journey::find($id);
-
-        if($journey && !$journey->archive){
+        try{
+            $journey = Journey::find($id);
+            if(!$journey || $journey->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $journey->archive = true;
-            $journey->save();
 
-            $steps = Step::where('id_journey', $id)->get();
-            $response = ['message'=>'Deleted !'];
-
+            $steps = Step::where('id_journey', $id)->where('archive', false)->get();
             if(!$steps->isEmpty()){
                 foreach($steps as $step){
                     $service = new DeleteService();
                     $service->deleteStepService($step->id);
                 }
-                $response[] = ['notice' => 'The journey you had still have steps, they have been deleted'];
             }
-            $status = 200;
-        }else{
-            $response = ['message'=>'Your element doesn\'t exists'];
-            $status = 404;
+            $journey->save();
+            return response()->json(['message' => 'Deleted successfully, everything linked to the journey was also deleted.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
     public function deleteStepService($id){
-        $step = Step::find($id);
-        if($step && !$step->archive) {
+        try {
+            $step = Step::find($id);
+            if(!$step || $step->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $step->archive = true;
             $step->save();
 
-            $response = ['message' => 'Deleted!'];
-            $status = 200;
-        } else
-        {
-            $response = ['message' => 'Your element doesn\'t exist'];
-            $status = 404;
+            return response()->json(['message' => 'Deleted successfully'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
+    public function deletePieceService($id){
+        try{
+            $piece = Piece::find($id);
+            if(!$piece || $piece->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $piece->archive = true;
+            $piece->save();
 
+            return response()->json(['message' => 'Deleted successfully'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+    }
+
+    public function deleteMakesService($id, $element){
+        try {
+            $makes = Make::where($element, $id)->where('archive', false)->get();
+            if (!$makes->isEmpty()) {
+                foreach ($makes as $make) {
+                    $make->archive = true;
+                    $make->save();
+                }
+            }
+            return response()->json(['message' => 'Deleted successfully'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+    }
 }

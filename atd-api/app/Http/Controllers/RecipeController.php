@@ -47,7 +47,9 @@ class RecipeController extends Controller
         $recipes = Recipe::where('archive', false)->get();
 
         $recipesWithProductNames = $recipes->map(function ($recipe) {
-            $recipe->load('products');
+            $recipe->load(['products' => function ($query) {
+                $query->where('products.archive', false);
+            }]);
             $productNames = $recipe->products->pluck('name');
 
             return [
@@ -66,7 +68,9 @@ class RecipeController extends Controller
     {
         $recipe = Recipe::find($id);
         if(!$recipe->archive) {
-            $recipe->load('products');
+            $recipe->load(['products' => function ($query) {
+                $query->where('products.archive', false);
+            }]);
             $productNames = $recipe->products->pluck('name');
 
             return [
@@ -83,25 +87,22 @@ class RecipeController extends Controller
 
     public function deleteRecipe($id)
     {
-        $recipe = Recipe::find($id);
-
-        if($recipe && !$recipe->archive){
+        try{
+            $recipe = Recipe::find($id);
+            if(!$recipe || $recipe->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $recipe->archive = true;
-            $recipe->save();
-
             $makes = Make::where('id_recipe', $id)->get();
-            $response = ['message'=>'Deleted !'];
 
             if(!$makes->isEmpty()){
                 foreach ($makes as $make)
                     Make::where('id_recipe', $make->id_recipe)->update(['archive' => true]);
             }
-            $status = 200;
-        }else{
-            $response = ['message'=>'Your element doesn\'t exists'];
-            $status = 404;
+            $recipe->save();
+            return response()->json(['message' => 'Deleted successfully, everything linked to the recipe was also deleted.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-        return Response($response, $status);
     }
 
     public function deleteRecipeProduct($id, Request $request)

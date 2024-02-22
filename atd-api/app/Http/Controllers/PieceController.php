@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Piece;
 use App\Models\Product;
 use App\Models\Warehouse;
-use App\Services\DeleteServiceWarehouse;
+use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -57,7 +57,7 @@ class PieceController extends Controller
 
     public function deletePiece($id)
     {
-        $service = new DeleteServiceWarehouse();
+        $service = new DeleteService();
         return $service->deletePieceService($id);
     }
     public function updatePiece($id, Request $request)

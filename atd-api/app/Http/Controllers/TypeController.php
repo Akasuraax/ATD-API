@@ -40,22 +40,17 @@ class TypeController extends Controller
         return Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')->where('archive', false)->get();
     }
     public function deleteType($id){
-        $type = Type::find($id);
+        try{
+            $type = Type::find($id);
+            if(!$type || $type->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $type->archive = true;
+            $type->save();
 
-        if($type && !$type->archive){
-            $type->update(['archive' => true]);
-            $response = [
-                'message'=>'Deleted !'
-            ];
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
+            return response()->json(['message' => 'Deleted successfully.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
     public function updateType($id, Request $request){

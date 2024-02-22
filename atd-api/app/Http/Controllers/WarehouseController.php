@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Piece;
 use App\Models\Warehouse;
+use App\Services\DeleteServiceWarehouse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -46,9 +48,19 @@ class WarehouseController extends Controller
         if($warehouse && !$warehouse->archive){
             $warehouse->archive = true;
             $warehouse->save();
+
+            $pieces = Piece::where('id_warehouse', $id)->where('archive', false)->get();
             $response = [
                 'message'=>'Deleted !'
             ];
+
+            if(!$pieces->isEmpty()){
+                foreach($pieces as $piece) {
+                    $service = new DeleteServiceWarehouse();
+                    $service->deletePieceService($piece->id);
+                }
+                $response[] = ['notice' => 'The pieces inside the warehouse have been archived.'];
+            }
             $status = 200;
         }else{
             $response = [

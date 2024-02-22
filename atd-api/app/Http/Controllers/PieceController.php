@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Piece;
 use App\Models\Product;
 use App\Models\Warehouse;
+use App\Services\DeleteServiceWarehouse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -56,24 +57,8 @@ class PieceController extends Controller
 
     public function deletePiece($id)
     {
-        $piece = Piece::find($id);
-
-        if($piece && !$piece->archive){
-            $piece->archive = true;
-            $piece->save();
-
-            $response = [
-                'message'=>'Deleted !'
-            ];
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
-        }
-
-        return Response($response, $status);
+        $service = new DeleteServiceWarehouse();
+        return $service->deletePieceService($id);
     }
     public function updatePiece($id, Request $request)
     {

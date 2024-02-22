@@ -25,7 +25,7 @@ class ValidationTokenMiddleware
         }
 
         $time = TokenController::decodeToken($token)->time;
-        if ($time > time()) {
+        if ($time < time()) {
             (new AuthController())->logOut($request);
             return response()->json(["Token expired"], 401);
         }

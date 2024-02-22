@@ -28,9 +28,7 @@ use App\Http\Controllers\TypeController;
             return app(UserController::class)->register($request, 4);
         });
     });
-
-    Route::get('/user', [UserController::class, 'getUser'])->middleware('authorization' . serialize([1]));
-
+    
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 

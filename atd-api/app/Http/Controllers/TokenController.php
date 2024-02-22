@@ -14,7 +14,7 @@ class TokenController extends Controller
         $secKey = 'chipichipichapachapadubidubidabadaba';
         $payload = [
             'id' => $id,
-            'time' => time() + 2//432000
+            'time' => time() + 432000
         ];
 
         return JWT::encode($payload, $secKey, 'HS256');

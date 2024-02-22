@@ -15,22 +15,24 @@ class UserRoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $array): Response
     {
-        $userRoles = HaveRole::where('id_user', TokenController::decodeToken($request->header('Authorization'))->id);
+        $roles = unserialize($array);
 
-        $access = FALSE;
-        dd($userRoles);
-        foreach ($userRoles as $userRole) {
-            if (in_array($userRole->id, 3)) {
-                $access = true;
-                break;
+        $userRoles = HaveRole::where('id_user', TokenController::decodeToken($request->header('Authorization'))->id)->get();
+        $access = false;
+        foreach($roles as $role){
+            foreach ($userRoles as $userRole) {
+                if ($userRole->id_role == $role) {
+                    $access = true;
+                    break;
+                }
             }
         }
 
         if($access)
-            abort(403, 'Unauthorized action.');
-        else
             return $next($request);
+        else
+            abort(403, 'Unauthorized action.');
     }
 }

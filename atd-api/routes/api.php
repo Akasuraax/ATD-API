@@ -29,10 +29,10 @@ use App\Http\Controllers\TypeController;
         });
     });
 
-    Route::get('/user', [UserController::class, 'getUser'])->middleware('authorization');
+    Route::get('/user', [UserController::class, 'getUser'])->middleware('authorization' . serialize([1]));
 
     Route::post('/logIn', [AuthController::class, 'logIn']);
-    Route::get('/logOut', [AuthController::class, 'logOut']);
+    Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 
     Route::prefix('/type')->group(function(){
         Route::post('/', [TypeController::class, 'createType']);

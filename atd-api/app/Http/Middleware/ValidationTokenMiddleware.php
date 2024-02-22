@@ -20,7 +20,7 @@ class ValidationTokenMiddleware
     {
         $token = $request->header('Authorization');
 
-        if (!isset($token)) {
+        if ($token == NULL) {
             return response()->json(['message' => 'You\'re not connected'], 401);
         }
 

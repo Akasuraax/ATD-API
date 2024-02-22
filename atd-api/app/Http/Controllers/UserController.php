@@ -71,10 +71,4 @@ class UserController extends Controller
 
         return response()->json($response, 201);
     }
-
-    public function getUser(Request $request)
-    {
-        return User::where('id', 4)->first();
-    }
-
 }

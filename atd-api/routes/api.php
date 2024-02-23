@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\DemandController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +29,7 @@ use App\Http\Controllers\TypeController;
             return app(UserController::class)->register($request, 4);
         });
     });
-    
+
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 
@@ -37,5 +38,13 @@ use App\Http\Controllers\TypeController;
         Route::get('/', [TypeController::class, 'getTypes']);
         Route::delete('/{id}', [TypeController::class, 'deleteType']);
         Route::patch('/{id}', [TypeController::class, 'updateType']);
+    });
+
+    Route::prefix('/demand')->group(function(){
+       Route::post('/', [DemandController::class, 'createDemand']);
+       Route::get('/', [DemandController::class, 'getDemands']);
+       Route::get('/{id}', [DemandController::class, 'getDemand']);
+       Route::delete('/{id}', [DemandController::class, 'deleteDemand']);
+       Route::patch('/{id}', [DemandController::class, 'updateDemand']);
     });
 

@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Demand extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'description',
+        'id_user',
+        'id_type'
+    ];
 }

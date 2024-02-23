@@ -24,7 +24,9 @@ return new class extends Migration
             ['name' => 'admin', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
             ['name' => 'volunteer', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
             ['name' => 'beneficiary', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
-            ['name' => 'partner', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]
+            ['name' => 'partner', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
+            ['name' => 'support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]
+
         ]);
     }
 

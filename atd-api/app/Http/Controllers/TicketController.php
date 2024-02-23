@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\HaveRole;
 use App\Models\Send;
 use App\Models\Type;
+use App\Models\User;
 use Illuminate\Http\Response;
 
 use App\Models\Ticket;
@@ -52,13 +54,6 @@ class TicketController extends Controller
 
         return response()->json(['tickets' => $tickets]);
     }
-
-    public function getTicketsUser(Request $request){
-
-    }
-
-    public function getTickets(Request $request){
-
-    }
+    
 
 }

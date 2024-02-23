@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('pieces', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->dateTime('expired_date');
-            $table->integer('weight');
+            $table->double('count');
+            $table->string('measure')->nullable();
             $table->integer('id_warehouse');
             $table->integer('id_product');
             $table->foreign('id_warehouse')->references('id')->on('warehouses')->onDelete('restrict');

@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('distance');
             $table->integer('cost');
             $table->integer('fuel_cost');
+            $table->integer('id_activity')->nullable();
+            $table->foreign('id_activity')->references('id')->on('activities')->onDelete('restrict');
             $table->boolean('archive')->default(false);
             $table->timestamps();
         });

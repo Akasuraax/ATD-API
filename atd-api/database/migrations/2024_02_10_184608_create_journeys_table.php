@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('journeys', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('name', 255);
-            $table->dateTime('date');
             $table->integer('duration');
             $table->integer('distance');
             $table->integer('cost');

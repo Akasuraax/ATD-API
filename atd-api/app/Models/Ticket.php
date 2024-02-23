@@ -20,8 +20,7 @@ class Ticket extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user')
-            ->withPivot('archive');
+        return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user')->withTimestamps();
     }
 }
 

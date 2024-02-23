@@ -60,13 +60,12 @@ class User extends Authenticatable
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class, 'have_roles', 'id_user', 'id_role');
+        return $this->belongsToMany(Role::class, 'have_roles', 'id_user', 'id_role')->withTimestamps();
     }
 
 
     public function tickets()
     {
-        return $this->belongsToMany(Ticket::class, 'sends', 'id_user', 'id_ticket')
-            ->withPivot('archive');
+        return $this->belongsToMany(Ticket::class, 'sends', 'id_user', 'id_ticket')->withTimestamps();
     }
 }

@@ -29,7 +29,7 @@ use App\Http\Controllers\TypeController;
             return app(UserController::class)->register($request, 4);
         });
     });
-    
+
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 
@@ -40,8 +40,8 @@ use App\Http\Controllers\TypeController;
         Route::patch('/{id}', [TypeController::class, 'updateType']);
     });
 
-Route::prefix('/ticket')->group(function () {
-    Route::post('/', [TicketController::class, 'createTicket']);
-
-    Route::get('/', [TicketController::class, 'getTickets']);
-});
+    Route::prefix('/ticket')/*->middleware('validity.token')*/->group(function () {
+        Route::get('/mine', [TicketController::class, 'getMyTickets'])->middleware('validity.token');
+        Route::post('/', [TicketController::class, 'createTicket'])->middleware('validity.token');
+        Route::delete('/{id}', [TicketController::class, 'deleteTicket']);
+    });

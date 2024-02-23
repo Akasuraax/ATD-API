@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Demand;
+use App\Models\Type;
+use App\Models\User;
+use App\Models\Warehouse;
+use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -18,6 +22,12 @@ class DemandController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+
+        if(!User::find($validateData['id_user']) || User::find($validateData['id_user'])->archive)
+            return response()->json(['message' => 'The user you put doesn\'t exist'], 404);
+
+        if(!Type::find($validateData['id_type']) || Type::find($validateData['id_type'])->archive)
+            return response()->json(['message' => 'The type you put doesn\'t exist'], 404);
 
         $demand = Demand::create([
             'description' => $validateData['description'],
@@ -41,16 +51,8 @@ class DemandController extends Controller
     }
 
     public function deleteDemand($id){
-        try{
-            $demand = Demand::find($id);
-            if(!$demand || $demand->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
-            $demand->archive = true;
-            $demand->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the annexe was also deleted.'], 200);
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
-        }
+        $service = new DeleteService();
+        return $service->deleteDemandService($id);
     }
 
     public function updateDemand($id, Request $request){
@@ -75,7 +77,7 @@ class DemandController extends Controller
                     $demand->$key = $value;
             }
             $demand->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the annexe was also deleted.'], 200);
+            return response()->json(['demand' => $demand], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

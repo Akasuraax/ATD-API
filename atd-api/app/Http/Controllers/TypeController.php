@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Demand;
 use App\Models\Type;
+use App\Services\DeleteService;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 class TypeController extends Controller
@@ -41,22 +43,25 @@ class TypeController extends Controller
         return Type::select('name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')->where('archive', false)->get();
     }
     public function deleteType($id){
-        $type = Type::find($id);
+        try{
+            $type = Type::find($id);
+            if(!$type || $type->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $type->archive = true;
+            $demands = Demand::where('id_type', $id)->where('archive', false)->get();
+            if(!$demands->isEmpty()){
+                foreach($demands as $demand){
+                    $service = new DeleteService();
+                    $service->deleteDemandService($demand->id);
+                }
+            }
 
-        if($type){
-            $type->update(['archive' => true]);
-            $response = [
-                'message'=>'Deleted !'
-            ];
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
+            $type->save();
+
+            return response()->json(['message' => 'Deleted successfully.'], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
     public function updateType($id, Request $request){

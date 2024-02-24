@@ -15,6 +15,6 @@ class Recipe extends Model
     ];
 
     public function products(){
-        return $this->belongsToMany(Product::class, 'makes', 'id_recipe', 'id_product')->withPivot('archive', 'count');
+        return $this->belongsToMany(Product::class, 'makes', 'id_recipe', 'id_product')->withPivot('archive', 'count', 'measure');
     }
 }

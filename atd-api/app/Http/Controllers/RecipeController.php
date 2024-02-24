@@ -22,9 +22,13 @@ class RecipeController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        foreach($validateData['listProduct'] as $id => $count){
+        foreach($validateData['listProduct'] as $id => $tab){
             if(!Product::find($id) || Product::find($id)->archive)
                 return response()->json(['message' => 'The product with the id ' . $id .' doesn\'t exist'], 404);
+            if(!is_int($tab[0]))
+                return response()->json(['message' => 'You have to put an numeric value !'], 422);
+            if(isset($tab[1]) && !is_string($tab[1]))
+                return response()->json(['message' => 'You have to put an string value !'], 422);
         }
 
         $recipe = Recipe::create([
@@ -32,8 +36,9 @@ class RecipeController extends Controller
             'description' => $validateData['description'],
         ]);
 
-        foreach($validateData['listProduct'] as $id => $count)
-            $recipe->products()->attach($id, ['archive' => false, 'count' => $count]);
+        foreach($validateData['listProduct'] as $id => $tab) {
+            $recipe->products()->attach($id, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
+        }
 
         $response = [
             'recipe' => $recipe
@@ -67,7 +72,7 @@ class RecipeController extends Controller
     public function getRecipe($id)
     {
         $recipe = Recipe::find($id);
-        if(!$recipe->archive) {
+        if($recipe && !$recipe->archive) {
             $recipe->load(['products' => function ($query) {
                 $query->where('products.archive', false);
             }]);

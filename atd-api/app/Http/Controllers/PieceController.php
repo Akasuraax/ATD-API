@@ -16,7 +16,8 @@ class PieceController extends Controller
         try{
             $validateData = $request->validate([
                 'expired_date' => 'required|date_format:Y-m-d H:i',
-                'weight' => 'required|int',
+                'count' => 'required|numeric',
+                'measure' => 'string',
                 'id_warehouse' => 'required|int',
                 'id_product' => 'required|int'
             ]);
@@ -25,18 +26,22 @@ class PieceController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(Warehouse::find($validateData['id_warehouse'])->archive)
+        if(!Warehouse::find($validateData['id_warehouse']) || Warehouse::find($validateData['id_warehouse'])->archive)
             return response()->json(['message' => 'The warehouse you put doesn\'t exist'], 404);
 
-        if(Product::find($validateData['id_product'])->archive)
+        if(!Product::find($validateData['id_product']) || Product::find($validateData['id_product'])->archive)
             return response()->json(['message' => 'The product you put doesn\'t exist'], 404);
 
         $piece = Piece::create([
-           'expired_date' => $validateData['expired_date'],
-            'weight' => $validateData['weight'],
+            'expired_date' => $validateData['expired_date'],
+            'count' => $validateData['count'],
             'id_warehouse' => $validateData['id_warehouse'],
             'id_product' => $validateData['id_product']
         ]);
+
+        if (isset($validateData['measure'])) {
+            $piece['measure'] = $validateData['measure'];
+        }
 
         $response = [
             'piece' => $piece
@@ -47,12 +52,12 @@ class PieceController extends Controller
 
     public function getPieces()
     {
-        return Piece::select('id', 'expired_date', 'weight', 'id_warehouse', 'id_product', 'archive')->where('archive', false)->get();
+        return Piece::all();
     }
 
     public function getPiece($id)
     {
-        return Piece::select('id', 'expired_date', 'weight', 'id_warehouse', 'id_product', 'archive')->where('archive', false)->where('id', $id)->get();
+        return Piece::find($id);
     }
 
     public function deletePiece($id)
@@ -68,7 +73,8 @@ class PieceController extends Controller
             try{
                 $requestData = $request->validate([
                     'expired_date' => 'date_format:Y-m-d H:i',
-                    'weight' => 'int',
+                    'count' => 'int',
+                    'measure' => 'numeric',
                     'id_warehouse' => 'int',
                     'id_product' => 'int'
                 ]);

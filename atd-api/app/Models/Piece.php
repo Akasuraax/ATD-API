@@ -11,7 +11,8 @@ class Piece extends Model
 
     protected $fillable = [
         'expired_date',
-        'weight',
+        'count',
+        'measure',
         'id_warehouse',
         'id_product'
     ];

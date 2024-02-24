@@ -32,7 +32,7 @@ class TicketController extends Controller
         $ticket = Ticket::create([
             'title' => $validatedData['title'],
             'description' => $validatedData['description'],
-            'type' => $validatedData['type'],
+            'type' => $validatedData['type']
         ]);
 
         $ticket->users()->attach(TokenController::decodeToken($request->header('Authorization'))->id);
@@ -54,6 +54,12 @@ class TicketController extends Controller
 
         return response()->json(['tickets' => $tickets]);
     }
-    
+
+    public function getTicket(int $id_ticket, Request $request){
+        $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
+        $verif = Send::select('id_user')->where('id_ticket', $id_ticket)->get();
+        dd($verif);
+    }
+
 
 }

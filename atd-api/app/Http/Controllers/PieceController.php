@@ -73,8 +73,8 @@ class PieceController extends Controller
             try{
                 $requestData = $request->validate([
                     'expired_date' => 'date_format:Y-m-d H:i',
-                    'count' => 'int',
-                    'measure' => 'numeric',
+                    'count' => 'numeric',
+                    'measure' => 'string',
                     'id_warehouse' => 'int',
                     'id_product' => 'int'
                 ]);

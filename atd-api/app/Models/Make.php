@@ -10,6 +10,7 @@ class Make extends Model
     use HasFactory;
 
     protected $fillable = [
-        'count'
+        'count',
+        'measure'
     ];
 }

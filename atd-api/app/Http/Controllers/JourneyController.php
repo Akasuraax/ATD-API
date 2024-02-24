@@ -15,7 +15,6 @@ class JourneyController extends Controller
         try{
             $validateData = $request->validate([
                 'name' => 'string|required|max:255',
-                'date' => 'date|required',
                 'duration' => 'int|required',
                 'distance' => 'int|required',
                 'cost' => 'int|required',
@@ -31,7 +30,6 @@ class JourneyController extends Controller
 
         $journey = Journey::create([
             'name' => $validateData['name'],
-            'date' => $validateData['date'],
             'duration' => $validateData['duration'],
             'distance' => $validateData['distance'],
             'cost' => $validateData['cost'],
@@ -48,11 +46,7 @@ class JourneyController extends Controller
     }
 
     public function getJourneys(){
-        return Journey::select('journeys.id','journeys.name', 'journeys.date', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost' ,'vehicles.name as vehicle_name', 'journeys.archive')
-            ->join('drives', 'journeys.id', '=', 'drives.id_journey')
-            ->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')
-            ->where('journeys.archive', false)
-            ->get();
+        return Journey::all();
     }
 
     public function deleteJourney($id){
@@ -67,7 +61,6 @@ class JourneyController extends Controller
             try{
                 $requestData = $request->validate([
                     'name' => 'string|max:255',
-                    'date' => 'date',
                     'duration' => 'int',
                     'distance' => 'int',
                     'cost' => 'int',

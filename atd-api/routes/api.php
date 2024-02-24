@@ -32,13 +32,17 @@ use App\Http\Controllers\TypeController;
 
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
-    Route::get('/user', [UserController::class, 'getUsers']);
 
     Route::prefix('/type')->group(function(){
         Route::post('/', [TypeController::class, 'createType']);
         Route::get('/', [TypeController::class, 'getTypes']);
         Route::delete('/{id}', [TypeController::class, 'deleteType']);
         Route::patch('/{id}', [TypeController::class, 'updateType']);
+    });
+
+    Route::prefix('/user')->group(function(){
+        Route::get('/', [TypeController::class, 'getUsers']);
+        Route::delete('/{id}', [TypeController::class, 'deleteUser']);
     });
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {

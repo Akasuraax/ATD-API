@@ -47,7 +47,7 @@ Class DeleteService{
             if(!$steps->isEmpty()){
                 foreach($steps as $step){
                     $service = new DeleteService();
-                    $service->deleteStepService($step->id);
+                    $service->deleteService($step->id, 'App\Models\Step');
                 }
             }
             $journey->save();
@@ -57,44 +57,16 @@ Class DeleteService{
         }
     }
 
-    public function deleteStepService($id){
-        try {
-            $step = Step::find($id);
-            if(!$step || $step->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
-            $step->archive = true;
-            $step->save();
-
-            return response()->json(['message' => 'Deleted successfully'], 200);
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
-        }
-    }
-
-    public function deletePieceService($id){
+    public function deleteService($id, $element){
         try{
-            $piece = Piece::find($id);
-            if(!$piece || $piece->archive)
+            $toDelete = $element::find($id);
+            if(!$toDelete || $toDelete->archive)
                 return response()->json(['message' => 'Element doesn\'t exist'], 404);
-            $piece->archive = true;
-            $piece->save();
+            $toDelete->archive = true;
+            $toDelete->save();
 
-            return response()->json(['message' => 'Deleted successfully'], 200);
+            return response()->json(['element' => $toDelete], 200);
         }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
-        }
-    }
-
-    public function deleteDemandService($id)
-    {
-        try {
-            $demand = Demand::find($id);
-            if (!$demand || $demand->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
-            $demand->archive = true;
-            $demand->save();
-            return response()->json(['message' => 'Deleted successfully.'], 200);
-        } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }

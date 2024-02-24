@@ -52,7 +52,7 @@ class ProductController extends Controller
             $pieces = Piece::where('id_product', $id)->where('archive', false)->get();
             if(!$pieces->isEmpty()){
                 foreach($pieces as $piece)
-                    $service->deletePieceService($piece->id);
+                    $service->deleteService($piece->id, 'App\Models\Piece');
             }
 
             $makes = Make::where('id_product', $id)->where('archive', false)->get();

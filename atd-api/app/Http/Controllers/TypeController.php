@@ -51,7 +51,7 @@ class TypeController extends Controller
             if(!$demands->isEmpty()){
                 foreach($demands as $demand){
                     $service = new DeleteService();
-                    $service->deleteDemandService($demand->id);
+                    $service->deleteService($demand->id, 'App\Models\Demand');
                 }
             }
 

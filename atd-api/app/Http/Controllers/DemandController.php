@@ -52,7 +52,7 @@ class DemandController extends Controller
 
     public function deleteDemand($id){
         $service = new DeleteService();
-        return $service->deleteDemandService($id);
+        return $service->deleteService($id, 'App\Models\Demand');
     }
 
     public function updateDemand($id, Request $request){

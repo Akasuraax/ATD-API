@@ -54,7 +54,7 @@ class WarehouseController extends Controller
             if(!$pieces->isEmpty()){
                 foreach($pieces as $piece) {
                     $service = new DeleteService();
-                    $service->deletePieceService($piece->id);
+                    $service->deleteService($piece->id, 'App\Models\Piece');
                 }
             }
             $warehouse->save();

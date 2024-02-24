@@ -24,7 +24,7 @@ class StepController extends Controller
         }
 
         if(!Journey::find($validateData['id_journey']) || Journey::find($validateData['id_journey'])->archive)
-            return Response(['message'=>'The vehicle you selected doesn\'t exist!'], 404);
+            return Response(['message'=>'The journey you selected doesn\'t exist!'], 404);
 
         $defaultDate = date('Y-m-d'); // Use today's date
         $timeWithDefaultDate = $defaultDate . ' ' . $validateData['time'];
@@ -70,7 +70,7 @@ class StepController extends Controller
 
     public function deleteStep($id){
         $service = new DeleteService();
-        return $service->deleteStepService($id);
+        return $service->deleteService($id, 'App\Models\Step');
     }
 
     public function updateStep($id, Request $request){

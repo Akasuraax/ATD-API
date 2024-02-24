@@ -63,7 +63,7 @@ class PieceController extends Controller
     public function deletePiece($id)
     {
         $service = new DeleteService();
-        return $service->deletePieceService($id);
+        return $service->deleteService($id, 'App\Models\Piece');
     }
     public function updatePiece($id, Request $request)
     {

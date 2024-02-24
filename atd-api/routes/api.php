@@ -10,7 +10,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AnnexesController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\JourneyController;
-use App\Http\Controllers\DrivesController;
 use App\Http\Controllers\StepController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\PieceController;
@@ -42,19 +41,20 @@ use App\Http\Controllers\DemandController;
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 
-    Route::prefix('/type')->group(function(){
-        Route::post('/', [TypeController::class, 'createType']);
-        Route::get('/', [TypeController::class, 'getTypes']);
-        Route::delete('/{id}', [TypeController::class, 'deleteType']);
-        Route::patch('/{id}', [TypeController::class, 'updateType']);
-    });
-
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
         Route::get('/mine', [TicketController::class, 'getMyTickets']);
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
         Route::post('/', [TicketController::class, 'createTicket']);
     });
-    Route::prefix('/demand')->group(function(){
+
+    Route::prefix('/type')->middleware('validity.token')->group(function(){
+        Route::post('/', [TypeController::class, 'createType'])->middleware('authorization:' . serialize([1]));
+        Route::get('/', [TypeController::class, 'getTypes']);
+        Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
+    });
+
+    Route::prefix('/demand')->middleware('validity.token')->group(function(){
        Route::post('/', [DemandController::class, 'createDemand']);
        Route::get('/', [DemandController::class, 'getDemands']);
        Route::get('/{id}', [DemandController::class, 'getDemand']);
@@ -62,65 +62,64 @@ use App\Http\Controllers\DemandController;
        Route::patch('/{id}', [DemandController::class, 'updateDemand']);
     });
 
-    Route::prefix('/warehouse')->group(function(){
-       Route::post('/', [WarehouseController::class, 'createWarehouse']);
+    Route::prefix('/warehouse')->middleware('validity.token')->group(function(){
+       Route::post('/', [WarehouseController::class, 'createWarehouse'])->middleware('authorization:' . serialize([1]));
        Route::get('/', [WarehouseController::class, 'getWarehouse']);
-       Route::delete('/{id}', [WarehouseController::class, 'deleteWarehouse']);
-       Route::patch('/{id}', [WarehouseController::class, 'updateWarehouse']);
+       Route::delete('/{id}', [WarehouseController::class, 'deleteWarehouse'])->middleware('authorization:' . serialize([1]));
+       Route::patch('/{id}', [WarehouseController::class, 'updateWarehouse'])->middleware('authorization:' . serialize([1]));
     });
-    Route::prefix('/annexe')->group(function(){
-        Route::post('/', [AnnexesController::class, 'createAnnexe']);
+
+    Route::prefix('/annexe')->middleware('validity.token')->group(function(){
+        Route::post('/', [AnnexesController::class, 'createAnnexe'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [AnnexesController::class, 'getAnnexes']);
-        Route::delete('/{id}', [AnnexesController::class, 'deleteAnnexe']);
-        Route::patch('/{id}', [AnnexesController::class, 'updateAnnexe']);
+        Route::delete('/{id}', [AnnexesController::class, 'deleteAnnexe'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [AnnexesController::class, 'updateAnnexe'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/vehicle')->group(function(){
-        Route::post('/', [VehicleController::class, 'createVehicle']);
+    Route::prefix('/vehicle')->middleware('validity.token')->group(function(){
+        Route::post('/', [VehicleController::class, 'createVehicle'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [VehicleController::class, 'getVehicles']);
-        Route::delete('/{id}', [VehicleController::class, 'deleteVehicle']);
-        Route::patch('/{id}', [VehicleController::class, 'updateVehicle']);
+        Route::delete('/{id}', [VehicleController::class, 'deleteVehicle'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [VehicleController::class, 'updateVehicle'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/journey')->group(function(){
-        Route::post('/', [JourneyController::class, 'createJourney']);
+    Route::prefix('/journey')->middleware('validity.token')->group(function(){
+        Route::post('/', [JourneyController::class, 'createJourney'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [JourneyController::class, 'getJourneys']);
-        Route::delete('/{id}', [JourneyController::class, 'deleteJourney']);
-        Route::patch('/{id}', [JourneyController::class, 'updateJourney']);
+        Route::delete('/{id}', [JourneyController::class, 'deleteJourney'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [JourneyController::class, 'updateJourney'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::get('/drives', [DrivesController::class, 'getDrives']);
-
-    Route::prefix('step')->group(function(){
-       Route::post('/', [StepController::class, 'createStep']);
+    Route::prefix('step')->middleware('validity.token')->group(function(){
+       Route::post('/', [StepController::class, 'createStep'])->middleware('authorization:' . serialize([1]));
        Route::get('/', [StepController::class, 'getSteps']);
        Route::get('/{id}', [StepController::class, 'getJourneySteps']);
-       Route::delete('/{id}', [StepController::class, 'deleteStep']);
-       Route::patch('/{id}', [StepController::class, 'updateStep']);
+       Route::delete('/{id}', [StepController::class, 'deleteStep'])->middleware('authorization:' . serialize([1]));
+       Route::patch('/{id}', [StepController::class, 'updateStep'])->middleware('authorization:' . serialize([1]));
     });
 
 
-    Route::prefix('/product')->group(function (){
-        Route::post('/', [ProductController::class, 'createProduct']);
+    Route::prefix('/product')->middleware('validity.token')->group(function (){
+        Route::post('/', [ProductController::class, 'createProduct'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [ProductController::class, 'getProducts']);
         Route::get('/{id}', [ProductController::class, 'getProduct']);
-        Route::delete('/{id}', [ProductController::class, 'deleteProduct']);
-        Route::patch('/{id}', [ProductController::class, 'updateProduct']);
+        Route::delete('/{id}', [ProductController::class, 'deleteProduct'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [ProductController::class, 'updateProduct'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/piece')->group(function (){
-        Route::post('/', [PieceController::class, 'createPiece']);
+    Route::prefix('/piece')->middleware('validity.token')->group(function (){
+        Route::post('/', [PieceController::class, 'createPiece'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [PieceController::class, 'getPieces']);
         Route::get('/{id}', [PieceController::class, 'getPiece']);
-        Route::delete('/{id}', [PieceController::class, 'deletePiece']);
-        Route::patch('/{id}', [PieceController::class, 'updatePiece']);
+        Route::delete('/{id}', [PieceController::class, 'deletePiece'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [PieceController::class, 'updatePiece'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/recipe')->group(function (){
-        Route::post('/', [RecipeController::class, 'createRecipe']);
+    Route::prefix('/recipe')->middleware('validity.token')->group(function (){
+        Route::post('/', [RecipeController::class, 'createRecipe'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [RecipeController::class, 'getRecipes']);
         Route::get('/{id}', [RecipeController::class, 'getRecipe']);
-        Route::delete('/{id}', [RecipeController::class, 'deleteRecipe']);
-        Route::delete('/{id}/product', [RecipeController::class, 'deleteRecipeProduct']);
-        Route::patch('/{id}', [RecipeController::class, 'updateRecipe']);
+        Route::delete('/{id}', [RecipeController::class, 'deleteRecipe'])->middleware('authorization:' . serialize([1]));
+        Route::delete('/{id}/product', [RecipeController::class, 'deleteRecipeProduct'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [RecipeController::class, 'updateRecipe'])->middleware('authorization:' . serialize([1]));
     });

@@ -16,23 +16,50 @@ class UserController extends Controller
     public function getUsers(Request $request): LengthAwarePaginator
 {
 
-            $perPage = $request->input('pageSize', 10);
-            $page = $request->input('page', 1);
-            $field = $request->input('field', "id");
-            $sort = $request->input('sort', "asc");
-            $field = "users." . $field;
+    $perPage = $request->input('pageSize', 10);
+    $page = $request->input('page', 1);
+    $field = $request->input('field', "id");
+    $sort = $request->input('sort', "asc");
 
-            $users = User::Select('*')
-                            ->with('roles')
-                            ->orderBy($field,$sort)
-                            ->paginate($perPage, ['*'], 'page', $page+1);
+    $fieldFilter = $request->input('fieldFilter', '');
+    $operator = $request->input('operator', '');
+    $value = $request->input('value', '%');
 
-            return $users;
+    $field = "users." . $field;
 
-    /*>join('drives', 'journeys.id', '=', 'drives.id_journey')
-    ->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')
-    ->where('journeys.archive', false)
-    ->get(); */
+    $users = User::select('*')
+        ->with('roles')
+        ->where(function ($query) use ($fieldFilter, $operator, $value) {
+            if ($fieldFilter && $operator && $value !== '*') {
+                switch ($operator) {
+                    case 'contains':
+                        $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                        break;
+                    case 'equals':
+                        $query->where($fieldFilter, '=', $value);
+                        break;
+                    case 'startsWith':
+                        $query->where($fieldFilter, 'LIKE', $value . '%');
+                        break;
+                    case 'endsWith':
+                        $query->where($fieldFilter, 'LIKE', '%' . $value);
+                        break;
+                    case 'isEmpty':
+                        $query->whereNull($fieldFilter);
+                        break;
+                    case 'isNotEmpty':
+                        $query->whereNotNull($fieldFilter);
+                        break;
+                    case 'isAnyOf':
+                        $values = explode(',', $value);
+                        $query->whereIn($fieldFilter, $values);
+                        break;
+                }
+            }
+        })
+        ->orderBy($field, $sort)
+        ->paginate($perPage, ['*'], 'page', $page + 1);
 
+    return $users;
         }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\StepController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\PieceController;
 use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\DemandController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -52,6 +53,13 @@ use App\Http\Controllers\RecipeController;
         Route::get('/mine', [TicketController::class, 'getMyTickets']);
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
         Route::post('/', [TicketController::class, 'createTicket']);
+    });
+    Route::prefix('/demand')->group(function(){
+       Route::post('/', [DemandController::class, 'createDemand']);
+       Route::get('/', [DemandController::class, 'getDemands']);
+       Route::get('/{id}', [DemandController::class, 'getDemand']);
+       Route::delete('/{id}', [DemandController::class, 'deleteDemand']);
+       Route::patch('/{id}', [DemandController::class, 'updateDemand']);
     });
 
     Route::prefix('/warehouse')->group(function(){

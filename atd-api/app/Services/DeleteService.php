@@ -1,14 +1,13 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\Journey;
-use App\Models\Make;
 use App\Models\Piece;
 use App\Models\Step;
 use App\Models\Vehicle;
 use App\Models\Drives;
 use http\Env\Response;
+use App\Models\Demand;
 use Illuminate\Validation\ValidationException;
 
 Class DeleteService{
@@ -86,18 +85,18 @@ Class DeleteService{
         }
     }
 
-    public function deleteMakesService($id, $element){
+    public function deleteDemandService($id)
+    {
         try {
-            $makes = Make::where($element, $id)->where('archive', false)->get();
-            if (!$makes->isEmpty()) {
-                foreach ($makes as $make) {
-                    $make->archive = true;
-                    $make->save();
-                }
-            }
-            return response()->json(['message' => 'Deleted successfully'], 200);
-        }catch(ValidationException $e){
+            $demand = Demand::find($id);
+            if (!$demand || $demand->archive)
+                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $demand->archive = true;
+            $demand->save();
+            return response()->json(['message' => 'Deleted successfully.'], 200);
+        } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 }
+

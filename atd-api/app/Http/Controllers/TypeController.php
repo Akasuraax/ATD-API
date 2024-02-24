@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Demand;
 use App\Models\Type;
+use App\Services\DeleteService;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 class TypeController extends Controller
@@ -45,6 +47,14 @@ class TypeController extends Controller
             if(!$type || $type->archive)
                 return response()->json(['message' => 'Element doesn\'t exist'], 404);
             $type->archive = true;
+            $demands = Demand::where('id_type', $id)->where('archive', false)->get();
+            if(!$demands->isEmpty()){
+                foreach($demands as $demand){
+                    $service = new DeleteService();
+                    $service->deleteDemandService($demand->id);
+                }
+            }
+
             $type->save();
 
             return response()->json(['message' => 'Deleted successfully.'], 200);

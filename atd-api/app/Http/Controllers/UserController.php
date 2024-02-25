@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -63,15 +64,37 @@ class UserController extends Controller
         return $users;
     }
 
+    public function getUser(int $userId)
+    {
+
+        $user = User::where('id', $userId)
+            ->with('roles')
+            ->first();
+
+        if ($user) {
+            $response = [
+                'user' => $user
+            ];
+            $status = 200;
+        } else {
+            $response = [
+                'message' => 'Your element doesn\'t exists'
+            ];
+            $status = 404;
+        }
+
+        return Response($response, $status);
+    }
 
     public function deleteUser(int $userId)
     {
-        $user = User::find($userId);
-
+        $user = User::where('id', $userId)
+            ->first();
         if ($user) {
             $user->update(['archive' => true]);
             $response = [
-                'message' => 'Deleted !'
+                'message' => 'Deleted !',
+                'user' => $user
             ];
             $status = 200;
         } else {

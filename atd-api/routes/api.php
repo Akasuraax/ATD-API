@@ -41,8 +41,9 @@ use App\Http\Controllers\TypeController;
     });
 
     Route::prefix('/user')->group(function(){
-        Route::get('/', [TypeController::class, 'getUsers']);
-        Route::delete('/{id}', [TypeController::class, 'deleteUser']);
+        Route::get('/', [UserController::class, 'getUsers']);
+        Route::get('/{id}', [UserController::class, 'getUser']);
+        Route::delete('/{id}', [UserController::class, 'deleteUser']);
     });
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {

@@ -58,7 +58,7 @@ class WarehouseController extends Controller
                 }
             }
             $warehouse->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the warehouse was also deleted.'], 200);
+            return response()->json(['element' => $warehouse], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

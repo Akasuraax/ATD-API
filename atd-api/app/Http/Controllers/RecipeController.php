@@ -138,7 +138,7 @@ class RecipeController extends Controller
             $recipe->products()->detach($make->id_product);
         }
 
-        return response()->json(['message' => 'Deleted successfully'], 200);
+        return response()->json(['element' => $recipe], 200);
     }
 
     public function updateRecipe($id, Request $request)

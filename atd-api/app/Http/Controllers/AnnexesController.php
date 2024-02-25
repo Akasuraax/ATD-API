@@ -53,7 +53,7 @@ class AnnexesController extends Controller
                 }
             }
             $annexe->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the annexe was also deleted.'], 200);
+            return response()->json(['element' => $annexe], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

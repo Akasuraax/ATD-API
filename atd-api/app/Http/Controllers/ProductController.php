@@ -61,7 +61,7 @@ class ProductController extends Controller
                     Make::where('id_product', $make->id_product)->update(['archive' => true]);
             }
             $product->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the product was deleted.'], 200);
+            return response()->json(['element' => $product], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

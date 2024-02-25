@@ -30,7 +30,7 @@ Class DeleteService{
                 }
             }
             $vehicle->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the vehicle was also deleted.'], 200);
+            return response()->json(['element' => $vehicle], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
@@ -51,7 +51,7 @@ Class DeleteService{
                 }
             }
             $journey->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the journey was also deleted.'], 200);
+            return response()->json(['element' => $journey], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

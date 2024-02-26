@@ -97,10 +97,17 @@ class RecipeController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         $recipes->getCollection()->transform(function ($recipe) {
-            $recipe->load(['products' => function ($query) {
-                $query->where('products.archive', false);
-            }]);
-            $productNames = $recipe->products->pluck('name');
+            $recipe->load('products');
+            $productNames = $recipe->products->map(function ($product) {
+                return [
+                    'name' => $product->name,
+                    'archive' => $product->archive,
+                    'pivot' => [
+                        'count' => $product->pivot->count,
+                        'measure' => $product->pivot->measure,
+                    ]
+                ];
+            });
 
             return [
                 'id' => $recipe->id,
@@ -119,10 +126,17 @@ class RecipeController extends Controller
     {
         $recipe = Recipe::find($id);
         if($recipe && !$recipe->archive) {
-            $recipe->load(['products' => function ($query) {
-                $query->where('products.archive', false);
-            }]);
-            $productNames = $recipe->products->pluck('name');
+            $recipe->load('products');
+            $productNames = $recipe->products->map(function ($product) {
+                return [
+                    'name' => $product->name,
+                    'archive' => $product->archive,
+                    'pivot' => [
+                        'count' => $product->pivot->count,
+                        'measure' => $product->pivot->measure,
+                    ]
+                ];
+            });
 
             return [
                 'id' => $recipe->id,

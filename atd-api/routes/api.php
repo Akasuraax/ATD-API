@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
@@ -45,6 +46,10 @@ use App\Http\Controllers\TypeController;
         Route::get('/{id}', [UserController::class, 'getUser']);
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
     });
+
+Route::prefix('/role')->group(function(){
+    Route::get('/', [RoleController::class, 'getRoles']);
+});
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
         Route::get('/mine', [TicketController::class, 'getMyTickets']);

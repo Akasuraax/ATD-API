@@ -43,29 +43,56 @@ class StepController extends Controller
         return Response($response, 201);
     }
 
-    public function getSteps(){
-        return Step::select('steps.id', 'steps.address', 'steps.zipcode', 'steps.time', 'steps.id_journey', 'journeys.name as journey_name' ,'steps.archive')
+    public function getSteps(Request $request){
+        $perPage = $request->input('pageSize', 10);
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
+
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $field = "steps." . $field;
+
+        $step = Step::select('steps.id', 'steps.address', 'steps.zipcode', 'steps.time', 'journeys.name as journey_name' ,'steps.archive')
             ->join('journeys', 'steps.id_journey', '=', 'journeys.id')
-            ->where('steps.archive', false)
-            ->get();
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            })
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        return response()->json($step);
     }
 
     public function getJourneySteps($id){
-        $journey = Journey::find($id);
-
-        if($journey && !$journey->archive) {
-            return Step::select('steps.id', 'steps.address', 'steps.zipcode', 'steps.time', 'steps.id_journey', 'journeys.name as journey_name' ,'steps.archive')
-                ->join('journeys', 'steps.id_journey', '=', 'journeys.id')
-                ->where('steps.id_journey', $id)
-                ->where('steps.archive', false)
-                ->get();
-        } else
-        {
-            $response = ['message' => 'Your element doesn\'t exist'];
-            $status = 404;
-        }
-
-        return Response($response, $status);
+        return Journey::find($id) ? Step::select('steps.id', 'steps.address', 'steps.zipcode', 'steps.time', 'journeys.name as journey_name' ,'steps.archive')->join('journeys', 'steps.id_journey', '=', 'journeys.id')->where('steps.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteStep($id){

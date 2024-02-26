@@ -43,11 +43,56 @@ class VehicleController extends Controller
     }
 
 
-    public function getVehicles(){
-        return Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'vehicles.id_annexe', 'annexes.name as annexe_name','vehicles.archive')
+    public function getVehicles(Request $request){
+        $perPage = $request->input('pageSize', 10);
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
+
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $field = "vehicles." . $field;
+
+        $vehicle = Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'annexes.name as annexe_name','vehicles.archive')
             ->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')
-            ->where('vehicles.archive', false)
-            ->get();
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            })
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        return response()->json($vehicle);
+    }
+
+    public function getVehicle($id){
+        return Vehicle::find($id) ? Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'annexes.name as annexe_name','vehicles.archive')->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')->where('vehicles.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteVehicle($id){

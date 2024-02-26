@@ -36,11 +36,59 @@ class TypeController extends Controller
 
     }
 
-    public function getTypes()
+    public function getTypes(Request $request)
     {
+        $perPage = $request->input('pageSize', 10);
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
 
-        return Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')->where('archive', false)->get();
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $field = "types." . $field;
+
+        $type = Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            })
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        return response()->json($type);
     }
+
+    public function getType($id){
+        return Type::find($id) ? Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+
+    }
+
     public function deleteType($id){
         try{
             $type = Type::find($id);

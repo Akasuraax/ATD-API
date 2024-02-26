@@ -50,6 +50,7 @@ use App\Http\Controllers\DemandController;
     Route::prefix('/type')->middleware('validity.token')->group(function(){
         Route::post('/', [TypeController::class, 'createType'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [TypeController::class, 'getTypes']);
+        Route::get('/{id}', [TypeController::class, 'getType']);
         Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
@@ -64,7 +65,8 @@ use App\Http\Controllers\DemandController;
 
     Route::prefix('/warehouse')->middleware('validity.token')->group(function(){
        Route::post('/', [WarehouseController::class, 'createWarehouse'])->middleware('authorization:' . serialize([1]));
-       Route::get('/', [WarehouseController::class, 'getWarehouse']);
+       Route::get('/', [WarehouseController::class, 'getWarehouses']);
+       Route::get('/{id}', [WarehouseController::class, 'getWarehouse']);
        Route::delete('/{id}', [WarehouseController::class, 'deleteWarehouse'])->middleware('authorization:' . serialize([1]));
        Route::patch('/{id}', [WarehouseController::class, 'updateWarehouse'])->middleware('authorization:' . serialize([1]));
     });
@@ -80,6 +82,7 @@ use App\Http\Controllers\DemandController;
     Route::prefix('/vehicle')->middleware('validity.token')->group(function(){
         Route::post('/', [VehicleController::class, 'createVehicle'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [VehicleController::class, 'getVehicles']);
+        Route::get('/{id}', [VehicleController::class, 'getVehicle']);
         Route::delete('/{id}', [VehicleController::class, 'deleteVehicle'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [VehicleController::class, 'updateVehicle'])->middleware('authorization:' . serialize([1]));
     });

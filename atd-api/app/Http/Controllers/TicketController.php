@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\HaveRole;
+use App\Models\Message;
 use App\Models\Send;
 use App\Models\Type;
 use App\Models\User;
@@ -38,7 +39,12 @@ class TicketController extends Controller
         $ticket->users()->attach(TokenController::decodeToken($request->header('Authorization'))->id);
 
         $response = [
-            'ticket' => $ticket
+            'ticket' => [
+                'id' => $ticket->id,
+                'description' => $ticket->description,
+                'type' => $ticket->type,
+                'created_at' => $ticket->created_at
+            ]
         ];
 
         return Response($response, 201);
@@ -46,19 +52,51 @@ class TicketController extends Controller
 
     public function getMyTickets(Request $request){
         $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
+
         $tickets_id = Send::select('id_ticket')->where('id_user', $id_user)->get();
 
         $ticketIds = $tickets_id->pluck('id_ticket');
 
-        $tickets = Ticket::whereIn('id', $ticketIds)->get();
+        $tickets = Ticket::select('id', 'title', 'description', 'type', 'created_at')->whereIn('id', $ticketIds)->get();
 
-        return response()->json(['tickets' => $tickets]);
+        return response()->json([
+            'ticket' => $tickets,
+        ]);
     }
 
-    public function getTicket(int $id_ticket, Request $request){
-        $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
-        $verif = Send::select('id_user')->where('id_ticket', $id_ticket)->get();
-        dd($verif);
+
+    public function getTicket(int $id_ticket, Request $request)
+    {
+        $ticket = Ticket::select('id', 'title', 'description', 'type', 'created_at')->where('id', $id_ticket)->first();
+        $messages = Message::where('id_ticket', $ticket->id)->get();
+
+        $messagesData = [];
+        foreach ($messages as $message) {
+            $user = User::where('id', $message->id_user)->get()->first();
+            $messagesData[] = [
+                'description' => $message->description,
+                'created_at' => $message->created_at,
+                'user' => [
+                    'name' => $user->name,
+                    'forname' => $user->forname
+                ]
+            ];
+        }
+        $user = User::where('id', TokenController::decodeToken($request->header('Authorization'))->id)->first();
+        return response()->json([
+            'ticket' => [
+                'id' => $ticket->id,
+                'title' => $ticket->title,
+                'description' => $ticket->description,
+                'type' => $ticket->type,
+                'created_at' => $ticket->created_at,
+                'user' => [
+                    'name' => $user->name,
+                    'forname' => $user->forname
+                ]
+            ],
+            'messages' => $messagesData
+        ]);
     }
 
 

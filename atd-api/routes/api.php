@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
@@ -42,8 +43,9 @@ use App\Http\Controllers\DemandController;
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
-        Route::get('/mine', [TicketController::class, 'getMyTickets']);
-        Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
+        Route::get('/', [TicketController::class, 'getMyTickets']);
+        Route::get('/{id_ticket}', [TicketController::class, 'getTicket'])->middleware('ticket');
+        Route::post('/{id_ticket}', [MessageController::class, 'createMessage'])->middleware('ticket');
         Route::post('/', [TicketController::class, 'createTicket']);
     });
 

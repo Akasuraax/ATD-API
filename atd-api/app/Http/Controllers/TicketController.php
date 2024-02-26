@@ -39,7 +39,12 @@ class TicketController extends Controller
         $ticket->users()->attach(TokenController::decodeToken($request->header('Authorization'))->id);
 
         $response = [
-            'ticket' => $ticket
+            'ticket' => [
+                'id' => $ticket->id,
+                'description' => $ticket->description,
+                'type' => $ticket->type,
+                'created_at' => $ticket->created_at
+            ]
         ];
 
         return Response($response, 201);
@@ -52,47 +57,45 @@ class TicketController extends Controller
 
         $ticketIds = $tickets_id->pluck('id_ticket');
 
-        $tickets = Ticket::whereIn('id', $ticketIds)->get();
+        $tickets = Ticket::select('id', 'title', 'description', 'type', 'created_at')->whereIn('id', $ticketIds)->get();
 
-        $response = [];
-
-        foreach ($tickets as $ticket) {
-            Message::where('id_ticket', $ticket->id)->get();
-
-            $ticketData = [
-                'ticket' => $ticket,
-                'messages' => [
-                    'url' => url('api/ticket/' . $ticket->id)
-                ]
-            ];
-
-            $response[] = $ticketData;
-        }
-
-        return response()->json($response);
+        return response()->json([
+            'ticket' => $tickets,
+        ]);
     }
 
 
-    public function getTicket(int $id_ticket, Request $request){
-        $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
-        $send = Send::select('id_user')->where('id_ticket', $id_ticket)->where('id_user', $id_user)->get()->first();
-
-        if($send  == '[]'){
-            return response()->json([
-                'message' => 'Resource not found'
-            ], 404);
-        }elseif($id_user != $send->id_user) {
-            return response()->json([
-                'message' => 'You\'re not allowed to get this ticket'
-            ], 403);
-        }
-
-        $ticket = Ticket::select('id', 'title', 'description', 'type')->where('id', $id_ticket)->get()->first();
+    public function getTicket(int $id_ticket, Request $request)
+    {
+        $ticket = Ticket::select('id', 'title', 'description', 'type', 'created_at')->where('id', $id_ticket)->first();
         $messages = Message::where('id_ticket', $ticket->id)->get();
 
+        $messagesData = [];
+        foreach ($messages as $message) {
+            $user = User::where('id', $message->id_user)->get()->first();
+            $messagesData[] = [
+                'description' => $message->description,
+                'created_at' => $message->created_at,
+                'user' => [
+                    'name' => $user->name,
+                    'forname' => $user->forname
+                ]
+            ];
+        }
+        $user = User::where('id', TokenController::decodeToken($request->header('Authorization'))->id)->first();
         return response()->json([
-            'ticket' => $ticket,
-            'messages' => $messages
+            'ticket' => [
+                'id' => $ticket->id,
+                'title' => $ticket->title,
+                'description' => $ticket->description,
+                'type' => $ticket->type,
+                'created_at' => $ticket->created_at,
+                'user' => [
+                    'name' => $user->name,
+                    'forname' => $user->forname
+                ]
+            ],
+            'messages' => $messagesData
         ]);
     }
 

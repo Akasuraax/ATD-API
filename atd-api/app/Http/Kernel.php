@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'authorization' => \App\Http\Middleware\UserRoleMiddleware::class,
         'validity.token' => \App\Http\Middleware\ValidationTokenMiddleware::class,
+        'ticket' => \App\Http\Middleware\TicketMiddleware::class,
     ];
 }

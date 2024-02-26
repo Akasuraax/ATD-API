@@ -14,6 +14,10 @@ class UserController extends Controller
 {
     public function register(Request $request, int $role) : JsonResponse
     {
+        $verifBan = User::where('email', $request->email)->where('ban', true)->get()->first();
+        if(isset($verifBan))
+            return response()->json(['message' => "This email is banned"], 403);
+
         try {
             $fields = $request->validate([
                 'name' => 'required|string|max:255',
@@ -32,6 +36,7 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+
 
         if ($role == 2 || $role == 3) {
             $user = User::create([
@@ -71,10 +76,4 @@ class UserController extends Controller
 
         return response()->json($response, 201);
     }
-
-    public function getUser(Request $request)
-    {
-        return User::where('id', 4)->first();
-    }
-
 }

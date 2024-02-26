@@ -50,14 +50,59 @@ class PieceController extends Controller
         return Response($response, 201);
     }
 
-    public function getPieces()
+    public function getPieces(Request $request)
     {
-        return Piece::all();
+        $perPage = $request->input('pageSize', 10);
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
+
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $field = "pieces." . $field;
+
+        $pieces = Piece::select('pieces.id', 'pieces.expired_date', 'pieces.count', 'pieces.measure', 'products.name as product_name', 'warehouses.name as warehouse_name', 'pieces.archive')
+            ->join('products','products.id', '=', 'pieces.id_product')
+            ->join('warehouses', 'warehouses.id', '=', 'pieces.id_warehouse')
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            })
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        return response()->json($pieces);
     }
 
     public function getPiece($id)
     {
-        return Piece::find($id);
+        return Piece::find($id) ? Piece::select('pieces.id', 'pieces.expired_date', 'pieces.count', 'pieces.measure', 'products.name as product_name', 'warehouses.name as warehouse_name', 'pieces.archive')->join('products','products.id', '=', 'pieces.id_product')->join('warehouses', 'warehouses.id', '=', 'pieces.id_warehouse')->where('pieces.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deletePiece($id)

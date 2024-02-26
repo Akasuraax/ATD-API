@@ -72,6 +72,7 @@ use App\Http\Controllers\DemandController;
     Route::prefix('/annexe')->middleware('validity.token')->group(function(){
         Route::post('/', [AnnexesController::class, 'createAnnexe'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [AnnexesController::class, 'getAnnexes']);
+        Route::get('/{id}', [AnnexesController::class, 'getAnnexe']);
         Route::delete('/{id}', [AnnexesController::class, 'deleteAnnexe'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [AnnexesController::class, 'updateAnnexe'])->middleware('authorization:' . serialize([1]));
     });
@@ -86,6 +87,7 @@ use App\Http\Controllers\DemandController;
     Route::prefix('/journey')->middleware('validity.token')->group(function(){
         Route::post('/', [JourneyController::class, 'createJourney'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [JourneyController::class, 'getJourneys']);
+        Route::get('/{id}', [JourneyController::class, 'getJourney']);
         Route::delete('/{id}', [JourneyController::class, 'deleteJourney'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [JourneyController::class, 'updateJourney'])->middleware('authorization:' . serialize([1]));
     });

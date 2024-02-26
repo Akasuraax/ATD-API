@@ -45,8 +45,58 @@ class JourneyController extends Controller
         return Response($response, 201);
     }
 
-    public function getJourneys(){
-        return Journey::all();
+    public function getJourneys(Request $request){
+        $perPage = $request->input('pageSize', 10);
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
+
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $field = "journeys." . $field;
+
+        $journey = Journey::select('journeys.id', 'journeys.name', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost', 'journeys.id_activity', 'vehicles.name as vehicle_name', 'vehicles.license_plate','journeys.archive')
+            ->join('drives', 'drives.id_journey', '=', 'journeys.id')
+            ->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            })
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        return response()->json($journey);
+    }
+
+    public function getJourney($id)
+    {
+        return Journey::find($id) ?  Journey::select('journeys.id', 'journeys.name', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost', 'journeys.id_activity', 'vehicles.name as vehicle_name', 'vehicles.license_plate','journeys.archive')->join('drives', 'drives.id_journey', '=', 'journeys.id')->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')->where('journeys.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteJourney($id){

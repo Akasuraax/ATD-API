@@ -43,7 +43,7 @@ class DemandController extends Controller
     }
 
     public function getDemand($id){
-        return Demand::find($id);
+        return Demand::find($id) ? Demand::select('demands.id', 'demands.description', 'demands.status', 'users.name as user_name', 'users.forname as user_forname', 'users.email as user_email', 'types.name as type_name', 'demands.archive')->join('users', 'users.id', '=', 'demands.id_user')->join('types', 'types.id', '=', 'demands.id_type')->where('demands.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function getDemands(Request $request){
@@ -58,7 +58,9 @@ class DemandController extends Controller
 
         $field = "demands." . $field;
 
-        $users = Demand::select('id', 'description', 'status', 'id_user', 'id_type', 'archive')
+        $demand = Demand::select('demands.id', 'demands.description', 'demands.status', 'users.name as user_name', 'users.forname as user_forname', 'users.email as user_email', 'types.name as type_name', 'demands.archive')
+            ->join('users', 'users.id', '=', 'demands.id_user')
+            ->join('types', 'types.id', '=', 'demands.id_type')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -90,7 +92,7 @@ class DemandController extends Controller
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
 
-        return response()->json($users);
+        return response()->json($demand);
     }
 
     public function deleteDemand($id){

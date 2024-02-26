@@ -46,7 +46,7 @@ class AnnexesController extends Controller
 
         $field = "annexes." . $field;
 
-        $users = Annexe::select('id', 'name', 'address', 'zipcode', 'archive')
+        $annexe = Annexe::select('id', 'name', 'address', 'zipcode', 'archive')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -78,7 +78,11 @@ class AnnexesController extends Controller
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
 
-        return response()->json($users);
+        return response()->json($annexe);
+    }
+
+    public function getAnnexe($id){
+        return  Annexe::find($id) ? Annexe::select('id', 'name', 'address', 'zipcode', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteAnnexe($id){

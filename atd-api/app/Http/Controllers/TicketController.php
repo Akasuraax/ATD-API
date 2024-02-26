@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\HaveRole;
+use App\Models\Message;
 use App\Models\Send;
 use App\Models\Type;
 use App\Models\User;
@@ -46,19 +47,53 @@ class TicketController extends Controller
 
     public function getMyTickets(Request $request){
         $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
+
         $tickets_id = Send::select('id_ticket')->where('id_user', $id_user)->get();
 
         $ticketIds = $tickets_id->pluck('id_ticket');
 
         $tickets = Ticket::whereIn('id', $ticketIds)->get();
 
-        return response()->json(['tickets' => $tickets]);
+        $response = [];
+
+        foreach ($tickets as $ticket) {
+            Message::where('id_ticket', $ticket->id)->get();
+
+            $ticketData = [
+                'ticket' => $ticket,
+                'messages' => [
+                    'url' => url('api/ticket/' . $ticket->id)
+                ]
+            ];
+
+            $response[] = $ticketData;
+        }
+
+        return response()->json($response);
     }
+
 
     public function getTicket(int $id_ticket, Request $request){
         $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
-        $verif = Send::select('id_user')->where('id_ticket', $id_ticket)->get();
-        dd($verif);
+        $send = Send::select('id_user')->where('id_ticket', $id_ticket)->where('id_user', $id_user)->get()->first();
+
+        if($send  == '[]'){
+            return response()->json([
+                'message' => 'Resource not found'
+            ], 404);
+        }elseif($id_user != $send->id_user) {
+            return response()->json([
+                'message' => 'You\'re not allowed to get this ticket'
+            ], 403);
+        }
+
+        $ticket = Ticket::select('id', 'title', 'description', 'type')->where('id', $id_ticket)->get()->first();
+        $messages = Message::where('id_ticket', $ticket->id)->get();
+
+        return response()->json([
+            'ticket' => $ticket,
+            'messages' => $messages
+        ]);
     }
 
 

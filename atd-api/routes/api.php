@@ -41,7 +41,7 @@ use App\Http\Controllers\TypeController;
     });
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
-        Route::get('/mine', [TicketController::class, 'getMyTickets']);
+        Route::get('/', [TicketController::class, 'getMyTickets']);
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
         Route::post('/', [TicketController::class, 'createTicket']);
     });

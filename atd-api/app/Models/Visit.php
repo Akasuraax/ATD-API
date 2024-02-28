@@ -13,12 +13,8 @@ class Visit extends Model
         'checking',
         'id_volunteer',
         'id_beneficiary',
-        'archive'
-    ];
-
-    protected $rules = [
-        'checking' => 'required|string|max:255',
-        'attribute2' => 'numeric',
-        'attribute3' => 'email|unique:visits,email',
+        'archive',
+        'created_at',
+        'updated_at'
     ];
 }

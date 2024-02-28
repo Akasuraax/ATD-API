@@ -36,21 +36,37 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
-        
-        $user = User::create([
-            'name' => $fields['name'],
-            'forname' => $fields['forname'],
-            'email' => $fields['email'],
-            'password' => $fields['password'],
-            'phone_country' => $fields['phone_country'],
-            'phone_number' => $fields['phone_number'],
-            'gender' => $fields['gender'],
-            'birth_date' => $fields['birth_date'],
-            'address' => $fields['address'],
-            'zipcode' => $fields['zipcode'],
-            'siret_number' => $fields['siret_number'],
-            'compagny' => $fields['compagny'],
-        ]);
+
+
+        if ($role == 2 || $role == 3) {
+            $user = User::create([
+                'name' => $fields['name'],
+                'forname' => $fields['forname'],
+                'email' => $fields['email'],
+                'password' => $fields['password'],
+                'phone_country' => $fields['phone_country'],
+                'phone_number' => $fields['phone_number'],
+                'gender' => $fields['gender'],
+                'birth_date' => $fields['birth_date'],
+                'address' => $fields['address'],
+                'zipcode' => $fields['zipcode'],
+            ]);
+        } else {
+            $user = User::create([
+                'name' => $fields['name'],
+                'forname' => $fields['forname'],
+                'email' => $fields['email'],
+                'password' => $fields['password'],
+                'phone_country' => $fields['phone_country'],
+                'phone_number' => $fields['phone_number'],
+                'gender' => $fields['gender'],
+                'birth_date' => $fields['birth_date'],
+                'address' => $fields['address'],
+                'zipcode' => $fields['zipcode'],
+                'siret_number' => $fields['siret_number'],
+                'compagny' => $fields['compagny'],
+            ]);
+        }
         //add MtM in have_roles
         $user->roles()->attach($role);
 

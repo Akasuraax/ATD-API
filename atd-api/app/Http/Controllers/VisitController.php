@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\HaveRole;
 use App\Models\User;
 use App\Models\Visit;
+use Exception;
+use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -20,19 +22,8 @@ class VisitController extends Controller
                 'id_beneficiary' => 'required|integer',
             ]);
 
-            $volunteerExists = User::where('id', $fields['id_volunteer'])->exists();
-            $beneficiaryExists = User::where('id', $fields['id_beneficiary'])->exists();
-
-            if (!$volunteerExists || !$beneficiaryExists) {
-                $errors = [];
-                if (!$volunteerExists) {
-                    $errors['id_volunteer'] = ['ID volunteer not found'];
-                }
-                if (!$beneficiaryExists) {
-                    $errors['id_beneficiary'] = ['ID beneficiary not found'];
-                }
-                throw ValidationException::withMessages($errors);
-            }
+            User::findOrFail($fields['id_volunteer']);
+            User::findOrFail($fields['id_beneficiary']);
 
             $volunteer = User::where('id', $fields['id_volunteer'])->get()->first();
             $beneficiary = User::where('id', $fields['id_beneficiary'])->get()->first();
@@ -83,7 +74,22 @@ class VisitController extends Controller
 
     }
 
-    public function deleteVisit(Request $request){
+    /**
+     * @throws Exception
+     */
+    public function deleteVisit(int $visit_id, Request $request): JsonResponse
+    {
+        $visit = Visit::findOrFail($visit_id);
 
+        if ($visit->archive) {
+            return response()->json([
+                'message' => 'Visit is already archived'
+            ], 400);
+        }
+
+        $visit->archive = true;
+        $visit->save();
+
+        return response()->json(['message' => 'Visit deleted successfully']);
     }
 }

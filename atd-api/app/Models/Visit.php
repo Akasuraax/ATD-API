@@ -15,4 +15,10 @@ class Visit extends Model
         'id_beneficiary',
         'archive'
     ];
+
+    protected $rules = [
+        'checking' => 'required|string|max:255',
+        'attribute2' => 'numeric',
+        'attribute3' => 'email|unique:visits,email',
+    ];
 }

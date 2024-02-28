@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HaveRole;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Http\JsonResponse;
@@ -36,7 +37,17 @@ class VisitController extends Controller
             $volunteer = User::where('id', $fields['id_volunteer'])->get()->first();
             $beneficiary = User::where('id', $fields['id_beneficiary'])->get()->first();
 
-            if(Visit::where('id_beneficiary', $fields['id_beneficiary'])->get()){
+            if(HaveRole::where('id_user', $fields['id_beneficiary'])->where('id_role', 3)->get()->first()){
+                $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a beneficiary'];
+                throw ValidationException::withMessages($error);
+            }
+
+            if(HaveRole::where('id_user', $fields['id_volunteer'])->where('id_role', 2)->get()->first()){
+                $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a volunteer'];
+                throw ValidationException::withMessages($error);
+            }
+
+            if(Visit::where('id_beneficiary', $fields['id_beneficiary'])->where('archive', false)->get()->first()){
                 $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' already has a visit'];
                 throw ValidationException::withMessages($error);
             }

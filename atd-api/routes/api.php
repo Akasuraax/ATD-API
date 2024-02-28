@@ -4,6 +4,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VisitController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
@@ -130,3 +131,8 @@ use App\Http\Controllers\DemandController;
         Route::delete('/{id}/product', [RecipeController::class, 'deleteRecipeProduct'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [RecipeController::class, 'updateRecipe'])->middleware('authorization:' . serialize([1]));
     });
+
+Route::prefix('/visit')->middleware('validity.token')->group(function (){
+    Route::post('/', [VisitController::class, 'createVisit'])->middleware('authorization:' . serialize([1]));
+    Route::patch('/{visit_id}', [VisitController::class, 'validateVisit'])->middleware('authorization:' . serialize([1, 2]));
+});

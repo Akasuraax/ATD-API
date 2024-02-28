@@ -9,8 +9,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Controllers\RoleController;
+use function Webmozart\Assert\Tests\StaticAnalysis\length;
 
 class UserController extends Controller
 {
@@ -57,7 +60,7 @@ class UserController extends Controller
                             break;
                     }
                 }
-            })
+            } )
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
 
@@ -72,9 +75,7 @@ class UserController extends Controller
             ->first();
 
         if ($user) {
-            $response = [
-                'user' => $user
-            ];
+            $response = $user;
             $status = 200;
         } else {
             $response = [
@@ -86,24 +87,91 @@ class UserController extends Controller
         return Response($response, $status);
     }
 
-    public function deleteUser(int $userId)
+    public function patchUser(int $userId, Request $request)
     {
+        try {
+
+            $fields = $request->validate([
+                'name' => 'required|string|max:255',
+                'forname' => 'required|string|max:255',
+                'email' => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    Rule::unique('users')->ignore($userId),
+                ],
+                'phone_number' => 'nullable|string|max:15',
+                'gender' => 'required|int|max:1',
+                'birth_date' => 'required|date',
+                'address' => 'required|string',
+                'zipcode' => 'required|string|max:5',
+                'siret_number' => 'nullable|string|max:14',
+                'compagny' => 'nullable|string',
+                'roles' => 'required|array'
+            ]);
+
+
+            $roles = $request['roles'];
+            $rolesRequired = [1,2,3,4,5];
+            $roleIds = array_column($roles, 'id');
+            if(count(array_intersect($roleIds, $rolesRequired)) != 1){
+                return response()->json(['errors' => "The list of roles is incorrect"], 400);
+            }
+
+            $roleController = app(RoleController::class);
+            $validRoles = $roleController->getRoles($request);
+            $validIds = $validRoles->pluck('id')->all();
+
+            if(count(array_intersect($roleIds, $validIds)) != 1){
+                return response()->json(['errors' => "The list of roles is incorrect"], 400);
+            }
+
+           if(count(array_diff($roleIds, $validIds)) != 0){
+               return response()->json(['errors' => "The list of roles is incorrect"], 400);
+
+           }
+
+
+            $user = User::findOrFail($userId);
+            $user->update($fields);
+            $user->roles()->sync($roleIds);
+            $user->load('roles');
+
+            return response()->json([
+                'message' => 'User updated successfully',
+                'user' => $user
+            ], 200);
+        }catch (ValidationException $e){
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+    }
+
+    public function deleteUser(int $userId, Request $request)
+    {
+
+        $ban = $request->input('ban', 0);
         $user = User::where('id', $userId)
+            ->with('roles')
             ->first();
-        if ($user) {
+        if (!$user) {
+            $response = [
+                'message' => 'Your element doesn\'t exists'
+            ];
+            $status = 404;
+            return Response($response, $status);
+        }
+
+        if($ban == "true") {
+            $user->update(['ban' => true, 'archive' => true]);
+        } else {
             $user->update(['archive' => true]);
+        }
             $response = [
                 'message' => 'Deleted !',
                 'user' => $user
             ];
             $status = 200;
-        } else {
-            $response = [
-                'message' => 'Your element doesn\'t exists'
-            ];
-            $status = 404;
-        }
-
         return Response($response, $status);
     }
 }

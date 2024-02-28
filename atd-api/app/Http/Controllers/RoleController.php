@@ -12,7 +12,7 @@ use PhpParser\Node\Expr\List_;
 
 class RoleController extends Controller
 {
-    public function getRoles(Request $request): Collection
+    public function getRoles(): Collection
     {
         $roles = Role::select('id','name')
             ->where('archive', false)

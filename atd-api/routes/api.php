@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AuthController;
@@ -57,6 +58,21 @@ use App\Http\Controllers\DemandController;
         Route::patch('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
 
+    Route::prefix('/user')->group(function(){
+        Route::get('/', [UserController::class, 'getUsers']);
+        Route::get('/{id}', [UserController::class, 'getUser']);
+        Route::patch('/{id}', [UserController::class, 'patchUser']);
+        Route::delete('/{id}', [UserController::class, 'deleteUser']);
+    });
+
+Route::prefix('/role')->group(function(){
+    Route::get('/', [RoleController::class, 'getRoles']);
+});
+
+    Route::prefix('/ticket')->middleware('validity.token')->group(function () {
+        Route::get('/mine', [TicketController::class, 'getMyTickets']);
+        Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
+        Route::post('/', [TicketController::class, 'createTicket']);
     Route::prefix('/demand')->middleware('validity.token')->group(function(){
        Route::post('/', [DemandController::class, 'createDemand']);
        Route::get('/', [DemandController::class, 'getDemands']);

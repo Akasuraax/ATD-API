@@ -73,12 +73,14 @@ Route::prefix('/role')->group(function(){
         Route::get('/mine', [TicketController::class, 'getMyTickets']);
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
         Route::post('/', [TicketController::class, 'createTicket']);
+    });
+
     Route::prefix('/demand')->middleware('validity.token')->group(function(){
-       Route::post('/', [DemandController::class, 'createDemand']);
-       Route::get('/', [DemandController::class, 'getDemands']);
-       Route::get('/{id}', [DemandController::class, 'getDemand']);
-       Route::delete('/{id}', [DemandController::class, 'deleteDemand']);
-       Route::patch('/{id}', [DemandController::class, 'updateDemand']);
+        Route::post('/', [DemandController::class, 'createDemand']);
+        Route::get('/', [DemandController::class, 'getDemands']);
+        Route::get('/{id}', [DemandController::class, 'getDemand']);
+        Route::delete('/{id}', [DemandController::class, 'deleteDemand']);
+        Route::patch('/{id}', [DemandController::class, 'updateDemand']);
     });
 
     Route::prefix('/warehouse')->middleware('validity.token')->group(function(){

@@ -22,9 +22,9 @@ class FileController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(!User::find($id) || User::find($id)->archive)
-            return Response(['message'=>'User doesn\'t exist!'], 404);
-
+        $user = User::findOrFail($id);
+        if($user->archive)
+            return response()->json(['message' => 'The user you selected is archived.'], 405);
 
         $file = File::create([
             'name' => $validateData['name'],
@@ -45,8 +45,9 @@ class FileController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-       if(!Activity::find($id) ||Activity::find($id)->archive)
-           return response()->json(['message' => 'Element doesn\'t exist'], 404);
+        $activity = Activity::findOrFail($id);
+       if($activity->archive)
+           return response()->json(['message' => 'The activity you selected is archived.'], 405);
 
         $file = File::create([
             'name' => $validateData['name'],
@@ -173,9 +174,9 @@ class FileController extends Controller
 
     public function deleteActivityFile($id, $idFile){
         try{
-            $file = File::find($idFile);
-            if(!$file || $file->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $file = File::findOrFail($idFile);
+            if($file->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $file->archive = true;
             $activity_files= ActivityFile::where('id_activity', $id)->get();
 
@@ -183,21 +184,16 @@ class FileController extends Controller
                 ActivityFile::where('id_activity', $id)->update(['archive' => true]);
 
             $file->save();
-            return response()->json(['message' => 'Deleted successfully.'], 200);
+            return response()->json(['file' => $file], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
     public function deleteUserFile($id, $idFile){
-        $user = User::find($id);
-        if(!$user || $user->archive)
-            return response()->json(['message' => 'User doesn\'t exist'], 404);
+        User::findOrFail($id);
 
         $service = new DeleteService();
         return $service->deleteService($idFile, 'App\Models\File');
     }
-
-
-
 }

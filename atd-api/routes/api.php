@@ -17,6 +17,7 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\PieceController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\DemandController;
+use App\Http\Controllers\FileController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -147,4 +148,18 @@ Route::prefix('/role')->group(function(){
         Route::delete('/{id}', [RecipeController::class, 'deleteRecipe'])->middleware('authorization:' . serialize([1]));
         Route::delete('/{id}/product', [RecipeController::class, 'deleteRecipeProduct'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [RecipeController::class, 'updateRecipe'])->middleware('authorization:' . serialize([1]));
+    });
+
+    Route::prefix('/user')->middleware('validity.token')->group(function (){
+        Route::post('/{id}/file', [FileController::class, 'createUserFile']);
+        Route::get('/{id}/file', [FileController::class, 'getUserFiles']);
+        Route::get('/{id}/file/{idFile}', [FileController::class, 'getUserFile']);
+        Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteUserFile']);
+    });
+
+    Route::prefix('/activity')->middleware('validity.token')->group(function (){
+        Route::post('/{id}/file', [FileController::class, 'createActivityFile']);
+        Route::get('/{id}/file', [FileController::class, 'getActivityFiles']);
+        Route::get('/{id}/file/{idFile}', [FileController::class, 'getActivityFile']);
+        Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteActivityFile']);
     });

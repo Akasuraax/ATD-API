@@ -134,6 +134,7 @@ use App\Http\Controllers\DemandController;
 
 Route::prefix('/visit')->middleware('validity.token')->group(function (){
     Route::post('/', [VisitController::class, 'createVisit'])->middleware('authorization:' . serialize([1]));
+    Route::get('/', [VisitController::class, 'getVisits'])->middleware('authorization:' . serialize([1, 2, 3]));
     Route::get('/{visit_id}', [VisitController::class, 'getVisit']);
     Route::patch('/{visit_id}', [VisitController::class, 'updateVisit'])->middleware('authorization:' . serialize([1, 2]));
     Route::delete('/{visit_id}', [VisitController::class, 'deleteVisit'])->middleware('authorization:' . serialize([1]));

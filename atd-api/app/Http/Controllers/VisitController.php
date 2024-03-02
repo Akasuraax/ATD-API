@@ -72,14 +72,103 @@ class VisitController extends Controller
     }
 
     public function getVisits(Request $request){
+        $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
+        $beneficiary = HaveRole::where('id_user', $user_id)->where('id_role', 3)->get()->first();
+        $admin = HaveRole::where('id_user', $user_id)->where('id_role', 1)->get()->first();
+
+        if($beneficiary){
+            $visit = Visit::where('id_beneficiary', $user_id)->get()->first();
+            return response()->json([
+                "visit" => [
+                    'checking' => $visit->checking,
+                    'created_at' => $visit->created_at,
+                    'update_at' => $visit->updated_at
+                ]
+            ]);
+        }
+        $perPage = $request->input('pageSize', 10);
+        if($perPage > 50){
+            $perPage = 50;
+        }
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
+
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $visit = Visit::select('*')
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            } )
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        if($admin){
+            return response()->json([
+                'visits' => $visit
+            ]);
+        }else{
+            foreach ($visit as $v) {
+                $beneficiary = User::where('id', $v['id_beneficiary'])->get()->first();
+                $filteredVisit = [];
+                if(!$v['archive']){
+                    $filteredVisit = [
+                        'id' => $v['id'],
+                        'checking' => $v['checking'],
+                        'updated_at' => $v['updated_at'],
+                        'beneficiary' => [
+                            'address' => $beneficiary->address,
+                            'zipcode' => $beneficiary->zipcode
+                        ]
+                    ];
+                }
+
+                if($filteredVisit != [])
+                    $filteredVisits[] = $filteredVisit;
+            }
+
+            return response()->json([
+                'visits' => $filteredVisits
+            ]);
+        }
+
 
     }
 
     public function getVisit(int $visit_id, Request $request){
+
         $visit = Visit::findOrFail($visit_id);
         $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
         $admin = HaveRole::where('id_user', $user_id)->where('id_role', 1)->get()->first();
         $volunteer_id = HaveRole::where('id_user', $user_id)->where('id_role', 2)->get()->first();
+
         if(($visit->archive && $admin == NULL)){
                 return response()->json([
                     'message' => 'Ressource not found'
@@ -95,6 +184,7 @@ class VisitController extends Controller
         $beneficiary = User::where('id', $visit->id_beneficiary)->get()->first();
         $volunteer = User::where('id', $visit->id_volunteer)->get()->first();
 
+        //If it's the administrator
         if($admin != NULL){
             return response()->json([
                 "visit" => [
@@ -109,7 +199,9 @@ class VisitController extends Controller
                     ],
                     'beneficiary' => [
                         'forname' => $beneficiary->forname,
-                        'name' => $beneficiary->name
+                        'name' => $beneficiary->name,
+                        'address' => $beneficiary->address,
+                        'zipcode' => $beneficiary->zipcode
                     ]
                 ]
             ]);

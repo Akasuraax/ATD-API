@@ -15,7 +15,7 @@ class PieceController extends Controller
     {
         try{
             $validateData = $request->validate([
-                'expired_date' => 'required|date_format:Y-m-d H:i',
+                'expired_date' => 'required|date_format:Y-m-d H:i|after:today',
                 'count' => 'required|numeric',
                 'measure' => 'string',
                 'id_warehouse' => 'required|int',
@@ -26,11 +26,14 @@ class PieceController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(!Warehouse::find($validateData['id_warehouse']) || Warehouse::find($validateData['id_warehouse'])->archive)
-            return response()->json(['message' => 'The warehouse you put doesn\'t exist'], 404);
+        $warehouse = Warehouse::findOrFail($validateData['id_warehouse']);
+        $product = Product::findOrFail($validateData['id_product']);
 
-        if(!Product::find($validateData['id_product']) || Product::find($validateData['id_product'])->archive)
-            return response()->json(['message' => 'The product you put doesn\'t exist'], 404);
+        if($warehouse->archive)
+            return response()->json(['message' => 'The warehouse you selected is archived.'], 404);
+
+        if($product->archive)
+            return response()->json(['message' => 'The product you selected is archived.'], 404);
 
         $piece = Piece::create([
             'expired_date' => $validateData['expired_date'],
@@ -43,11 +46,7 @@ class PieceController extends Controller
             $piece['measure'] = $validateData['measure'];
         }
 
-        $response = [
-            'piece' => $piece
-        ];
-
-        return Response($response, 201);
+        return Response(['piece' => $piece], 201);
     }
 
     public function getPieces(Request $request)
@@ -110,20 +109,21 @@ class PieceController extends Controller
         $service = new DeleteService();
         return $service->deleteService($id, 'App\Models\Piece');
     }
+
     public function updatePiece($id, Request $request)
     {
-        $piece = Piece::find($id);
-
-        if($piece && !$piece->archive){
+        try{
+            $piece = Piece::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'expired_date' => 'date_format:Y-m-d H:i',
+                    'expired_date' => 'date_format:Y-m-d H:i|date|after:today',
                     'count' => 'numeric',
                     'measure' => 'string',
                     'id_warehouse' => 'int',
-                    'id_product' => 'int'
+                    'id_product' => 'int',
+                    'archive' => 'boolean'
                 ]);
-            }catch(ValidationException $e){
+            }catch(ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
@@ -142,19 +142,10 @@ class PieceController extends Controller
             }
             $piece->save();
 
-            $response = [
-                'piece'=> $piece
-            ];
-
-            $status = 200;
-        } else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
+            return response()->json(['piece' => $piece], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 
 

@@ -14,6 +14,7 @@ class Piece extends Model
         'count',
         'measure',
         'id_warehouse',
-        'id_product'
+        'id_product',
+        'archive'
     ];
 }

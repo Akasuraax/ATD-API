@@ -14,7 +14,8 @@ class Vehicle extends Model
         'license_plate',
         'average_consumption',
         'fuel_type',
-        'id_annexe'
+        'id_annexe',
+        'vehicle'
     ];
 
     public function journeys(){

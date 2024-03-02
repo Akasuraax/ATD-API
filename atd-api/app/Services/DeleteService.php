@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 Class DeleteService{
     public function deleteVehicleService($id){
         try {
-            $vehicle = Vehicle::find($id);
-            if(!$vehicle || $vehicle->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $vehicle = Vehicle::findOrFail($id);
+            if($vehicle->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $vehicle->archive = true;
 
             $drives = Drives::where('id_vehicle', $id)->get();
@@ -30,7 +30,7 @@ Class DeleteService{
                 }
             }
             $vehicle->save();
-            return response()->json(['element' => $vehicle], 200);
+            return response()->json(['vehicle' => $vehicle], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
@@ -38,9 +38,9 @@ Class DeleteService{
 
     public function deleteJourneyService($id){
         try{
-            $journey = Journey::find($id);
-            if(!$journey || $journey->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $journey = Journey::findOrFail($id);
+            if($journey->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $journey->archive = true;
 
             $steps = Step::where('id_journey', $id)->where('archive', false)->get();
@@ -51,7 +51,7 @@ Class DeleteService{
                 }
             }
             $journey->save();
-            return response()->json(['element' => $journey], 200);
+            return response()->json(['journey' => $journey], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
@@ -59,9 +59,9 @@ Class DeleteService{
 
     public function deleteService($id, $element){
         try{
-            $toDelete = $element::find($id);
-            if(!$toDelete || $toDelete->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $toDelete = $element::findOrFail($id);
+            if($toDelete->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $toDelete->archive = true;
             $toDelete->save();
 

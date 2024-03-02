@@ -27,11 +27,7 @@ class AnnexesController extends Controller
             'zipcode' => $validateData['zipcode']
         ]);
 
-        $response = [
-            'annexe' => $annexe
-        ];
-
-        return Response($response, 201);
+        return Response(['annexe' => $annexe], 201);
     }
 
     public function getAnnexes(Request $request){
@@ -87,9 +83,9 @@ class AnnexesController extends Controller
 
     public function deleteAnnexe($id){
         try{
-            $annexe = Annexe::find($id);
-            if(!$annexe || $annexe->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $annexe = Annexe::findOrFail($id);
+            if($annexe->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $annexe->archive = true;
 
             $vehicles = Vehicle::where('id_annexe', $annexe->id)->where('archive', false)->get();
@@ -100,42 +96,36 @@ class AnnexesController extends Controller
                 }
             }
             $annexe->save();
-            return response()->json(['element' => $annexe], 200);
+            return response()->json(['annexe' => $annexe], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
-    public function updateAnnexe($id, Request $request){
-        $annexe = Annexe::find($id);
-
-        if($annexe && !$annexe->archive){
-            try{
+    public function updateAnnexe($id, Request $request)
+    {
+        try {
+            $annexe = Annexe::findOrFail($id);
+            try {
                 $requestData = $request->validate([
                     'name' => 'string|max:255',
                     'address' => 'string',
-                    'zipcode' => 'digits:5|integer'
+                    'zipcode' => 'digits:5|integer',
+                    'archive' => 'boolean'
                 ]);
-            }catch(ValidationException $e){
+            } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
-            foreach($requestData as $key => $value){
-                if(in_array($key, $annexe->getFillable()))
+
+            foreach ($requestData as $key => $value) {
+                if (in_array($key, $annexe->getFillable()))
                     $annexe->$key = $value;
             }
             $annexe->save();
-            $response = [
-                'type' => $annexe
-            ];
 
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
+            return response()->json(['annexe' => $annexe], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 }

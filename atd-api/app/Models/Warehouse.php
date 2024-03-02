@@ -13,6 +13,7 @@ class Warehouse extends Model
         'name',
         'address',
         'zipcode',
-        'capacity'
+        'capacity',
+        'archive'
     ];
 }

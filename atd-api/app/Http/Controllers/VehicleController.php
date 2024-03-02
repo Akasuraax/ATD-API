@@ -24,8 +24,9 @@ class VehicleController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(!Annexe::find($validateData['id_annexe']) || Annexe::find($validateData['id_annexe'])->archive)
-            return Response(['message'=>'The annex you selected doesn\'t exist!'], 404);
+        $annexe = Annexe::findOrFail($validateData['id_annexe']);
+        if($annexe->archive)
+            return response()->json(['message' => 'The annexe you selected is archived.'], 405);
 
         $vehicle = Vehicle::create([
             'name' => $validateData['name'],
@@ -35,13 +36,8 @@ class VehicleController extends Controller
             'id_annexe' => $validateData['id_annexe']
         ]);
 
-        $response = [
-            'vehicle' => $vehicle
-        ];
-
-        return Response($response, 201);
+        return Response(['vehicle' => $vehicle], 201);
     }
-
 
     public function getVehicles(Request $request){
         $perPage = $request->input('pageSize', 10);
@@ -101,17 +97,17 @@ class VehicleController extends Controller
     }
 
     public function updateVehicle($id, Request $request){
-        $vehicle = Vehicle::find($id);
-
-        if($vehicle && !$vehicle->archive){
+        try{
+            $vehicle = Vehicle::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                'name' => 'string|max:255',
-                'license_plate' => 'string|max:9',
-                'average_consumption' => 'numeric',
-                'fuel_type' => 'string',
-                'id_annexe' => 'int'
-            ]);
+                    'name' => 'string|max:255',
+                    'license_plate' => 'string|max:9',
+                    'average_consumption' => 'numeric',
+                    'fuel_type' => 'string',
+                    'id_annexe' => 'int',
+                    'archive' => 'boolean'
+                ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
@@ -119,22 +115,15 @@ class VehicleController extends Controller
                 if(in_array($key, $vehicle->getFillable()))
                     $vehicle->$key = $value;
             }
-            if(!Annexe::find($vehicle->id_annexe) || Annexe::find($vehicle->id_annexe)->archive)
-                return Response(['message'=>'The annex you selected doesn\'t exist!'], 404);
 
+            $annexe = Annexe::findOrFail($vehicle->id_annexe);
+            if($annexe->archive)
+                return response()->json(['message' => 'The annexe you selected is archived.'], 405);
             $vehicle->save();
-            $response = [
-                'vehicle' => $vehicle
-            ];
 
-            $status = 200;
-            }else{
-                $response = [
-                    'message'=>'Your element doesn\'t exists'
-                ];
-                $status = 404;
-            }
-
-        return Response($response, $status);
+            return response()->json(['vehicle' => $vehicle], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 }

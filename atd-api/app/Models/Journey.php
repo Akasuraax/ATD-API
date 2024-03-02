@@ -15,7 +15,8 @@ class Journey extends Model
         'duration',
         'distance',
         'cost',
-        'fuel_cost'
+        'fuel_cost',
+        'archive'
     ];
 
     public function vehicles(){

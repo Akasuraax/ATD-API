@@ -23,8 +23,9 @@ class StepController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(!Journey::find($validateData['id_journey']) || Journey::find($validateData['id_journey'])->archive)
-            return Response(['message'=>'The journey you selected doesn\'t exist!'], 404);
+        $journey = Journey::findOrFail($validateData['id_journey']);
+        if($journey->archive)
+            return response()->json(['message' => 'The journey selected is archived.'], 405);
 
         $defaultDate = date('Y-m-d'); // Use today's date
         $timeWithDefaultDate = $defaultDate . ' ' . $validateData['time'];
@@ -36,11 +37,7 @@ class StepController extends Controller
             'id_journey' =>  $validateData['id_journey']
         ]);
 
-        $response = [
-            'step' => $step
-        ];
-
-        return Response($response, 201);
+        return Response(['step' => $step], 201);
     }
 
     public function getSteps(Request $request){
@@ -101,19 +98,20 @@ class StepController extends Controller
     }
 
     public function updateStep($id, Request $request){
-        $step = Step::find($id);
-
-        if($step && !$step->archive){
+        try{
+            $step = Step::findOrFail($id);
             try{
                 $requestData = $request->validate([
                     'address' => 'string',
                     'zipcode' => 'int|digits:5',
                     'time' => 'date_format:H:i',
-                    'id_journey' => 'int'
+                    'id_journey' => 'int',
+                    'archive' => 'boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
+
             foreach($requestData as $key => $value){
                 if(in_array($key, $step->getFillable())) {
                     if($key == "time"){
@@ -125,18 +123,10 @@ class StepController extends Controller
                 }
             }
             $step->save();
-            $response = [
-                'step' => $step
-            ];
 
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exists'
-            ];
-            $status = 404;
+            return response()->json(['step' => $step], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 }

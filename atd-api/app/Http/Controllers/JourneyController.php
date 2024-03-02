@@ -25,8 +25,10 @@ class JourneyController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(!Vehicle::find($validateData['id_vehicle']) || Vehicle::find($validateData['id_vehicle'])->archive)
-            return Response(['message'=>'The vehicle you selected doesn\'t exist!'], 404);
+        $vehicle = Vehicle::findOrFail($validateData['id_vehicle']);
+
+        if($vehicle->archive)
+            return Response(['message'=>'The vehicle you selected is archived.'], 404);
 
         $journey = Journey::create([
             'name' => $validateData['name'],
@@ -38,11 +40,7 @@ class JourneyController extends Controller
 
         $journey->vehicles()->attach($validateData['id_vehicle'], ['archive' => false]);
 
-        $response = [
-            'journey' => $journey
-        ];
-
-        return Response($response, 201);
+        return Response(['journey' => $journey], 201);
     }
 
     public function getJourneys(Request $request){
@@ -105,17 +103,17 @@ class JourneyController extends Controller
     }
 
     public function updateJourney($id, Request $request){
-        $journey = Journey::find($id);
-
-        if($journey && !$journey->archive) {
+        try{
+            $journey = Journey::findOrFail($id);
             try{
                 $requestData = $request->validate([
                     'name' => 'string|max:255',
                     'duration' => 'int',
                     'distance' => 'int',
                     'cost' => 'int',
+                    'archive' => 'boolean',
                     'fuel_cost' => 'int',
-                    'id_vehicle' => 'int'
+                    'id_vehicle' => 'int',
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
@@ -135,19 +133,11 @@ class JourneyController extends Controller
                 }
             }
             $journey->save();
-            $response = [
-                'journey' => $journey
-            ];
 
-            $status = 200;
-        } else {
-            $response = [
-                'message' => 'Your element doesn\'t exist'
-            ];
-            $status = 404;
+            return response()->json(['journey' => $journey], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return response()->json($response, $status);
     }
 
 }

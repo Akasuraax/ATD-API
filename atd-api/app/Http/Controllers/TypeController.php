@@ -28,12 +28,7 @@ class TypeController extends Controller
             'access_to_journey' => $validateData['access_to_journey'],
         ]);
 
-        $response = [
-            'type' => $type
-        ];
-
-        return Response($response, 201);
-
+        return Response(['type' => $type], 201);
     }
 
     public function getTypes(Request $request)
@@ -91,10 +86,11 @@ class TypeController extends Controller
 
     public function deleteType($id){
         try{
-            $type = Type::find($id);
-            if(!$type || $type->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $type = Type::findOrFail($id);
+            if($type->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $type->archive = true;
+
             $demands = Demand::where('id_type', $id)->where('archive', false)->get();
             if(!$demands->isEmpty()){
                 foreach($demands as $demand){
@@ -102,19 +98,29 @@ class TypeController extends Controller
                     $service->deleteService($demand->id, 'App\Models\Demand');
                 }
             }
-
             $type->save();
 
-            return response()->json(['message' => 'Deleted successfully.'], 200);
+            return response()->json(['type' => $type], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
     public function updateType($id, Request $request){
-        $type = Type::find($id);
-        if($type && !$type->archive){
-            $requestData = $request->all();
+        try{
+            $type = Type::findOrFail($id);
+            try {
+                $requestData = $request->validate([
+                    'name' => 'string|max:128',
+                    'description' => 'string',
+                    'access_to_warehouse' => 'boolean',
+                    'access_to_journey' => 'boolean',
+                    'archive' => 'boolean'
+                ]);
+            }catch(ValidationException $e) {
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+
             foreach($requestData as $key => $value){
                 if(in_array($key, $type->getFillable())){
                     $type->$key = $value;
@@ -122,19 +128,10 @@ class TypeController extends Controller
             }
             $type->save();
 
-            $response = [
-                'type' => $type
-            ];
-
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exist'
-            ];
-            $status = 404;
+            return response()->json(['type' => $type], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return response()->json($response, $status);
     }
 
 

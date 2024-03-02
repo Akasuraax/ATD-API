@@ -12,6 +12,7 @@ class Demand extends Model
     protected $fillable = [
         'description',
         'id_user',
-        'id_type'
+        'id_type',
+        'archive'
     ];
 }

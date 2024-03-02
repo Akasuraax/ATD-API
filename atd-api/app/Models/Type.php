@@ -17,8 +17,4 @@ class Type extends Model
       'archive'
     ];
 
-    protected $guarded = [
-        'archive'
-    ];
-
 }

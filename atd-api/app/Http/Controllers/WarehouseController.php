@@ -31,11 +31,7 @@ class WarehouseController extends Controller
             'capacity' => $validateData['capacity'],
         ]);
 
-        $response =[
-            'warehouse' => $warehouse
-        ];
-
-        return Response($response, 201);
+        return Response(['warehouse' => $warehouse], 201);
     }
 
     public function getWarehouses(Request $request){
@@ -91,10 +87,9 @@ class WarehouseController extends Controller
 
     public function deleteWarehouse($id){
         try{
-            $warehouse = Warehouse::find($id);
-
-            if(!$warehouse || $warehouse->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            $warehouse = Warehouse::findOrFail($id);
+            if($warehouse->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $warehouse->archive = true;
 
             $pieces = Piece::where('id_warehouse', $id)->where('archive', false)->get();
@@ -105,21 +100,22 @@ class WarehouseController extends Controller
                 }
             }
             $warehouse->save();
-            return response()->json(['element' => $warehouse], 200);
+            return response()->json(['warehouse' => $warehouse], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
     public function updateWarehouse($id, Request $request){
-        $warehouse = Warehouse::find($id);
-        if($warehouse && !$warehouse->archive){
+        try{
+            $warehouse = Warehouse::findOrFail($id);
             try{
                 $requestData = $request->validate([
                     'name' => 'string|max:255',
                     'address' => 'string',
                     'zipcode' => 'digits:5|integer',
-                    'capacity' => 'integer'
+                    'capacity' => 'integer',
+                    'archive' => 'boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
@@ -131,18 +127,9 @@ class WarehouseController extends Controller
             }
             $warehouse->save();
 
-            $response = [
-                'warehouse' => $warehouse
-            ];
-
-            $status = 200;
-        }else{
-            $response = [
-                'message'=>'Your element doesn\'t exist'
-            ];
-            $status = 404;
+            return response()->json(['warehouse' => $warehouse], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return response()->json($response, $status);
     }
 }

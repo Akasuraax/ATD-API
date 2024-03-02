@@ -25,11 +25,7 @@ class ProductController extends Controller
             'name' => $validateData['name']
         ]);
 
-        $response = [
-            'product' => $product
-        ];
-
-        return Response($response, 201);
+        return Response(['product' => $product], 201);
     }
 
     public function getProducts(Request $request){
@@ -86,10 +82,10 @@ class ProductController extends Controller
 
     public function deleteProduct($id){
         try{
-            $product = Product::find($id);
+            $product = Product::findOrFail($id);
             $service = new DeleteService();
-            if(!$product || $product->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
+            if($product->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
             $product->archive = true;
 
             $pieces = Piece::where('id_product', $id)->where('archive', false)->get();
@@ -104,19 +100,19 @@ class ProductController extends Controller
                     Make::where('id_product', $make->id_product)->update(['archive' => true]);
             }
             $product->save();
-            return response()->json(['element' => $product], 200);
+            return response()->json(['product' => $product], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
     public function updateProduct($id, Request $request){
-        $product = Product::find($id);
-
-        if($product && !$product->archive){
+        try{
+            $product = Product::findOrFail($id);
             try{
                 $requestData = $request->validate([
                     'name' => 'string|max:255',
+                    'archive' => 'boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
@@ -128,15 +124,9 @@ class ProductController extends Controller
             }
             $product->save();
 
-            $response = [
-                'product' => $product
-            ];
-            $status = 200;
-        }else{
-            $response = [ 'message'=>'Your element doesn\'t exists' ];
-            $status = 404;
+            return response()->json(['product' => $product], 200);
+        }catch (ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return Response($response, $status);
     }
 }

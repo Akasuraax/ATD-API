@@ -10,7 +10,8 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'archive'
     ];
 
     public function recipes(){

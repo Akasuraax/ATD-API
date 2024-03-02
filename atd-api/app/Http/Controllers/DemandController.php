@@ -23,11 +23,13 @@ class DemandController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(!User::find($validateData['id_user']) || User::find($validateData['id_user'])->archive)
-            return response()->json(['message' => 'The user you put doesn\'t exist'], 404);
+        $user = User::findOrFail($validateData['id_user']);
+        $type = Type::findOrFail($validateData['id_type']);
 
-        if(!Type::find($validateData['id_type']) || Type::find($validateData['id_type'])->archive)
-            return response()->json(['message' => 'The type you put doesn\'t exist'], 404);
+        if($user->archive)
+            return response()->json(['message' => 'The user you put is archived.'], 405);
+        if($type->archive)
+            return response()->json(['message' => 'The type of activity you put is archived.'], 405);
 
         $demand = Demand::create([
             'description' => $validateData['description'],
@@ -102,16 +104,13 @@ class DemandController extends Controller
 
     public function updateDemand($id, Request $request){
         try{
-            $demand = Demand::find($id);
-
-            if(!$demand || $demand->archive)
-                return response()->json(['message' => 'Element doesn\'t exist'], 404);
-
+            $demand = Demand::findOrFail($id);
             try{
                 $requestData = $request->validate([
                     'description' => 'string',
                     'id_user' => 'int',
-                    'id_type' => 'int'
+                    'id_type' => 'int',
+                    'archive' => 'boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);

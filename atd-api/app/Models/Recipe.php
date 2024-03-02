@@ -11,7 +11,8 @@ class Recipe extends Model
 
     protected $fillable = [
         'name',
-        'description'
+        'description',
+        'archive'
     ];
 
     public function products(){

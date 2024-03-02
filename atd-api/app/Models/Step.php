@@ -13,6 +13,7 @@ class Step extends Model
         'address',
         'zipcode',
         'time',
-        'id_journey'
+        'id_journey',
+        'archive'
     ];
 }

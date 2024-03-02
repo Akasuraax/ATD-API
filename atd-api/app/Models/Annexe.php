@@ -12,7 +12,8 @@ class Annexe extends Model
     protected $fillable = [
         'name',
         'address',
-        'zipcode'
+        'zipcode',
+        'archive'
     ];
 
 }

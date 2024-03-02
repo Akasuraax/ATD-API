@@ -5,6 +5,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VisitController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
@@ -163,3 +164,11 @@ Route::prefix('/role')->group(function(){
         Route::get('/{id}/file/{idFile}', [FileController::class, 'getActivityFile']);
         Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteActivityFile']);
     });
+
+Route::prefix('/visit')->middleware('validity.token')->group(function (){
+    Route::post('/', [VisitController::class, 'createVisit'])->middleware('authorization:' . serialize([1]));
+    Route::get('/', [VisitController::class, 'getVisits'])->middleware('authorization:' . serialize([1, 2, 3]));
+    Route::get('/{visit_id}', [VisitController::class, 'getVisit']);
+    Route::patch('/{visit_id}', [VisitController::class, 'updateVisit'])->middleware('authorization:' . serialize([1, 2]));
+    Route::delete('/{visit_id}', [VisitController::class, 'deleteVisit'])->middleware('authorization:' . serialize([1]));
+});

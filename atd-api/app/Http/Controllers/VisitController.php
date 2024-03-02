@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use function PHPUnit\Framework\isEmpty;
 
 class VisitController extends Controller
 {
@@ -74,7 +75,60 @@ class VisitController extends Controller
 
     }
 
-    public function getVisit(int $visit_id){
+    public function getVisit(int $visit_id, Request $request){
+        $visit = Visit::findOrFail($visit_id);
+        $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
+        $admin = HaveRole::where('id_user', $user_id)->where('id_role', 1)->get()->first();
+        $volunteer_id = HaveRole::where('id_user', $user_id)->where('id_role', 2)->get()->first();
+        if(($visit->archive && $admin == NULL)){
+                return response()->json([
+                    'message' => 'Ressource not found'
+                ], 404);
+        }
+
+        if($visit->id_beneficiary != $user_id && $volunteer_id == NULL && $admin == NULL){
+            return response()->json([
+                'message' => 'Ressource not found'
+            ], 404);
+        }
+
+        $beneficiary = User::where('id', $visit->id_beneficiary)->get()->first();
+        $volunteer = User::where('id', $visit->id_volunteer)->get()->first();
+
+        if($admin != NULL){
+            return response()->json([
+                "visit" => [
+                    'id' => $visit->id,
+                    'checking' => $visit->checking,
+                    'archive' => $visit->archive,
+                    'created_at' => $visit->created_at,
+                    'update_at' => $visit->updated_at,
+                    'volunteer' => [
+                        'forname' => $volunteer->forname,
+                        'name' => $volunteer->name
+                    ],
+                    'beneficiary' => [
+                        'forname' => $beneficiary->forname,
+                        'name' => $beneficiary->name
+                    ]
+                ]
+            ]);
+        }else
+            return response()->json([
+                "visit" => [
+                    'checking' => $visit->checking,
+                    'created_at' => $visit->created_at,
+                    'update_at' => $visit->updated_at,
+                    'volunteer' => [
+                        'forname' => $volunteer->forname,
+                        'name' => $volunteer->name
+                    ],
+                    'beneficiary' => [
+                        'forname' => $beneficiary->forname,
+                        'name' => $beneficiary->name
+                    ]
+                ]
+            ]);
 
     }
 
@@ -87,10 +141,13 @@ class VisitController extends Controller
                 'checking' => 'integer|max:1',
                 'id_volunteer' => 'integer',
                 'id_beneficiary' => 'integer',
+                'archive' => 'nullable|boolean'
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+
+        //if it's an administrator
 
         if(HaveRole::where('id_user', TokenController::decodeToken($request->header('Authorization'))->id)->where('id_role', 1)->get()->first()){
             if(isset($fields['id_volunteer']))
@@ -99,6 +156,9 @@ class VisitController extends Controller
                 $visit->id_beneficiary = $fields['id_beneficiary'];
             if(isset($fields['checking']))
                 $visit->checking = $fields['checking'];
+            if(isset($fields['archive']))
+                $visit->checking = $fields['archive'];
+
             $visit->save();
             $visit->touch();
 
@@ -125,10 +185,10 @@ class VisitController extends Controller
         }else{
             $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
             $visit->id_volunteer = $user_id;
-            if($visit->checking)
-                $visit->checking = false;
+            if($visit->checking == 0)
+                $visit->checking = 1;
             else
-                $visit->checking = true;
+                $visit->checking = 0;
 
             $visit->save();
             $visit->touch();
@@ -138,6 +198,7 @@ class VisitController extends Controller
             return response()->json([
                 'visit' => [
                     'updated_at' => $visit->updated_at,
+                    'checking' => $visit->checking,
                     'volunteer' => [
                         'forname' => $volunteer->forname,
                         'name' => $volunteer->name

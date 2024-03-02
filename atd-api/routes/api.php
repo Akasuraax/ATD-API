@@ -67,9 +67,12 @@ use App\Http\Controllers\FileController;
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
     });
 
-Route::prefix('/role')->group(function(){
-    Route::get('/', [RoleController::class, 'getRoles']);
-});
+    Route::prefix('/role')->group(function(){
+        Route::post('/', [RoleController::class, 'createRole'])->middleware('authorization:' . serialize([1]));
+        Route::get('/', [RoleController::class, 'getRoles']);
+        Route::delete('/{id}', [RoleController::class, 'deleteRole'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{id}', [RoleController::class, 'updateRole'])->middleware('authorization:' . serialize([1]));
+    });
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
         Route::get('/mine', [TicketController::class, 'getMyTickets']);
@@ -165,10 +168,10 @@ Route::prefix('/role')->group(function(){
         Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteActivityFile']);
     });
 
-Route::prefix('/visit')->middleware('validity.token')->group(function (){
-    Route::post('/', [VisitController::class, 'createVisit'])->middleware('authorization:' . serialize([1]));
-    Route::get('/', [VisitController::class, 'getVisits'])->middleware('authorization:' . serialize([1, 2, 3]));
-    Route::get('/{visit_id}', [VisitController::class, 'getVisit']);
-    Route::patch('/{visit_id}', [VisitController::class, 'updateVisit'])->middleware('authorization:' . serialize([1, 2]));
-    Route::delete('/{visit_id}', [VisitController::class, 'deleteVisit'])->middleware('authorization:' . serialize([1]));
-});
+    Route::prefix('/visit')->middleware('validity.token')->group(function (){
+        Route::post('/', [VisitController::class, 'createVisit'])->middleware('authorization:' . serialize([1]));
+        Route::get('/', [VisitController::class, 'getVisits'])->middleware('authorization:' . serialize([1, 2, 3]));
+        Route::get('/{visit_id}', [VisitController::class, 'getVisit']);
+        Route::patch('/{visit_id}', [VisitController::class, 'updateVisit'])->middleware('authorization:' . serialize([1, 2]));
+        Route::delete('/{visit_id}', [VisitController::class, 'deleteVisit'])->middleware('authorization:' . serialize([1]));
+    });

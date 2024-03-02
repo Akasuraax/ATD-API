@@ -64,7 +64,6 @@ class TicketController extends Controller
         ]);
     }
 
-
     public function getTicket(int $id_ticket, Request $request)
     {
         $ticket = Ticket::select('id', 'title', 'description', 'type', 'created_at')->where('id', $id_ticket)->first();
@@ -85,7 +84,6 @@ class TicketController extends Controller
         $user = User::where('id', TokenController::decodeToken($request->header('Authorization'))->id)->first();
         return response()->json([
             'ticket' => [
-                'id' => $ticket->id,
                 'title' => $ticket->title,
                 'description' => $ticket->description,
                 'type' => $ticket->type,
@@ -97,6 +95,24 @@ class TicketController extends Controller
             ],
             'messages' => $messagesData
         ]);
+    }
+
+    public function patchTicket(int $id_ticket, Request $request){
+        try{
+            $validatedData = $request->validate([
+                'title' => 'required|string',
+                'description' => 'required|string',
+                'type' => 'required|int',
+                'status' => 'required|int',
+                'severity' => 'required|int',
+                'archive' => 'required|boolean'
+            ]);
+        }catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+        if()
+        $ticket = Ticket::findOrFail($id_ticket);
+
     }
 
 

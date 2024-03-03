@@ -50,8 +50,8 @@ use App\Http\Controllers\FileController;
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket'])->middleware('ticket');
         Route::post('/{id_ticket}', [MessageController::class, 'createMessage'])->middleware('ticket');
         Route::post('/', [TicketController::class, 'createTicket']);
-        Route::patch('/{id_ticket}', [TicketController::class, 'patchTicket'])->middleware('authorization:' . serialize([5]));
-        Route::delete('/{id_ticket}', [TicketController::class, 'deleteTicket'])->middleware('authorization:' . serialize([5]));
+        Route::patch('/{id_ticket}', [TicketController::class, 'patchTicket'])->middleware('authorization:' . serialize([1, 5]));
+        Route::delete('/{id_ticket}', [TicketController::class, 'deleteTicket'])->middleware('authorization:' . serialize([1, 5]));
     });
 
     Route::prefix('/type')->middleware('validity.token')->group(function(){

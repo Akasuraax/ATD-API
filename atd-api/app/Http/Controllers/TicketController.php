@@ -125,12 +125,44 @@ class TicketController extends Controller
         if(isset($validatedData['archive']))
             $ticket->archive = $validatedData['archive'];
 
+        if(!$ticket->archive){
+            $messages = Message::where('id_ticket', $id_ticket)->get();
+
+            foreach($messages as $message){
+                $message->archive = true;
+            }
+        }else{
+            $messages = Message::where('id_ticket', $id_ticket)->get();
+
+            foreach($messages as $message){
+                $message->archive = false;
+            }
+        }
         $ticket->save();
         $ticket->touch();
 
+        $messages = Message::where('id_ticket', $id_ticket)->get();
+
         return response()->json([
-            'ticket' => $ticket
+            'ticket' => $ticket,
+            'messages' => $messages
         ]);
+    }
+
+    public function deleteTicket(int $id_ticket){
+        $ticket = Ticket::findOrFail($id_ticket);
+        $ticket->archive = true;
+
+        $messages = Message::where('id_ticket', $id_ticket)->get();
+
+        foreach($messages as $message){
+            $message->archive = true;
+        }
+
+        return response()->json([
+            'ticket' => $ticket,
+            'messages' => $messages
+        ], 200);
     }
 
 

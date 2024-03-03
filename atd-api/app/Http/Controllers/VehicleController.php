@@ -24,13 +24,17 @@ class VehicleController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        $exist = Vehicle::where('license_plate', strtoupper($validateData['license_plate']))->first();
+        if($exist)
+            return response()->json(['message' => 'This product already exist !'], 409);
+
         $annexe = Annexe::findOrFail($validateData['id_annexe']);
         if($annexe->archive)
             return response()->json(['message' => 'The annexe you selected is archived.'], 405);
 
         $vehicle = Vehicle::create([
             'name' => $validateData['name'],
-            'license_plate' => $validateData['license_plate'],
+            'license_plate' => strtoupper($validateData['license_plate']),
             'average_consumption' => $validateData['average_consumption'],
             'fuel_type' => $validateData['fuel_type'],
             'id_annexe' => $validateData['id_annexe']
@@ -111,9 +115,19 @@ class VehicleController extends Controller
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
+
+            if(isset($requestData['license_plate'])){
+                $exist = Vehicle::where('license_plate', strtoupper($requestData['license_plate']))->first();
+                if($exist)
+                    return response()->json(['message' => 'This product already exist !'], 409);
+            }
+
             foreach($requestData as $key => $value){
                 if(in_array($key, $vehicle->getFillable()))
-                    $vehicle->$key = $value;
+                    if($key == 'license_plate')
+                        $vehicle->$key = strtoupper($value);
+                    else
+                        $vehicle->$key = $value;
             }
 
             $annexe = Annexe::findOrFail($vehicle->id_annexe);

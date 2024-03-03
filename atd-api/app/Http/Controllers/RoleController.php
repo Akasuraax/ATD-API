@@ -88,7 +88,7 @@ class RoleController extends Controller
         $have_role = HaveRole::where('id_role', $id)->get();
         if(!$have_role->isEmpty())
             return response()->json(['message' => 'You can\'t archive this role ! It\'s used'], 405);
-        
+
         $service = new DeleteService();
         return $service->deleteService($id, 'App\Models\Role');
     }
@@ -105,9 +105,18 @@ class RoleController extends Controller
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
+            if(isset($validateData['name'])){
+                $exist = Role::where('name', strtolower($validateData['name']))->first();
+                if($exist)
+                    return response()->json(['message' => 'This role already exist !'], 409);
+            }
+
             foreach($validateData as $key => $value){
                 if(in_array($key, $role->getFillable()))
-                    $role->$key = $value;
+                    if($key == 'name')
+                        $role->$key = strtolower($value);
+                    else
+                        $role->$key = $value;
             }
             $role->save();
 

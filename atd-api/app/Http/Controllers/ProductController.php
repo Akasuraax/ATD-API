@@ -21,8 +21,12 @@ class ProductController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        $exist = Product::where('name', ucfirst(strtolower($validateData['name'])))->first();
+        if($exist)
+            return response()->json(['message' => 'This product already exist !'], 409);
+
         $product = Product::create([
-            'name' => $validateData['name']
+            'name' => ucfirst(strtolower($validateData['name']))
         ]);
 
         return Response(['product' => $product], 201);
@@ -118,9 +122,18 @@ class ProductController extends Controller
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
+            if(isset($requestData['name'])) {
+                $exist = Product::where('name', ucfirst(strtolower($requestData['name'])))->first();
+                if ($exist)
+                    return response()->json(['message' => 'This product already exist !'], 409);
+            }
+
             foreach($requestData as $key => $value){
                 if(in_array($key, $product->getFillable()))
-                    $product->$key = $value;
+                    if($key == 'name')
+                        $product->$key = ucfirst(strtolower($value));
+                    else
+                        $product->$key = $value;
             }
             $product->save();
 

@@ -21,8 +21,13 @@ class TypeController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        $exist = Type::where('name', ucfirst(strtolower($validateData['name'])))->first();
+        if($exist)
+            return response()->json(['message' => 'This type already exist !'], 409);
+
+
         $type = Type::create([
-            'name' => $validateData['name'],
+            'name' => ucfirst(strtolower($validateData['name'])),
             'description' => $validateData['description'],
             'access_to_warehouse' => $validateData['access_to_warehouse'],
             'access_to_journey' => $validateData['access_to_journey'],
@@ -121,9 +126,18 @@ class TypeController extends Controller
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
+            if(isset($requestData['name'])) {
+                $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->first();
+                if ($exist)
+                    return response()->json(['message' => 'This type already exist !'], 409);
+            }
+
             foreach($requestData as $key => $value){
                 if(in_array($key, $type->getFillable())){
-                    $type->$key = $value;
+                    if($key == 'name')
+                        $type->$key = ucfirst(strtolower($value));
+                    else
+                        $type->$key = $value;
                 }
             }
             $type->save();

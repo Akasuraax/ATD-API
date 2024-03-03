@@ -170,7 +170,8 @@ class UserController extends Controller
                 'zipcode' => 'required|string|max:5',
                 'siret_number' => 'nullable|string|max:14',
                 'compagny' => 'nullable|string',
-                'roles' => 'required|array'
+                'roles' => 'required|array',
+                'status' => 'required|int'
             ]);
 
 
@@ -182,7 +183,7 @@ class UserController extends Controller
             }
 
             $roleController = app(RoleController::class);
-            $validRoles = $roleController->getRoles($request);
+            $validRoles = $roleController->getAllRoles($request);
             $validIds = $validRoles->pluck('id')->all();
 
             if(count(array_intersect($roleIds, $validIds)) != 1){

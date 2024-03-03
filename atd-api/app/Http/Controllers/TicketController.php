@@ -67,9 +67,13 @@ class TicketController extends Controller
     {
         $ticket = Ticket::findOrFail($id_ticket);
         $messages = Message::where('id_ticket', $ticket->id)->get();
-        $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
+
+        $admin = $request->attributes->parameters['admin'];
+        $support = $request->attributes->parameters['support'];
+        $demand_user = $request->attributes->parameters['demand_user'];
 
         $messagesData = [];
+
         foreach ($messages as $message) {
             $user = User::where('id', $message->id_user)->get()->first();
             $messagesData[] = [
@@ -81,7 +85,30 @@ class TicketController extends Controller
                 ]
             ];
         }
-        $user = User::where('id', TokenController::decodeToken($request->header('Authorization'))->id)->first();
+
+        $user = User::where('id', $demand_user)->first();
+
+        if(isset($admin) || isset($support)){
+            return response()->json([
+                'ticket' => [
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'description' => $ticket->description,
+                    'type' => $ticket->type,
+                    'status' => $ticket->status,
+                    'severity' => $ticket->severity,
+                    'archive' => $ticket->archive,
+                    'created_at' => $ticket->created_at,
+                    'updated_at' => $ticket->updated_at,
+                    'user' => [
+                        'name' => $user->name,
+                        'forname' => $user->forname
+                    ]
+                ],
+                'messages' => $messagesData
+            ]);
+        }
+
         return response()->json([
             'ticket' => [
                 'title' => $ticket->title,

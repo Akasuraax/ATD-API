@@ -51,8 +51,7 @@ class TicketController extends Controller
     }
 
     public function getMyTickets(Request $request){
-        $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
-
+        $id_user = $request->route('id');
         $tickets_id = Send::select('id_ticket')->where('id_user', $id_user)->get();
 
         $ticketIds = $tickets_id->pluck('id_ticket');
@@ -64,13 +63,17 @@ class TicketController extends Controller
         ]);
     }
 
-
     public function getTicket(int $id_ticket, Request $request)
     {
-        $ticket = Ticket::select('id', 'title', 'description', 'type', 'created_at')->where('id', $id_ticket)->first();
+        $ticket = Ticket::findOrFail($id_ticket);
         $messages = Message::where('id_ticket', $ticket->id)->get();
 
+        $admin = $request->attributes->parameters['admin'];
+        $support = $request->attributes->parameters['support'];
+        $demand_user = $request->attributes->parameters['demand_user'];
+
         $messagesData = [];
+
         foreach ($messages as $message) {
             $user = User::where('id', $message->id_user)->get()->first();
             $messagesData[] = [
@@ -82,10 +85,32 @@ class TicketController extends Controller
                 ]
             ];
         }
-        $user = User::where('id', TokenController::decodeToken($request->header('Authorization'))->id)->first();
+
+        $user = User::where('id', $demand_user)->first();
+
+        if(isset($admin) || isset($support)){
+            return response()->json([
+                'ticket' => [
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'description' => $ticket->description,
+                    'type' => $ticket->type,
+                    'status' => $ticket->status,
+                    'severity' => $ticket->severity,
+                    'archive' => $ticket->archive,
+                    'created_at' => $ticket->created_at,
+                    'updated_at' => $ticket->updated_at,
+                    'user' => [
+                        'name' => $user->name,
+                        'forname' => $user->forname
+                    ]
+                ],
+                'messages' => $messagesData
+            ]);
+        }
+
         return response()->json([
             'ticket' => [
-                'id' => $ticket->id,
                 'title' => $ticket->title,
                 'description' => $ticket->description,
                 'type' => $ticket->type,
@@ -97,6 +122,124 @@ class TicketController extends Controller
             ],
             'messages' => $messagesData
         ]);
+    }
+
+    public function getTickets(Request $request){
+        $perPage = $request->input('pageSize', 10);
+        if($perPage > 50){
+            $perPage = 50;
+        }
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
+
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $tickets = Ticket::select('*')
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            } )
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        return response()->json([
+            'tickets' => $tickets
+        ]);
+    }
+
+    public function patchTicket(int $id_ticket, Request $request){
+        try{
+            $validatedData = $request->validate([
+                'title' => 'string',
+                'description' => 'string',
+                'type' => 'integer',
+                'status' => 'integer',
+                'severity' => 'integer',
+                'archive' => 'boolean'
+            ]);
+        }catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $ticket = Ticket::findOrFail($id_ticket);
+        if(isset($validatedData['title']))
+            $ticket->title = $validatedData['title'];
+        if(isset($validatedData['description']))
+            $ticket->description = $validatedData['description'];
+        if(isset($validatedData['type']))
+            $ticket->type = $validatedData['type'];
+        if(isset($validatedData['status']))
+            $ticket->status = $validatedData['status'];
+        if(isset($validatedData['severity']))
+            $ticket->severity = $validatedData['severity'];
+        if(isset($validatedData['archive']))
+            $ticket->archive = $validatedData['archive'];
+
+        if(!$ticket->archive){
+            $messages = Message::where('id_ticket', $id_ticket)->get();
+
+            foreach($messages as $message){
+                $message->archive = true;
+            }
+        }else{
+            $messages = Message::where('id_ticket', $id_ticket)->get();
+
+            foreach($messages as $message){
+                $message->archive = false;
+            }
+        }
+        $ticket->save();
+        $ticket->touch();
+
+        $messages = Message::where('id_ticket', $id_ticket)->get();
+
+        return response()->json([
+            'ticket' => $ticket,
+            'messages' => $messages
+        ]);
+    }
+
+    public function deleteTicket(int $id_ticket){
+        $ticket = Ticket::findOrFail($id_ticket);
+        $ticket->archive = true;
+
+        $messages = Message::where('id_ticket', $id_ticket)->get();
+
+        foreach($messages as $message){
+            $message->archive = true;
+        }
+
+        return response()->json([
+            'ticket' => $ticket,
+            'messages' => $messages
+        ], 200);
     }
 
 

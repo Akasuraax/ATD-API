@@ -2,7 +2,13 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\TicketMiddleware;
+use App\Http\Middleware\UserRoleMiddleware;
+use App\Http\Middleware\ValidateSignature;
+use App\Http\Middleware\ValidateUserId;
+use App\Http\Middleware\ValidationTokenMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Nette\Schema\ValidationException;
 
 class Kernel extends HttpKernel
 {
@@ -67,8 +73,9 @@ class Kernel extends HttpKernel
     ];
 
     protected $routeMiddleware = [
-        'authorization' => \App\Http\Middleware\UserRoleMiddleware::class,
-        'validity.token' => \App\Http\Middleware\ValidationTokenMiddleware::class,
-        'ticket' => \App\Http\Middleware\TicketMiddleware::class,
+        'authorization' => UserRoleMiddleware::class,
+        'validity.token' => ValidationTokenMiddleware::class,
+        'ticket' => TicketMiddleware::class,
+        'ValidateUserId' => ValidateUserId::class
     ];
 }

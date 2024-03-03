@@ -46,8 +46,9 @@ use App\Http\Controllers\FileController;
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
-        Route::get('/', [TicketController::class, 'getMyTickets']);
+        Route::get('/', [TicketController::class, 'getTickets'])->middleware('authorization:' . serialize([1, 5]));
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket'])->middleware('ticket');
+        
         Route::post('/{id_ticket}', [MessageController::class, 'createMessage'])->middleware('ticket');
         Route::post('/', [TicketController::class, 'createTicket']);
         Route::patch('/{id_ticket}', [TicketController::class, 'patchTicket'])->middleware('authorization:' . serialize([1, 5]));
@@ -67,17 +68,12 @@ use App\Http\Controllers\FileController;
         Route::get('/{id}', [UserController::class, 'getUser']);
         Route::patch('/{id}', [UserController::class, 'patchUser']);
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
+        Route::get('/{id}/tickets', [TicketController::class, 'getMyTickets'])->middleware('ValidateUserId');
     });
 
 Route::prefix('/role')->group(function(){
     Route::get('/', [RoleController::class, 'getRoles']);
 });
-
-    Route::prefix('/ticket')->middleware('validity.token')->group(function () {
-        Route::get('/mine', [TicketController::class, 'getMyTickets']);
-        Route::get('/{id_ticket}', [TicketController::class, 'getTicket']);
-        Route::post('/', [TicketController::class, 'createTicket']);
-    });
 
     Route::prefix('/demand')->middleware('validity.token')->group(function(){
         Route::post('/', [DemandController::class, 'createDemand']);

@@ -51,8 +51,7 @@ class TicketController extends Controller
     }
 
     public function getMyTickets(Request $request){
-        $id_user = TokenController::decodeToken($request->header('Authorization'))->id;
-
+        $id_user = $request->route('id');
         $tickets_id = Send::select('id_ticket')->where('id_user', $id_user)->get();
 
         $ticketIds = $tickets_id->pluck('id_ticket');
@@ -66,8 +65,9 @@ class TicketController extends Controller
 
     public function getTicket(int $id_ticket, Request $request)
     {
-        $ticket = Ticket::select('id', 'title', 'description', 'type', 'created_at')->where('id', $id_ticket)->first();
+        $ticket = Ticket::findOrFail($id_ticket);
         $messages = Message::where('id_ticket', $ticket->id)->get();
+        $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
 
         $messagesData = [];
         foreach ($messages as $message) {

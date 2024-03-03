@@ -124,6 +124,56 @@ class TicketController extends Controller
         ]);
     }
 
+    public function getTickets(Request $request){
+        $perPage = $request->input('pageSize', 10);
+        if($perPage > 50){
+            $perPage = 50;
+        }
+        $page = $request->input('page', 1);
+        $field = $request->input('field', "id");
+        $sort = $request->input('sort', "asc");
+
+        $fieldFilter = $request->input('fieldFilter', '');
+        $operator = $request->input('operator', '');
+        $value = $request->input('value', '%');
+
+        $tickets = Ticket::select('*')
+            ->where(function ($query) use ($fieldFilter, $operator, $value) {
+                if ($fieldFilter && $operator && $value !== '*') {
+                    switch ($operator) {
+                        case 'contains':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
+                            break;
+                        case 'equals':
+                            $query->where($fieldFilter, '=', $value);
+                            break;
+                        case 'startsWith':
+                            $query->where($fieldFilter, 'LIKE', $value . '%');
+                            break;
+                        case 'endsWith':
+                            $query->where($fieldFilter, 'LIKE', '%' . $value);
+                            break;
+                        case 'isEmpty':
+                            $query->whereNull($fieldFilter);
+                            break;
+                        case 'isNotEmpty':
+                            $query->whereNotNull($fieldFilter);
+                            break;
+                        case 'isAnyOf':
+                            $values = explode(',', $value);
+                            $query->whereIn($fieldFilter, $values);
+                            break;
+                    }
+                }
+            } )
+            ->orderBy($field, $sort)
+            ->paginate($perPage, ['*'], 'page', $page + 1);
+
+        return response()->json([
+            'tickets' => $tickets
+        ]);
+    }
+
     public function patchTicket(int $id_ticket, Request $request){
         try{
             $validatedData = $request->validate([

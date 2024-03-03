@@ -48,7 +48,6 @@ use App\Http\Controllers\FileController;
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
         Route::get('/', [TicketController::class, 'getTickets'])->middleware('authorization:' . serialize([1, 5]));
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket'])->middleware('ticket');
-        
         Route::post('/{id_ticket}', [MessageController::class, 'createMessage'])->middleware('ticket');
         Route::post('/', [TicketController::class, 'createTicket']);
         Route::patch('/{id_ticket}', [TicketController::class, 'patchTicket'])->middleware('authorization:' . serialize([1, 5]));

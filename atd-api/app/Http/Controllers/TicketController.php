@@ -100,19 +100,37 @@ class TicketController extends Controller
     public function patchTicket(int $id_ticket, Request $request){
         try{
             $validatedData = $request->validate([
-                'title' => 'required|string',
-                'description' => 'required|string',
-                'type' => 'required|int',
-                'status' => 'required|int',
-                'severity' => 'required|int',
-                'archive' => 'required|boolean'
+                'title' => 'string',
+                'description' => 'string',
+                'type' => 'integer',
+                'status' => 'integer',
+                'severity' => 'integer',
+                'archive' => 'boolean'
             ]);
         }catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
-        if()
-        $ticket = Ticket::findOrFail($id_ticket);
 
+        $ticket = Ticket::findOrFail($id_ticket);
+        if(isset($validatedData['title']))
+            $ticket->title = $validatedData['title'];
+        if(isset($validatedData['description']))
+            $ticket->description = $validatedData['description'];
+        if(isset($validatedData['type']))
+            $ticket->type = $validatedData['type'];
+        if(isset($validatedData['status']))
+            $ticket->status = $validatedData['status'];
+        if(isset($validatedData['severity']))
+            $ticket->severity = $validatedData['severity'];
+        if(isset($validatedData['archive']))
+            $ticket->archive = $validatedData['archive'];
+
+        $ticket->save();
+        $ticket->touch();
+
+        return response()->json([
+            'ticket' => $ticket
+        ]);
     }
 
 

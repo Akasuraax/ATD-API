@@ -18,4 +18,8 @@ class Product extends Model
         return $this->belongsToMany(Recipe::class, 'makes', 'id_product', 'id_recipe')->withPivot('archive', 'count', 'measure');
     }
 
+    public function activities(){
+        return $this->belongsToMany(Activity::class, 'gives', 'id_product', 'id_activity')->withPivot('count', 'archive');
+    }
+
 }

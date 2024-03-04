@@ -22,8 +22,6 @@ class FileController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-
-
         $user = User::findOrFail($id);
         if($user->archive)
             return response()->json(['message' => 'The user you selected is archived.'], 405);
@@ -60,8 +58,6 @@ class FileController extends Controller
 
         return Response(['file' => $file], 201);
     }
-
-
 
     public function getUserFiles(Request $request, $id){
         $perPage = $request->input('pageSize', 10);

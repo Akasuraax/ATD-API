@@ -19,4 +19,8 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class, 'have_roles', 'id_role', 'id_user')->withTimestamps();
     }
+
+    public function activities(){
+        return $this->belongsToMany(Activity::class, 'limits', 'id_role', 'id_activity')->withPivot('min', 'max', 'count', 'archive');
+    }
 }

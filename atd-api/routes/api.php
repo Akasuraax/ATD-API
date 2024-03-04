@@ -62,8 +62,8 @@ use App\Http\Controllers\FileController;
         Route::patch('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/user')->group(function(){
-        Route::get('/', [UserController::class, 'getUsers']);
+    Route::prefix('/user')->middleware('validity.token')->group(function(){
+        Route::get('/', [UserController::class, 'getUsers'])->middleware('validity.token');
         Route::get('/{id}', [UserController::class, 'getUser']);
         Route::patch('/{id}', [UserController::class, 'patchUser']);
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
@@ -73,6 +73,7 @@ use App\Http\Controllers\FileController;
     Route::prefix('/role')->group(function(){
         Route::post('/', [RoleController::class, 'createRole'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [RoleController::class, 'getRoles']);
+        Route::get('/all', [RoleController::class, 'getAllRoles']);
         Route::delete('/{id}', [RoleController::class, 'deleteRole'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [RoleController::class, 'updateRole'])->middleware('authorization:' . serialize([1]));
     });

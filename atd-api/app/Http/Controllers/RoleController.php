@@ -83,6 +83,15 @@ class RoleController extends Controller
         return response()->json($roles);
     }
 
+    public function getAllRoles(Request $request): Collection
+    {
+        $roles = Role::select('id','name')
+            ->where('archive', false)
+            ->get();
+
+        return $roles;
+    }
+
     public function deleteRole($id){
         $role = Role::findOrFail($id);
         $have_role = HaveRole::where('id_role', $id)->get();

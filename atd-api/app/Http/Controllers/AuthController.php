@@ -36,11 +36,13 @@ class AuthController extends Controller
             $token = TokenController::encodeToken($user->id);
 
             User::where('id', $user->id)->update(['remember_token' => $token]);
-            $response = response()->json([
-                'message' => 'Logged in successfully'
-            ], 200);
+            $userWithRoles = User::with('roles')->find($user->id);
 
-            $response->header('Authorization', $token);
+            $response = response()->json([
+                'message' => 'Logged in successfully',
+                'token' => $token,
+                'user' => $userWithRoles
+            ], 200);
 
             return $response;
 

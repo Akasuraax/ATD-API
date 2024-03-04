@@ -24,6 +24,10 @@ class WarehouseController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        $exist = Warehouse::where('address', $validateData['address'])->where('zipcode', $validateData['zipcode'])->first();
+        if($exist)
+            return response()->json(['message' => 'This annexe with this address already exist !'], 409);
+
         $warehouse = Warehouse::create([
             'name' => $validateData['name'],
             'address' => $validateData['address'],
@@ -119,6 +123,19 @@ class WarehouseController extends Controller
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
+            }
+
+            if(isset($requestData['address'])){
+                if(isset($requestData['zipcode']))
+                    $exist = Warehouse::where('address', $requestData['address'])->where('zipcode', $requestData['zipcode'])->first();
+                else
+                    $exist = Warehouse::where('address', $requestData['address'])->where('zipcode', $warehouse->zipcode)->first();
+                if ($exist)
+                    return response()->json(['message' => 'This warehouse with this address already exist !'], 409);
+            }else if(isset($requestData['zipcode'])) {
+                $exist = Warehouse::where('address', $warehouse->address)->where('zipcode', $requestData['zipcode'])->first();
+                if ($exist)
+                    return response()->json(['message' => 'This warehouse with this address already exist !'], 409);
             }
 
             foreach($requestData as $key => $value){

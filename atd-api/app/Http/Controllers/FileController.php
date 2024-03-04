@@ -22,6 +22,8 @@ class FileController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+
+
         $user = User::findOrFail($id);
         if($user->archive)
             return response()->json(['message' => 'The user you selected is archived.'], 405);

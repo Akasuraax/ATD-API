@@ -22,6 +22,10 @@ class RecipeController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        $exist = Recipe::where('name', ucfirst(strtolower($validateData['name'])))->first();
+        if($exist)
+            return response()->json(['message' => 'This product already exist !'], 409);
+
         foreach($validateData['listProduct'] as $id => $tab){
             if(!Product::find($id) || Product::find($id)->archive)
                 return response()->json(['message' => 'The product with the id ' . $id .' doesn\'t exist or is archived.'], 404);
@@ -34,7 +38,7 @@ class RecipeController extends Controller
         }
 
         $recipe = Recipe::create([
-            'name' => $validateData['name'],
+            'name' => ucfirst(strtolower($validateData['name'])),
             'description' => $validateData['description'],
         ]);
 
@@ -209,9 +213,17 @@ class RecipeController extends Controller
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
+            if(isset($requestData['name'])) {
+                $exist = Recipe::where('name', ucfirst(strtolower($requestData['name'])))->first();
+                if ($exist)
+                    return response()->json(['message' => 'This product already exist !'], 409);
+            }
             foreach ($requestData as $key => $value) {
                 if (in_array($key, $recipe->getFillable())) {
-                    $recipe->$key = $value;
+                    if($key == 'name')
+                        $recipe->$key = ucfirst(strtolower($value));
+                    else
+                        $recipe->$key = $value;
                 }
             }
 

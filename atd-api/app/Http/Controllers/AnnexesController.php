@@ -21,6 +21,10 @@ class AnnexesController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        $exist = Annexe::where('address', $validateData['address'])->where('zipcode', $validateData['zipcode'])->first();
+        if($exist)
+            return response()->json(['message' => 'This annexe with this address already exist !'], 409);
+
         $annexe = Annexe::create([
             'name' => $validateData['name'],
             'address' => $validateData['address'],
@@ -115,6 +119,19 @@ class AnnexesController extends Controller
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
+            }
+
+            if(isset($requestData['address'])){
+                if(isset($requestData['zipcode']))
+                    $exist = Annexe::where('address', $requestData['address'])->where('zipcode', $requestData['zipcode'])->first();
+                else
+                    $exist = Annexe::where('address', $requestData['address'])->where('zipcode', $annexe->zipcode)->first();
+                if ($exist)
+                    return response()->json(['message' => 'This annexe with this address already exist !'], 409);
+            }else if(isset($requestData['zipcode'])) {
+                $exist = Annexe::where('address', $annexe->address)->where('zipcode', $requestData['zipcode'])->first();
+                if ($exist)
+                    return response()->json(['message' => 'This annexe with this address already exist !'], 409);
             }
 
             foreach ($requestData as $key => $value) {

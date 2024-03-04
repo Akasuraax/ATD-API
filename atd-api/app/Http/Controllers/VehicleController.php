@@ -40,6 +40,7 @@ class VehicleController extends Controller
     }
 
     public function getVehicles(Request $request){
+
         $perPage = $request->input('pageSize', 10);
         $page = $request->input('page', 1);
         $field = $request->input('field', "id");
@@ -88,7 +89,10 @@ class VehicleController extends Controller
     }
 
     public function getVehicle($id){
-        return Vehicle::find($id) ? Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'annexes.name as annexe_name','vehicles.archive')->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')->where('vehicles.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Vehicle::find($id) ? Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'annexes.name as annexe_name','vehicles.archive')
+            ->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')
+            ->where('vehicles.id', $id)
+            ->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteVehicle($id){

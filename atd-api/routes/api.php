@@ -60,8 +60,8 @@ use App\Http\Controllers\FileController;
         Route::patch('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/user')->group(function(){
-        Route::get('/', [UserController::class, 'getUsers']);
+    Route::prefix('/user')->middleware('validity.token')->group(function(){
+        Route::get('/', [UserController::class, 'getUsers'])->middleware('validity.token');
         Route::get('/{id}', [UserController::class, 'getUser']);
         Route::patch('/{id}', [UserController::class, 'patchUser']);
         Route::delete('/{id}', [UserController::class, 'deleteUser']);

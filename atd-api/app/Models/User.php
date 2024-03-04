@@ -72,4 +72,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Ticket::class, 'sends', 'id_user', 'id_ticket')->withTimestamps();
     }
+
+    public function activities(){
+        return $this->belongsToMany(Activity::class, 'participates', 'id_user', 'id_activity')->withPivot('count', 'archive');
+    }
 }

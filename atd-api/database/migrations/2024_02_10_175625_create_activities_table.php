@@ -20,8 +20,8 @@ return new class extends Migration
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->integer('donation')->nullable();
-            $table->integer('id_user');
-            $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');
+            $table->integer('id_type');
+            $table->foreign('id_type')->references('id')->on('types')->onDelete('restrict');
             $table->boolean('archive')->default(false);
             $table->timestamps();
         });

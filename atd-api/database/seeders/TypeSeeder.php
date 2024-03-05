@@ -55,5 +55,17 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => false,
             'access_to_journey' => false
         ]);
+
+        Type::create([
+            'name' => 'Autre',
+            'access_to_warehouse' => false,
+            'access_to_journey' => false
+        ]);
+
+        Type::create([
+            'name' => 'Rôle',
+            'access_to_warehouse' => false,
+            'access_to_journey' => false
+        ]);
     }
 }

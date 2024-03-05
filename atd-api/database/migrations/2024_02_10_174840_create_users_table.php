@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('remember_token')->nullable();
             $table->string('phone_country', 4)->nullable();
             $table->string('phone_number', 15)->nullable();
-            $table->integer('gender');
-            $table->date('birth_date');
+            $table->integer('gender')->nullable();
+            $table->date('birth_date')->nullable();
             $table->text('address');
             $table->string('zipcode', 5);
             $table->string('siret_number', 14)->nullable();

@@ -15,8 +15,9 @@ class FileController extends Controller
     public function createUserFile(Request $request, $id){
         try{
             $validateData = $request->validate([
-                'name' => 'max:255|required|string',
-                'link' => 'string|required',
+                'names' => 'array|required',
+                'links' => 'nullable',
+                'links.*' => 'mimes:pdf,jpg,jpeg,png'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -26,13 +27,28 @@ class FileController extends Controller
         if($user->archive)
             return response()->json(['message' => 'The user you selected is archived.'], 405);
 
-        $file = File::create([
-            'name' => $validateData['name'],
-            'link' => $validateData['link'],
-            'id_user' => $id,
-        ]);
+        foreach($validateData['names'] as $name){
+            if(!is_string($name) || strlen($name) > 255)
+                return Response(['message'=>'The name ' . $name  . ' should be a string and have less than 255 characters.'], 422);
+        }
 
-        return Response(['file' => $file], 201);
+        $index = 0;
+        if($request->links){
+            foreach($request->links as $file){
+                $name = $id . '-' . strtolower(str_replace(' ', '-', $validateData['names'][$index])) . '.' . $file->extension();
+                $file->move(public_path().'/storage/users/' . $id . '/', $name);
+
+                File::create([
+                    'name' => $validateData['names'][$index],
+                    'link' => '/' . $id . '/' . $name,
+                    'id_user' => $id
+                ]);
+
+                $index++;
+            }
+        }
+
+        return Response(['message' => 'Created !'], 201);
     }
 
     public function createActivityFile(Request $request, $id){
@@ -70,9 +86,6 @@ class FileController extends Controller
         $value = $request->input('value', '%');
 
         $field = "files." . $field;
-
-        if(!User::find($id) || User::find($id)->archive)
-            return Response(['message'=>'User doesn\'t exist!'], 404);
 
         $files = File::select('id', 'name', 'link', 'archive')
             ->where('id_user', $id)

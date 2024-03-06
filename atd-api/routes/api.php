@@ -20,6 +20,7 @@ use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\DemandController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\ActivityController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -162,6 +163,10 @@ use App\Http\Controllers\LanguageController;
     });
 
     Route::prefix('/activity')->middleware('validity.token')->group(function (){
+        Route::post('/', [ActivityController::class, 'createActivity']);
+        Route::get('/', [ActivityController::class, 'getActivities']);
+        Route::get('/{id}', [ActivityController::class, 'getActivity']);
+        Route::delete('/{id}', [ActivityController::class, 'deleteActivity']);
         Route::post('/{id}/file', [FileController::class, 'createActivityFile']);
         Route::get('/{id}/file', [FileController::class, 'getActivityFiles']);
         Route::get('/{id}/file/{idFile}', [FileController::class, 'getActivityFile']);

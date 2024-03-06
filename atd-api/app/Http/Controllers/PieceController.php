@@ -38,13 +38,10 @@ class PieceController extends Controller
         $piece = Piece::create([
             'expired_date' => $validateData['expired_date'],
             'count' => $validateData['count'],
+            'measure' => $validateData['measure'] ?? null,
             'id_warehouse' => $validateData['id_warehouse'],
             'id_product' => $validateData['id_product']
         ]);
-
-        if (isset($validateData['measure'])) {
-            $piece['measure'] = $validateData['measure'];
-        }
 
         return Response(['piece' => $piece], 201);
     }

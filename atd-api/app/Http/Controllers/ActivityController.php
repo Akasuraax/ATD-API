@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\Journey;
+use App\Models\Role;
 use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -19,10 +20,14 @@ class ActivityController extends Controller
                 'description' => 'required|string|max:255',
                 'address' => 'nullable|string',
                 'zipcode' => 'nullable|numeric:5',
-                'start_date' => 'required|date|after_or_equal:today',
-                'end_date' => 'required|date|after:start_date',
+                'start_date' => 'required|date|after_or_equal:today|date_format:Y-m-d H:i',
+                'end_date' => 'required|date|after:start_date|date_format:Y-m-d H:i',
                 'donation' => 'nullable|int',
-                'id_type' => 'required|int'
+                'id_type' => 'required|int',
+                'list_products' => 'nullable|array',
+                'list_recipes' => 'nullable|array',
+                'role_limits' => 'required|array',
+                'files' => 'nullable|array'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -32,22 +37,37 @@ class ActivityController extends Controller
         if($type->archive)
             return Response(['message'=>'The type you selected is archived.'], 404);
 
+        foreach($validateData['role_limits'] as $role => $qte){
+            if(count($qte) == 1 || count($qte) == 0)
+                return response()->json(['message' => 'The max and min is required.'], 422);
+            if($qte[1] < $qte[0])
+                return response()->json(['message' => 'The max should be greater than the min !'], 422);
+            if(!is_int($qte[1]) || !is_int($qte[0]))
+                return response()->json(['message' => 'The max and min should be integer!'], 422);
+            if(!Role::find($role))
+                return response()->json(['message' => 'The role with id ' . $role . ' doesn\'t exist !'], 404);
+        }
+
         $activity = Activity::create([
             'title' => $validateData['title'],
             'description' => $validateData['description'],
-            'address' => $validateData['address'],
-            'zipcode' => $validateData['zipcode'],
+            'address' => $validateData['address'] ?? null,
+            'zipcode' => $validateData['zipcode'] ?? null,
             'start_date' => $validateData['start_date'],
             'end_date' => $validateData['end_date'],
-            'donation' => $validateData['donation'],
+            'donation' => $validateData['donation'] ?? null,
             'id_type' => $validateData['id_type']
         ]);
+
+        foreach($validateData['role_limits'] as $role => $qte){
+            $activity->roles()->attach($role, ['archive' => false, 'min' => $qte[0], 'max' => $qte[1], 'count' => $qte[1]]);
+        }
 
         return Response(['activity' => $activity], 200);
     }
 
     public function participate($idActivity, $idUser){
-        
+
     }
 
     public function getActivities(Request $request){
@@ -62,7 +82,7 @@ class ActivityController extends Controller
 
         $field = "activities." . $field;
 
-        $activities = Activity::select('activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
+        $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
             ->join('types', 'types.id', '=', 'activities.id_type')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
@@ -99,7 +119,7 @@ class ActivityController extends Controller
     }
 
     public function getActivity($id){
-        return Activity::find($id) ? Activity::select('activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')->join('types', 'types.id', '=', 'activities.id_type')->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Activity::find($id) ? Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')->join('types', 'types.id', '=', 'activities.id_type')->where('activities.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteActivity($id){

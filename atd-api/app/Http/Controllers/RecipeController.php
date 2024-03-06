@@ -16,7 +16,7 @@ class RecipeController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'required|string',
-                'listProduct' => 'required|array'
+                'list_product' => 'required|array'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -26,7 +26,7 @@ class RecipeController extends Controller
         if($exist)
             return response()->json(['message' => 'This product already exist !'], 409);
 
-        foreach($validateData['listProduct'] as $id => $tab){
+        foreach($validateData['list_product'] as $id => $tab){
             if(!Product::find($id) || Product::find($id)->archive)
                 return response()->json(['message' => 'The product with the id ' . $id .' doesn\'t exist or is archived.'], 404);
             if(!isset($tab[0]))
@@ -42,7 +42,7 @@ class RecipeController extends Controller
             'description' => $validateData['description'],
         ]);
 
-        foreach($validateData['listProduct'] as $id => $tab) {
+        foreach($validateData['list_product'] as $id => $tab) {
             $recipe->products()->attach($id, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
         }
 
@@ -166,38 +166,6 @@ class RecipeController extends Controller
         }
     }
 
-    public function deleteRecipeProduct($id, Request $request)
-    {
-        try{
-            $recipe = Recipe::findOrFail($id);
-
-            if ($recipe->archive)
-                return response()->json(['message' => 'Element is already archived.'], 405);
-
-            try {
-                $validatedData = $request->validate([
-                    'listProducts' => 'array|required'
-                ]);
-            } catch (ValidationException $e) {
-                return response()->json(['errors' => $e->errors()], 422);
-            }
-
-            $makes = Make::where('id_recipe', $id)->whereIn('id_product', $validatedData['listProducts'])->get();
-
-            if ($makes->isEmpty()) {
-                return response()->json(['message' => 'Products not found or archived'], 404);
-            }
-
-            foreach ($makes as $make) {
-                $recipe->products()->detach($make->id_product);
-            }
-
-            return response()->json(['element' => $recipe], 200);
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
-        }
-    }
-
     public function updateRecipe($id, Request $request)
     {
         try{
@@ -227,6 +195,8 @@ class RecipeController extends Controller
                 }
             }
 
+            $recipe->products()->detach();
+
             if (isset($requestData['listProduct'])) {
                 foreach ($requestData['listProduct'] as $productId => $tab) {
                     if (!Product::find($productId) || Product::find($productId)->archive)
@@ -240,8 +210,7 @@ class RecipeController extends Controller
 
 
                     $existingMake = Make::where('id_product', $productId)->where('id_recipe', $id)->first();
-                    if ($existingMake) Make::where('id_recipe', $id)->where('id_product', $productId)->update(['count' => $tab[0], 'measure' => $tab[1] ?? null]);
-                    else $recipe->products()->attach($productId, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
+                    $recipe->products()->attach($productId, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
                 }
             }
             $recipe->save();

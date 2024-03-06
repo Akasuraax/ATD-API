@@ -97,6 +97,7 @@ use App\Http\Controllers\FileController;
     Route::prefix('/annexe')->middleware('validity.token')->group(function(){
         Route::post('/', [AnnexesController::class, 'createAnnexe'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [AnnexesController::class, 'getAnnexes']);
+        Route::get('/all', [AnnexesController::class, 'getAnnexesAll'])->middleware('authorization:' . serialize([1]));
         Route::get('/{id}', [AnnexesController::class, 'getAnnexe']);
         Route::delete('/{id}', [AnnexesController::class, 'deleteAnnexe'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [AnnexesController::class, 'updateAnnexe'])->middleware('authorization:' . serialize([1]));

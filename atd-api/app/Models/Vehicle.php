@@ -26,5 +26,15 @@ class Vehicle extends Model
     {
         return $this->belongsTo(Annexe::class, 'id_annexe');
     }
+
+    public function archive()
+    {
+
+        $this->archive = true;
+        $this->save();
+
+        $journeyIds = $this->journeys->pluck('id')->toArray();
+        $this->journeys()->sync($journeyIds, ['archive' => true]);
+    }
 }
 

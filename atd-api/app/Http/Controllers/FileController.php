@@ -16,7 +16,7 @@ class FileController extends Controller
         try{
             $validateData = $request->validate([
                 'names' => 'array|required',
-                'links' => 'nullable',
+                'links' => 'required',
                 'links.*' => 'mimes:pdf,jpg,jpeg,png'
             ]);
         }catch(ValidationException $e){
@@ -33,19 +33,23 @@ class FileController extends Controller
         }
 
         $index = 0;
-        if($request->links){
-            foreach($request->links as $file){
-                $name = $id . '-' . strtolower(str_replace(' ', '-', $validateData['names'][$index])) . '.' . $file->extension();
-                $file->move(public_path().'/storage/users/' . $id . '/', $name);
+        try {
+            if ($request->links) {
+                foreach ($request->links as $file) {
+                    $name = $id . '-' . strtolower(str_replace(' ', '-', $validateData['names'][$index])) . '.' . $file->extension();
+                    $file->move(public_path() . '/storage/users/' . $id . '/', $name);
 
-                File::create([
-                    'name' => $validateData['names'][$index],
-                    'link' => '/' . $id . '/' . $name,
-                    'id_user' => $id
-                ]);
+                    File::create([
+                        'name' => $validateData['names'][$index],
+                        'link' => '/storage/users/' . $id . '/' . $name,
+                        'id_user' => $id
+                    ]);
 
-                $index++;
+                    $index++;
+                }
             }
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
         return Response(['message' => 'Created !'], 201);
@@ -54,25 +58,36 @@ class FileController extends Controller
     public function createActivityFile(Request $request, $id){
         try{
             $validateData = $request->validate([
-                'name' => 'max:255|required|string',
-                'link' => 'string|required',
+                'activityFiles' => "required",
+                'activityFiles.*' => 'mimes:pdf,jpg,png,jpeg'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
         $activity = Activity::findOrFail($id);
-       if($activity->archive)
+        if($activity->archive)
            return response()->json(['message' => 'The activity you selected is archived.'], 405);
 
-        $file = File::create([
-            'name' => $validateData['name'],
-            'link' => $validateData['link'],
-        ]);
+        try {
+            if ($request->activityFiles) {
+                foreach ($request->activityFiles as $file) {
+                    $name = $id . '-' . time() . rand(1, 99) . '.' . $file->extension();
+                    $file->move(public_path() . '/storage/activities/' . $id . '/', $name);
 
-        $file->activities()->attach($id,  ['archive' => false]);
+                    $newFile = File::create([
+                        'name' => $name,
+                        'link' => '/storage/activities/' . $id . '/' . $name,
+                    ]);
 
-        return Response(['file' => $file], 201);
+                    $newFile->activities()->attach($id, ['archive' => false]);
+                }
+            }
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+
+        return Response(['message' => "Created !"], 201);
     }
 
     public function getUserFiles(Request $request, $id){

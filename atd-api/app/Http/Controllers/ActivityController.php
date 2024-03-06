@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Models\File;
 use App\Models\Journey;
 use App\Models\Role;
 use App\Services\DeleteService;
@@ -27,7 +28,8 @@ class ActivityController extends Controller
                 'list_products' => 'nullable|array',
                 'list_recipes' => 'nullable|array',
                 'role_limits' => 'required|array',
-                'files' => 'nullable|array'
+                'activityFiles' => 'nullable',
+                'activityFiles.*' => 'mimes:pdf,jpg,png,jpeg'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -37,15 +39,34 @@ class ActivityController extends Controller
         if($type->archive)
             return Response(['message'=>'The type you selected is archived.'], 404);
 
-        foreach($validateData['role_limits'] as $role => $qte){
-            if(count($qte) == 1 || count($qte) == 0)
-                return response()->json(['message' => 'The max and min is required.'], 422);
-            if($qte[1] < $qte[0])
-                return response()->json(['message' => 'The max should be greater than the min !'], 422);
-            if(!is_int($qte[1]) || !is_int($qte[0]))
-                return response()->json(['message' => 'The max and min should be integer!'], 422);
-            if(!Role::find($role))
-                return response()->json(['message' => 'The role with id ' . $role . ' doesn\'t exist !'], 404);
+        $attachedRoleIds = [];
+        foreach ($validateData['role_limits'] as $limits) {
+            $limits = json_decode($limits, true);
+            if (in_array($limits['id'], $attachedRoleIds))
+                return response()->json(['message' => 'The role with id ' . $limits['id'] . ' has already been attached to the activity.'], 422);
+
+            $attachedRoleIds[] = $limits['id'];
+
+            if ($limits === null)
+                return response()->json(['message' => 'Invalid JSON string for role limits'], 422);
+
+            if (!is_array($limits))
+                return response()->json(['message' => 'You should have an array of min and max value'], 422);
+
+            if (!isset($limits['limits']['min']) || !isset($limits['limits']['max']))
+                return response()->json(['message' => 'The max and min are required.'], 422);
+
+            $max = $limits['limits']['max'];
+            $min = $limits['limits']['min'];
+
+            if ($max < $min)
+                return response()->json(['message' => 'The max should be greater than the min!'], 422);
+
+            if (!is_int($min) || !is_int($max))
+                return response()->json(['message' => 'The max and min should be integers!'], 422);
+
+            if (!Role::find($limits["id"]))
+                return response()->json(['message' => 'The role with id ' . $limits["id"] . ' doesn\'t exist!'], 404);
         }
 
         $activity = Activity::create([
@@ -59,8 +80,31 @@ class ActivityController extends Controller
             'id_type' => $validateData['id_type']
         ]);
 
-        foreach($validateData['role_limits'] as $role => $qte){
-            $activity->roles()->attach($role, ['archive' => false, 'min' => $qte[0], 'max' => $qte[1], 'count' => $qte[1]]);
+        try {
+            foreach ($validateData['role_limits'] as $limits) {
+                $limits = json_decode($limits, true);
+                $activity->roles()->attach($limits["id"], ['archive' => false, 'min' => $limits["limits"]["min"], 'max' => $limits["limits"]["max"], 'count' => 0]);
+            }
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+
+        try{
+            if ($request->activityFiles) {
+                foreach ($request->activityFiles as $file) {
+                    $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
+                    $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
+
+                    $newFile = File::create([
+                        'name' => $name,
+                        'link' => '/storage/activities/' . $activity->id . '/' . $name,
+                    ]);
+
+                    $newFile->activities()->attach($activity->id, ['archive' => false]);
+                }
+            }
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
         return Response(['activity' => $activity], 200);

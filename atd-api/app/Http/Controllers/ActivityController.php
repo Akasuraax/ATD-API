@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\File;
 use App\Models\Journey;
+use App\Models\Recipe;
 use App\Models\Role;
+use App\Models\Product;
 use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -28,20 +30,26 @@ class ActivityController extends Controller
                 'list_products' => 'nullable|array',
                 'list_recipes' => 'nullable|array',
                 'role_limits' => 'required|array',
-                'activityFiles' => 'nullable',
-                'activityFiles.*' => 'mimes:pdf,jpg,png,jpeg'
+                'activity_files' => 'nullable',
+                'activity_files.*' => 'mimes:pdf,jpg,png,jpeg'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+
         $type = Type::findOrFail($validateData['id_type']);
         if($type->archive)
             return Response(['message'=>'The type you selected is archived.'], 404);
 
+        //vérifications de rôle
         $attachedRoleIds = [];
         foreach ($validateData['role_limits'] as $limits) {
             $limits = json_decode($limits, true);
+
+            if (!isset($limits['id']) || !isset($limits['limits']) || !isset($limits['limits']['min']) || !isset($limits['limits']['max']))
+                return response()->json(['message' => 'id, limits, min or max is missing in one or more roles.'], 400);
+
             if (in_array($limits['id'], $attachedRoleIds))
                 return response()->json(['message' => 'The role with id ' . $limits['id'] . ' has already been attached to the activity.'], 422);
 
@@ -52,9 +60,6 @@ class ActivityController extends Controller
 
             if (!is_array($limits))
                 return response()->json(['message' => 'You should have an array of min and max value'], 422);
-
-            if (!isset($limits['limits']['min']) || !isset($limits['limits']['max']))
-                return response()->json(['message' => 'The max and min are required.'], 422);
 
             $max = $limits['limits']['max'];
             $min = $limits['limits']['min'];
@@ -69,6 +74,35 @@ class ActivityController extends Controller
                 return response()->json(['message' => 'The role with id ' . $limits["id"] . ' doesn\'t exist!'], 404);
         }
 
+        //recettes et vérification stock
+
+        if ($request->list_recipes) {
+            foreach ($validateData['list_recipes'] as $recipe) {
+                $recipe = json_decode($recipe, true);
+
+                if (!isset($recipe['idRecipe']) || !isset($recipe['count']))
+                    return response()->json(['message' => 'idRecipe or count is missing in one or more recipes.'], 400);
+
+                $recipeModel = Recipe::findOrFail($recipe["idRecipe"]);
+
+                $makes = $recipeModel->makes()->get();
+                foreach ($makes as $make) {
+                    $product = Product::findOrFail($make->id_product);
+                    $pieces = $product->pieces()->get();
+
+                    $recipeCount = $this->makesToKg($make, $recipe["count"]);
+                    $piecesCount = $this->calculateToKg($pieces);
+
+                    if($recipeCount > $piecesCount)
+                        return response()->json(['message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock ! You are asking for ' . $recipeCount . ' kg and we have ' . $piecesCount . ' kg in stock.' ], 422);
+
+
+                }
+            }
+        }
+
+
+        //creéation de l'activité
         $activity = Activity::create([
             'title' => $validateData['title'],
             'description' => $validateData['description'],
@@ -80,6 +114,7 @@ class ActivityController extends Controller
             'id_type' => $validateData['id_type']
         ]);
 
+        //enregistrement des roles (id min max)
         try {
             foreach ($validateData['role_limits'] as $limits) {
                 $limits = json_decode($limits, true);
@@ -89,9 +124,10 @@ class ActivityController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
+        //enregistrement des fichiers
         try{
-            if ($request->activityFiles) {
-                foreach ($request->activityFiles as $file) {
+            if ($request->activity_files) {
+                foreach ($request->activity_files as $file) {
                     $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
                     $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
 
@@ -107,8 +143,51 @@ class ActivityController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
-        return Response(['activity' => $activity], 200);
+
+        return Response(['activity' => 'cc'], 200);
     }
+
+    public function makesToKg($asset, $count){
+        $totalCount = 0;
+        switch ($asset->measure){
+            case 'kg':
+                $totalCount += $asset->count * $count;
+                break;
+            case 'g':
+                $totalCount += $asset->count * $count /1000;
+                break;
+            case 'mg':
+                $totalCount += $asset->count * $count /(1000*1000);
+                break;
+            default:
+                $totalCount += $asset->count * 0;
+                break;
+        }
+        return $totalCount;
+    }
+
+    public function calculateToKg($assets){
+        $totalCount = 0;
+        foreach ($assets as $asset) {
+            switch ($asset->measure) {
+                case 'kg':
+                    $totalCount += $asset->count;
+                    break;
+                case 'g':
+                    $totalCount += $asset->count/1000;
+                    break;
+                case 'mg':
+                    $totalCount += $asset->count/(1000*1000);
+                    break;
+                default:
+                    $totalCount += $asset->count * 0;
+                    break;
+            }
+        }
+        return $totalCount;
+    }
+
+
 
     public function participate($idActivity, $idUser){
 

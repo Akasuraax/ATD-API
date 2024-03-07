@@ -7,7 +7,7 @@ use App\Models\Warehouse;
 use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-
+use App\Models\Product;
 
 class WarehouseController extends Controller
 {
@@ -88,6 +88,24 @@ class WarehouseController extends Controller
     public function getWarehouse($id){
         return Warehouse::find($id) ?  Warehouse::select('id', 'name', 'address', 'zipcode', 'capacity', 'archive', 'created_at')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
+
+    public function getWarehousesStock($id){
+        $product = Product::findOrFail($id);
+        $piecesData = [];
+
+        $pieces = $product->pieces()->get();
+        foreach ($pieces as $piece) {
+            $piecesData[] = [
+                'id' => $piece->id_warehouse,
+                'name' => $piece->warehouse->name,
+                'count' => $piece->count,
+                'measure' => $piece->measure,
+                'expired_date' => $piece->expired_date
+            ];
+        }
+        return response()->json($piecesData);
+    }
+
 
     public function deleteWarehouse($id){
         try{

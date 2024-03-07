@@ -91,6 +91,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/warehouse')->middleware('validity.token')->group(function(){
        Route::post('/', [WarehouseController::class, 'createWarehouse'])->middleware('authorization:' . serialize([1]));
        Route::get('/', [WarehouseController::class, 'getWarehouses']);
+       Route::get('/product/{id}', [WarehouseController::class, 'getWarehousesStock']);
        Route::get('/{id}', [WarehouseController::class, 'getWarehouse']);
        Route::delete('/{id}', [WarehouseController::class, 'deleteWarehouse'])->middleware('authorization:' . serialize([1]));
        Route::patch('/{id}', [WarehouseController::class, 'updateWarehouse'])->middleware('authorization:' . serialize([1]));

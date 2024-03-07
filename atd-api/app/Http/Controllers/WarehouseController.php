@@ -86,7 +86,7 @@ class WarehouseController extends Controller
     }
 
     public function getWarehouse($id){
-        return Warehouse::find($id) ?  Warehouse::select('id', 'name', 'address', 'zipcode', 'capacity', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Warehouse::find($id) ?  Warehouse::select('id', 'name', 'address', 'zipcode', 'capacity', 'archive', 'created_at')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteWarehouse($id){

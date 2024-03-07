@@ -22,4 +22,10 @@ class Product extends Model
         return $this->belongsToMany(Activity::class, 'gives', 'id_product', 'id_activity')->withPivot('count', 'archive');
     }
 
+    public function pieces()
+    {
+        return $this->hasMany(Piece::class, 'id_product');
+    }
+
+
 }

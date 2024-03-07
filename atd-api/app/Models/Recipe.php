@@ -23,4 +23,10 @@ class Recipe extends Model
         return $this->belongsToMany(Activity::class, 'contains', 'id_recipe', 'id_activity')->withPivot('count', 'archive');
     }
 
+    public function makes(){
+        return $this->hasMany(Make::class, 'id_recipe');
+    }
+
+
+
 }

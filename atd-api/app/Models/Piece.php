@@ -17,4 +17,14 @@ class Piece extends Model
         'id_product',
         'archive'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'id_products');
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class, 'id_warehouse');
+    }
 }

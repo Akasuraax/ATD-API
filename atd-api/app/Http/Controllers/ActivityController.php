@@ -95,8 +95,6 @@ class ActivityController extends Controller
 
                     if($recipeCount > $piecesCount)
                         return response()->json(['message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock ! You are asking for ' . $recipeCount . ' kg and we have ' . $piecesCount . ' kg in stock.' ], 422);
-
-
                 }
             }
         }

@@ -19,6 +19,7 @@ use App\Http\Controllers\PieceController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\DemandController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\LanguageController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -172,4 +173,10 @@ use App\Http\Controllers\FileController;
         Route::get('/{visit_id}', [VisitController::class, 'getVisit']);
         Route::patch('/{visit_id}', [VisitController::class, 'updateVisit'])->middleware('authorization:' . serialize([1, 2]));
         Route::delete('/{visit_id}', [VisitController::class, 'deleteVisit'])->middleware('authorization:' . serialize([1]));
+    });
+
+    Route::prefix('/language')->group(function () {
+        Route::post('/', [LanguageController::class, 'createLanguage'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
+        Route::get('/{abbreviation}', [LanguageController::class, 'getLanguageJSON']);
+        Route::get('/icon/{abbreviation}', [LanguageController::class, 'getLanguageIcon']);
     });

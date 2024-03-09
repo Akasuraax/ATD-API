@@ -178,5 +178,5 @@ use App\Http\Controllers\LanguageController;
     Route::prefix('/language')->group(function () {
         Route::post('/', [LanguageController::class, 'createLanguage'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
         Route::get('/{abbreviation}', [LanguageController::class, 'getLanguageJSON']);
-        Route::get('/icon/{abbreviation}', [LanguageController::class, 'getLanguageIcon']);
+        Route::get('/', [LanguageController::class, 'getLanguages']);
     });

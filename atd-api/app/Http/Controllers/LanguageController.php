@@ -13,8 +13,6 @@ class LanguageController extends Controller
                 'abbreviation' => 'string|max:2|required',
                 'language_file' => 'required|file',
                 'language_file.*' => 'mimes:application/json',
-                'icon' => 'required',
-                'icon.*' => 'mimes:png'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -22,13 +20,10 @@ class LanguageController extends Controller
 
         try{
             $file = $request->language_file;
-            $icon = $request->icon;
 
             $nameFile = 'translation' . '.' . $file->getClientOriginalExtension();
-            $nameIcon = $validateRequest['abbreviation'] . '.' . $icon->getClientOriginalExtension();
 
             $file->move(public_path() . '/storage/languages/' . $validateRequest['abbreviation'] . '/', $nameFile);
-            $icon->move(public_path() . '/storage/languages/' . $validateRequest['abbreviation'] . '/', $nameIcon);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
@@ -41,8 +36,13 @@ class LanguageController extends Controller
         return response($fileContents)->header('Content-Type', 'application/json');
     }
 
-    public function getLanguageIcon($abbreviation){
-        $fileContents = file_get_contents(public_path('/storage/languages/' . $abbreviation . '/' . $abbreviation . '.png'));
-        return response($fileContents)->header('Content-Type', 'application/json');
+    public function getLanguages()
+    {
+        $languages = [];
+        foreach (glob(public_path() . '/storage/languages/*', GLOB_ONLYDIR) as $dir) {
+            $languages[] = str_replace("/Users/linaphe/Documents/ATD-API/atd-api/public/storage/languages/", "", $dir);
+        };
+
+        return response($languages)->header('Content-Type', 'application/json');
     }
 }

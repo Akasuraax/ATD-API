@@ -37,7 +37,6 @@ class ActivityController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-
         $type = Type::findOrFail($validateData['id_type']);
         if($type->archive)
             return Response(['message'=>'The type you selected is archived.'], 404);
@@ -51,7 +50,7 @@ class ActivityController extends Controller
                 return response()->json(['message' => 'id, limits, min or max is missing in one or more roles.'], 400);
 
             if (in_array($limits['id'], $attachedRoleIds))
-                return response()->json(['message' => 'The role with id ' . $limits['id'] . ' has already been attached to the activity.'], 422);
+                return response()->json(['message' => 'You can\'t put 2 same roles.'], 422);
 
             $attachedRoleIds[] = $limits['id'];
 
@@ -74,14 +73,39 @@ class ActivityController extends Controller
                 return response()->json(['message' => 'The role with id ' . $limits["id"] . ' doesn\'t exist!'], 404);
         }
 
-        //recettes et vérification stock
+        //vérification produits
+        $attachedProductsIds = [];
+        if($request->list_products){
+            foreach($validateData['list_products'] as $product){
+                $product = json_decode($product, true);
 
+                if(!isset($product['idProduct']) || !isset($product['count']))
+                    return response()->json(['message' => 'idProduct or count is missing.'], 400);
+
+                if(in_array($product['idProduct'], $attachedProductsIds))
+                    return response()->json(['message' => 'You can\'t put 2 same products.'], 422);
+
+                $productModel = Product::findOrFail($product['idProduct']);
+                $pieces = $productModel->pieces()->get();
+
+                if($this->productsToKgOrL($productModel, $product['count']) > $this->calculateToKgOrL($pieces, $productModel->measure))
+                    return response()->json(['message' => 'The quantity of ' .  $productModel->name . ' you ask is higher than the stock ! You are asking for ' . $this->productsToKgOrL($productModel, $product['count']) . 'kg or l and we have ' . $this->calculateToKgOrL($pieces, $productModel->measure) . ' kg or l in stock.' ], 422);
+            }
+        }
+
+        //recettes et vérification stock
+        $attachedRecipeIds = [];
         if ($request->list_recipes) {
             foreach ($validateData['list_recipes'] as $recipe) {
                 $recipe = json_decode($recipe, true);
 
                 if (!isset($recipe['idRecipe']) || !isset($recipe['count']))
                     return response()->json(['message' => 'idRecipe or count is missing in one or more recipes.'], 400);
+
+                if (in_array($recipe['idRecipe'], $attachedRecipeIds))
+                    return response()->json(['message' => 'You can\'t put 2 same recipes.'], 422);
+
+                $attachedRecipeIds[] = $recipe['idRecipe'];
 
                 $recipeModel = Recipe::findOrFail($recipe["idRecipe"]);
 
@@ -90,17 +114,16 @@ class ActivityController extends Controller
                     $product = Product::findOrFail($make->id_product);
                     $pieces = $product->pieces()->get();
 
-                    $recipeCount = $this->makesToKg($make, $recipe["count"]);
-                    $piecesCount = $this->calculateToKg($pieces);
+                    $recipeCount = $this->makesToKgOrL($make, $recipe["count"]);
+                    $piecesCount = $this->calculateToKgOrL($pieces, $product->measure);
 
                     if($recipeCount > $piecesCount)
-                        return response()->json(['message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock ! You are asking for ' . $recipeCount . ' kg and we have ' . $piecesCount . ' kg in stock.' ], 422);
+                        return response()->json(['message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock ! You are asking for ' . $recipeCount . ' ' . $product->measure . ' and we have ' . $piecesCount . ' ' . $product->measure . ' in stock.' ], 422);
                 }
             }
         }
 
-
-        //creéation de l'activité
+        //création de l'activité
         $activity = Activity::create([
             'title' => $validateData['title'],
             'description' => $validateData['description'],
@@ -116,7 +139,27 @@ class ActivityController extends Controller
         try {
             foreach ($validateData['role_limits'] as $limits) {
                 $limits = json_decode($limits, true);
-                $activity->roles()->attach($limits["id"], ['archive' => false, 'min' => $limits["limits"]["min"], 'max' => $limits["limits"]["max"], 'count' => 0]);
+                $activity->roles()->attach($limits['id'], ['archive' => false, 'min' => $limits["limits"]["min"], 'max' => $limits["limits"]["max"], 'count' => 0]);
+            }
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+
+        //enregistrement des produits
+        try{
+            foreach ($validateData['list_products'] as $product) {
+                $product = json_decode($product, true);
+                $activity->products()->attach($product['idProduct'], ['archive' => false, 'count' => $product['count']]);
+            }
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+
+        //enregistrement des recettes
+        try{
+            foreach ($validateData['list_recipes'] as $recipe) {
+                $recipe = json_decode($recipe, true);
+                $activity->recipes()->attach($recipe['idRecipe'], ['archive' => false, 'count' => $recipe['count']]);
             }
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
@@ -125,6 +168,7 @@ class ActivityController extends Controller
         //enregistrement des fichiers
         try{
             if ($request->activity_files) {
+
                 foreach ($request->activity_files as $file) {
                     $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
                     $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
@@ -141,17 +185,16 @@ class ActivityController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
-
-        return Response(['activity' => 'cc'], 200);
+        return Response(['activity' => $activity], 200);
     }
 
-    public function makesToKg($asset, $count){
+    public function makesToKgOrL($asset, $count){
         $totalCount = 0;
         switch ($asset->measure){
-            case 'kg':
+            case 'kg' : case 'l':
                 $totalCount += $asset->count * $count;
                 break;
-            case 'g':
+            case 'g' : case 'ml':
                 $totalCount += $asset->count * $count /1000;
                 break;
             case 'mg':
@@ -164,14 +207,34 @@ class ActivityController extends Controller
         return $totalCount;
     }
 
-    public function calculateToKg($assets){
+    public function productsToKgOrL($asset, $count){
+        $totalCount = 0;
+        switch ($asset->measure){
+            case 'kg' : case 'l':
+            $totalCount += $count;
+            break;
+            case 'g' : case 'ml':
+            $totalCount += $count /1000;
+            break;
+            case 'mg':
+                $totalCount += $count /(1000*1000);
+                break;
+            default:
+                $totalCount +=  0;
+                break;
+        }
+        return $totalCount;
+    }
+
+
+    public function calculateToKgOrL($assets, $measure){
         $totalCount = 0;
         foreach ($assets as $asset) {
-            switch ($asset->measure) {
-                case 'kg':
+            switch ($measure) {
+                case 'kg':case 'l':
                     $totalCount += $asset->count;
                     break;
-                case 'g':
+                case 'g':case 'ml':
                     $totalCount += $asset->count/1000;
                     break;
                 case 'mg':

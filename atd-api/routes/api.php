@@ -61,7 +61,7 @@ use App\Http\Controllers\ActivityController;
         Route::get('/', [TypeController::class, 'getTypes']);
         Route::get('/{id}', [TypeController::class, 'getType']);
         Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
-        Route::patch('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
+        Route::post('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){

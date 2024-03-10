@@ -14,26 +14,37 @@ class TypeController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
-                'access_to_warehouse' => 'boolean',
-                'access_to_journey' => 'boolean',
+                'type_image' => 'nullable|mimes:png,jpg,jpeg',
+                'display' => 'required|boolean',
+                'access_to_warehouse' => 'required|boolean',
+                'access_to_journey' => 'required|boolean',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $exist = Type::where('name', ucfirst(strtolower($validateData['name'])))->first();
+        $exist = Type::where('name', ucfirst(strtolower($validateData['name'])))->where('archive',false)->first();
         if($exist)
-            return response()->json(['message' => 'This type already exist !'], 409);
+            return response()->json(['message' => 'This type already exists!'], 409);
+        if($validateData['display'] == 1 && !$request->type_image)
+            return response()->json(['message' => 'You have to put an image if you want to display the type'], 422);
 
+        if($file = $request->type_image)
+            $nameFile = 'icon' . '.' . $file->getClientOriginalExtension();
 
         $type = Type::create([
             'name' => ucfirst(strtolower($validateData['name'])),
             'description' => $validateData['description'],
+            'display' => $validateData['display'],
+            'image' => $nameFile ?? null,
             'access_to_warehouse' => $validateData['access_to_warehouse'],
             'access_to_journey' => $validateData['access_to_journey'],
         ]);
 
-        return Response(['type' => $type], 201);
+        if($request->type_image)
+            $file->move(public_path() . '/storage/types/' . $type->id . '/', $nameFile);
+
+        return response()->json(['type' => $type], 201);
     }
 
     public function getTypes(Request $request)
@@ -49,7 +60,7 @@ class TypeController extends Controller
 
         $field = "types." . $field;
 
-        $type = Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')
+        $type = Type::select('*')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -112,39 +123,50 @@ class TypeController extends Controller
     }
 
     public function updateType($id, Request $request){
-        try{
+        try {
             $type = Type::findOrFail($id);
-            try {
-                $requestData = $request->validate([
-                    'name' => 'string|max:128',
-                    'description' => 'string',
-                    'access_to_warehouse' => 'boolean',
-                    'access_to_journey' => 'boolean',
-                    'archive' => 'boolean'
-                ]);
-            }catch(ValidationException $e) {
-                return response()->json(['errors' => $e->errors()], 422);
-            }
 
-            if(isset($requestData['name'])) {
-                $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->first();
-                if ($exist)
-                    return response()->json(['message' => 'This type already exist !'], 409);
-            }
+            $requestData = $request->validate([
+                'name' => 'string|max:128',
+                'description' => 'string',
+                'display' => 'boolean',
+                'type_image' => 'mimes:png, jpeg, jpg',
+                'access_to_warehouse' => 'boolean',
+                'access_to_journey' => 'boolean',
+                'archive' => 'boolean'
+            ]);
 
-            foreach($requestData as $key => $value){
-                if(in_array($key, $type->getFillable())){
-                    if($key == 'name')
-                        $type->$key = ucfirst(strtolower($value));
-                    else
-                        $type->$key = $value;
+            if (isset($requestData['name'])) {
+                $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->where('id', '!=', $id)->first();
+                if ($exist) {
+                    return response()->json(['message' => 'This type already exists!'], 409);
                 }
             }
+
+            if ($request->hasFile('type_image')) {
+                $file = $request->file('type_image');
+                $nameFile = 'icon' . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path() . '/storage/types/' . $id . '/', $nameFile);
+                $type->image = $nameFile;
+            }
+
+            foreach ($requestData as $key => $value) {
+                if (in_array($key, $type->getFillable())) {
+                    if ($key == 'name') {
+                        $type->$key = ucfirst(strtolower($value));
+                    } else {
+                        $type->$key = $value;
+                    }
+                }
+            }
+
             $type->save();
 
             return response()->json(['type' => $type], 200);
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 

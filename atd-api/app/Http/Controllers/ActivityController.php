@@ -42,85 +42,25 @@ class ActivityController extends Controller
             return Response(['message'=>'The type you selected is archived.'], 404);
 
         //vérifications de rôle
-        $attachedRoleIds = [];
-        foreach ($validateData['role_limits'] as $limits) {
-            $limits = json_decode($limits, true);
+        $validateRole = $this->validateRoles($validateData['role_limits']);
 
-            if (!isset($limits['id']) || !isset($limits['limits']) || !isset($limits['limits']['min']) || !isset($limits['limits']['max']))
-                return response()->json(['message' => 'id, limits, min or max is missing in one or more roles.'], 400);
-
-            if (in_array($limits['id'], $attachedRoleIds))
-                return response()->json(['message' => 'You can\'t put 2 same roles.'], 422);
-
-            $attachedRoleIds[] = $limits['id'];
-
-            if ($limits === null)
-                return response()->json(['message' => 'Invalid JSON string for role limits'], 422);
-
-            if (!is_array($limits))
-                return response()->json(['message' => 'You should have an array of min and max value'], 422);
-
-            $max = $limits['limits']['max'];
-            $min = $limits['limits']['min'];
-
-            if ($max < $min)
-                return response()->json(['message' => 'The max should be greater than the min!'], 422);
-
-            if (!is_int($min) || !is_int($max))
-                return response()->json(['message' => 'The max and min should be integers!'], 422);
-
-            if (!Role::find($limits["id"]))
-                return response()->json(['message' => 'The role with id ' . $limits["id"] . ' doesn\'t exist!'], 404);
-        }
+        if ($validateRole['status'] === 'error')
+            return response()->json(['message' => $validateRole['message']], 422);
 
         //vérification produits
-        $attachedProductsIds = [];
-        if($request->list_products){
-            foreach($validateData['list_products'] as $product){
-                $product = json_decode($product, true);
+        if(isset($validateData['list_products'])){
+            $validateProduct = $this->validateProducts($validateData['list_products']);
 
-                if(!isset($product['idProduct']) || !isset($product['count']))
-                    return response()->json(['message' => 'idProduct or count is missing.'], 400);
-
-                if(in_array($product['idProduct'], $attachedProductsIds))
-                    return response()->json(['message' => 'You can\'t put 2 same products.'], 422);
-
-                $productModel = Product::findOrFail($product['idProduct']);
-                $pieces = $productModel->pieces()->get();
-
-                if($this->productsToKgOrL($productModel, $product['count']) > $this->calculateToKgOrL($pieces, $productModel->measure))
-                    return response()->json(['message' => 'The quantity of ' .  $productModel->name . ' you ask is higher than the stock ! You are asking for ' . $this->productsToKgOrL($productModel, $product['count']) . 'kg or l and we have ' . $this->calculateToKgOrL($pieces, $productModel->measure) . ' kg or l in stock.' ], 422);
-            }
+            if($validateProduct['status'] === 'error')
+                return response()->json(['message' => $validateProduct['message']], 422);
         }
 
         //recettes et vérification stock
-        $attachedRecipeIds = [];
-        if ($request->list_recipes) {
-            foreach ($validateData['list_recipes'] as $recipe) {
-                $recipe = json_decode($recipe, true);
+        if(isset($validateData['list_recipes'])) {
+            $validateRecipe = $this->validateRecipes($validateData['list_recipes']);
 
-                if (!isset($recipe['idRecipe']) || !isset($recipe['count']))
-                    return response()->json(['message' => 'idRecipe or count is missing in one or more recipes.'], 400);
-
-                if (in_array($recipe['idRecipe'], $attachedRecipeIds))
-                    return response()->json(['message' => 'You can\'t put 2 same recipes.'], 422);
-
-                $attachedRecipeIds[] = $recipe['idRecipe'];
-
-                $recipeModel = Recipe::findOrFail($recipe["idRecipe"]);
-
-                $makes = $recipeModel->makes()->get();
-                foreach ($makes as $make) {
-                    $product = Product::findOrFail($make->id_product);
-                    $pieces = $product->pieces()->get();
-
-                    $recipeCount = $this->makesToKgOrL($make, $recipe["count"]);
-                    $piecesCount = $this->calculateToKgOrL($pieces, $product->measure);
-
-                    if($recipeCount > $piecesCount)
-                        return response()->json(['message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock ! You are asking for ' . $recipeCount . ' ' . $product->measure . ' and we have ' . $piecesCount . ' ' . $product->measure . ' in stock.' ], 422);
-                }
-            }
+            if ($validateRecipe['status'] === 'error')
+                return response()->json(['message' => $validateRecipe['message']], 422);
         }
 
         //création de l'activité
@@ -146,23 +86,27 @@ class ActivityController extends Controller
         }
 
         //enregistrement des produits
-        try{
-            foreach ($validateData['list_products'] as $product) {
-                $product = json_decode($product, true);
-                $activity->products()->attach($product['idProduct'], ['archive' => false, 'count' => $product['count']]);
+        if(isset($validateData['list_products'])) {
+            try {
+                foreach ($validateData['list_products'] as $product) {
+                    $product = json_decode($product, true);
+                    $activity->products()->attach($product['idProduct'], ['archive' => false, 'count' => $product['count']]);
+                }
+            } catch (ValidationException $e) {
+                return response()->json(['message' => $e->getMessage()], $e->getCode());
             }
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
         //enregistrement des recettes
-        try{
-            foreach ($validateData['list_recipes'] as $recipe) {
-                $recipe = json_decode($recipe, true);
-                $activity->recipes()->attach($recipe['idRecipe'], ['archive' => false, 'count' => $recipe['count']]);
+        if(isset($validateData['list_recipes'])) {
+            try {
+                foreach ($validateData['list_recipes'] as $recipe) {
+                    $recipe = json_decode($recipe, true);
+                    $activity->recipes()->attach($recipe['idRecipe'], ['archive' => false, 'count' => $recipe['count']]);
+                }
+            } catch (ValidationException $e) {
+                return response()->json(['message' => $e->getMessage()], $e->getCode());
             }
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
         //enregistrement des fichiers
@@ -187,68 +131,6 @@ class ActivityController extends Controller
 
         return Response(['activity' => $activity], 200);
     }
-
-    public function makesToKgOrL($asset, $count){
-        $totalCount = 0;
-        switch ($asset->measure){
-            case 'kg' : case 'l':
-                $totalCount += $asset->count * $count;
-                break;
-            case 'g' : case 'ml':
-                $totalCount += $asset->count * $count /1000;
-                break;
-            case 'mg':
-                $totalCount += $asset->count * $count /(1000*1000);
-                break;
-            default:
-                $totalCount += $asset->count * 0;
-                break;
-        }
-        return $totalCount;
-    }
-
-    public function productsToKgOrL($asset, $count){
-        $totalCount = 0;
-        switch ($asset->measure){
-            case 'kg' : case 'l':
-            $totalCount += $count;
-            break;
-            case 'g' : case 'ml':
-            $totalCount += $count /1000;
-            break;
-            case 'mg':
-                $totalCount += $count /(1000*1000);
-                break;
-            default:
-                $totalCount +=  0;
-                break;
-        }
-        return $totalCount;
-    }
-
-
-    public function calculateToKgOrL($assets, $measure){
-        $totalCount = 0;
-        foreach ($assets as $asset) {
-            switch ($measure) {
-                case 'kg':case 'l':
-                    $totalCount += $asset->count;
-                    break;
-                case 'g':case 'ml':
-                    $totalCount += $asset->count/1000;
-                    break;
-                case 'mg':
-                    $totalCount += $asset->count/(1000*1000);
-                    break;
-                default:
-                    $totalCount += $asset->count * 0;
-                    break;
-            }
-        }
-        return $totalCount;
-    }
-
-
 
     public function participate($idActivity, $idUser){
 
@@ -361,5 +243,268 @@ class ActivityController extends Controller
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
+    }
+
+    public function updateActivityRecipe(Request $request, $id)
+    {
+        try {
+            $activity = Activity::findOrFail($id);
+
+            try{
+                $validateData = $request->validate([
+                    'list_recipes' => 'required|array',
+                ]);
+            }catch (ValidationException $e){
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+
+            $validationResult = $this->validateRecipes($validateData['list_recipes']);
+
+            if ($validationResult['status'] === 'error')
+                return response()->json(['message' => $validationResult['message']], 422);
+
+            $activity->recipes()->detach();
+
+            try{
+                foreach ($validateData['list_recipes'] as $recipe)
+                    $activity->recipes()->attach($recipe['idRecipe'], ['archive' => false, 'count' => $recipe['count']]);
+
+            }catch(ValidationException $e){
+                return response()->json(['message' => $e->getMessage()], $e->getCode());
+            }
+
+            return response()->json(['activity' => $activity], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+    }
+
+    public function updateActivityProduct(Request $request, $id){
+        try {
+            $activity = Activity::findOrFail($id);
+
+            try{
+                $validateData = $request->validate([
+                    'list_products' => 'required|array',
+                ]);
+            }catch (ValidationException $e){
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+
+            $validationResult = $this->validateProducts($validateData['list_products']);
+
+            if ($validationResult['status'] === 'error')
+                return response()->json(['message' => $validationResult['message']], 422);
+
+            $activity->products()->detach();
+
+            try {
+                foreach ($validateData['list_products'] as $product) {
+                    $activity->products()->attach($product['idProduct'], ['archive' => false, 'count' => $product['count']]);
+                }
+            } catch (ValidationException $e) {
+                return response()->json(['message' => $e->getMessage()], $e->getCode());
+            }
+
+            return response()->json(['activity' => $activity], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+    }
+
+    public function updateActivityRole(Request $request, $id){
+        try {
+            $activity = Activity::findOrFail($id);
+
+            try{
+                $validateData = $request->validate([
+                    'role_limits' => 'required|array',
+                ]);
+            }catch (ValidationException $e){
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+
+            $validationResult = $this->validateRoles($validateData['role_limits']);
+
+            if ($validationResult['status'] === 'error')
+                return response()->json(['message' => $validationResult['message']], 422);
+
+            $activity->roles()->detach();
+
+            try {
+                foreach ($validateData['role_limits'] as $limits) {
+                    $activity->roles()->attach($limits['id'], ['archive' => false, 'min' => $limits["limits"]["min"], 'max' => $limits["limits"]["max"], 'count' => 0]);
+                }
+            }catch(ValidationException $e){
+                return response()->json(['message' => $e->getMessage()], $e->getCode());
+            }
+
+            return response()->json(['activity' => $activity], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
+    }
+
+    public function validateRecipes($recipes)
+    {
+        $attachedRecipeIds = [];
+
+        foreach ($recipes as $recipe) {
+            if (!is_array($recipe))
+                $recipe = json_decode($recipe, true);
+
+            if (!isset($recipe['idRecipe']) || !isset($recipe['count']))
+                return ['status' => 'error', 'message' => 'idRecipe or count is missing in one or more recipes.'];
+
+            if (in_array($recipe['idRecipe'], $attachedRecipeIds))
+                return ['status' => 'error', 'message' => 'You can\'t put 2 same recipes.'];
+
+            $attachedRecipeIds[] = $recipe['idRecipe'];
+
+            $recipeModel = Recipe::findOrFail($recipe["idRecipe"]);
+
+            $makes = $recipeModel->makes()->get();
+            foreach ($makes as $make) {
+                $product = Product::findOrFail($make->id_product);
+                $pieces = $product->pieces()->get();
+
+                $recipeCount = $this->makesToKgOrL($make, $recipe["count"]);
+                $piecesCount = $this->calculateToKgOrL($pieces, $product->measure);
+
+                if ($recipeCount > $piecesCount)
+                    return ['status' => 'error', 'message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock ! You are asking for ' . $recipeCount . ' kg or l and we have ' . $piecesCount . ' kg or l in stock.' ];
+            }
+        }
+
+        return ['status' => 'success'];
+    }
+
+    public function validateRoles($roles)
+    {
+        $attachedRoleIds = [];
+
+        foreach ($roles as $limits) {
+            if(!is_array($limits))
+                $limits = json_decode($limits, true);
+
+            if (!isset($limits['id']) || !isset($limits['limits']) || !isset($limits['limits']['min']) || !isset($limits['limits']['max']))
+                return ['status' => 'error', 'message' => 'id, limits, min or max is missing in one or more roles.'];
+
+            if (in_array($limits['id'], $attachedRoleIds))
+                return ['status' => 'error', 'message' => 'You can\'t put 2 same roles.'];
+
+
+            $attachedRoleIds[] = $limits['id'];
+
+            if ($limits === null)
+                return ['status' => 'error', 'message' => 'Invalid JSON string for role limits'];
+
+            if (!is_array($limits))
+                return ['status' => 'error', 'message' => 'You should have an array of min and max value'];
+
+            $max = $limits['limits']['max'];
+            $min = $limits['limits']['min'];
+
+            if ($max < $min)
+                return ['status' => 'error', 'message' => 'The max should be greater than the min!'];
+
+            if (!is_int($min) || !is_int($max))
+                return ['status' => 'error', 'message' => 'The max and min should be integers!'];
+
+            if (!Role::find($limits["id"]))
+                return ['status' => 'error', 'message' => 'The role with id ' . $limits["id"] . ' doesn\'t exist!'];
+        }
+
+        return ['status' => 'success'];
+    }
+
+    public function validateProducts($products)
+    {
+        $attachedProductsIds = [];
+
+        foreach ($products as $product) {
+            if (!is_array($product))
+                $product = json_decode($product, true);
+
+            if (!isset($product['idProduct']) || !isset($product['count']))
+                return ['status' => 'error', 'message' => 'idProduct or count is missing.'];
+
+            if (in_array($product['idProduct'], $attachedProductsIds))
+                return ['status' => 'error', 'message' => 'You can\'t put 2 same products.'];
+
+            $attachedProductsIds[] = $product['idProduct'];
+
+            $productModel = Product::find($product['idProduct']);
+
+            if (!$productModel)
+                return ['status' => 'error', 'message' => 'Product with ID ' . $product['idProduct'] . ' does not exist.'];
+
+            $pieces = $productModel->pieces()->get();
+
+            if ($this->productsToKgOrL($productModel, $product['count']) > $this->calculateToKgOrL($pieces, $productModel->measure))
+                return ['status' => 'error', 'message' => 'The quantity of ' .  $productModel->name . ' you ask is higher than the stock ! You are asking for ' . $this->productsToKgOrL($productModel, $product['count']) . 'kg or l and we have ' . $this->calculateToKgOrL($pieces, $productModel->measure) . ' kg or l in stock.' ];
+        }
+
+        return ['status' => 'success'];
+    }
+
+    public function productsToKgOrL($asset, $count){
+        $totalCount = 0;
+        switch ($asset->measure){
+            case 'kg' : case 'l':
+                $totalCount += $count;
+                break;
+            case 'g' : case 'ml':
+                $totalCount += $count /1000;
+                break;
+            case 'mg':
+                $totalCount += $count /(1000*1000);
+                break;
+            default:
+                $totalCount +=  0;
+                break;
+        }
+        return $totalCount;
+    }
+
+
+    public function calculateToKgOrL($assets, $measure){
+        $totalCount = 0;
+        foreach ($assets as $asset) {
+            switch ($measure) {
+                case 'kg':case 'l':
+                    $totalCount += $asset->count;
+                    break;
+                case 'g':case 'ml':
+                    $totalCount += $asset->count/1000;
+                    break;
+                case 'mg':
+                    $totalCount += $asset->count/(1000*1000);
+                    break;
+                default:
+                    $totalCount += $asset->count * 0;
+                    break;
+            }
+        }
+        return $totalCount;
+    }
+
+    public function makesToKgOrL($asset, $count){
+        $totalCount = 0;
+        switch ($asset->measure){
+            case 'kg' : case 'l':
+                $totalCount += $asset->count * $count;
+                break;
+            case 'g' : case 'ml':
+                $totalCount += $asset->count * $count /1000;
+                break;
+            case 'mg':
+                $totalCount += $asset->count * $count /(1000*1000);
+                break;
+            default:
+                $totalCount += $asset->count * 0;
+                break;
+        }
+        return $totalCount;
     }
 }

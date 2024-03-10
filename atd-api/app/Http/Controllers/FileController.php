@@ -58,8 +58,8 @@ class FileController extends Controller
     public function createActivityFile(Request $request, $id){
         try{
             $validateData = $request->validate([
-                'activityFiles' => "required",
-                'activityFiles.*' => 'mimes:pdf,jpg,png,jpeg'
+                'activity_files' => "required",
+                'activity_files.*' => 'mimes:pdf,jpg,png,jpeg'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -70,8 +70,8 @@ class FileController extends Controller
            return response()->json(['message' => 'The activity you selected is archived.'], 405);
 
         try {
-            if ($request->activityFiles) {
-                foreach ($request->activityFiles as $file) {
+            if ($request->activity_files) {
+                foreach ($request->activity_files as $file) {
                     $name = $id . '-' . time() . rand(1, 99) . '.' . $file->extension();
                     $file->move(public_path() . '/storage/activities/' . $id . '/', $name);
 
@@ -87,7 +87,7 @@ class FileController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
-        return Response(['message' => "Created !"], 201);
+        return Response(['message' => "Added !"], 201);
     }
 
     public function getUserFiles(Request $request, $id){
@@ -157,7 +157,7 @@ class FileController extends Controller
         if(!Activity::find($id) ||Activity::find($id)->archive)
             return response()->json(['message' => 'Element doesn\'t exist'], 404);
 
-        $activites = File::select('files.id', 'files.name', 'files.link', 'files.archive')
+        $activities = File::select('files.id', 'files.name', 'files.link', 'files.archive')
             ->join('activity_files', 'activity_files.id_file', '=', 'files.id')
             ->where('activity_files.id_activity', '=', $id)
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
@@ -191,7 +191,7 @@ class FileController extends Controller
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
 
-        return response()->json($activites);
+        return response()->json($activities);
     }
 
     public function getActivityFile($id, $idFile){
@@ -210,6 +210,7 @@ class FileController extends Controller
                 ActivityFile::where('id_activity', $id)->update(['archive' => true]);
 
             $file->save();
+            unlink(public_path() . '/storage/activities/' . $id . '/' . $file->name);
             return response()->json(['file' => $file], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());

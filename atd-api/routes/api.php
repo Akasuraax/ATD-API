@@ -171,6 +171,10 @@ use App\Http\Controllers\ActivityController;
         Route::get('/{id}/file', [FileController::class, 'getActivityFiles']);
         Route::get('/{id}/file/{idFile}', [FileController::class, 'getActivityFile']);
         Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteActivityFile']);
+        Route::patch('/{id}', [ActivityController::class, 'updateActivity']);
+        Route::patch('/{id}/recipe', [ActivityController::class, 'updateActivityRecipe']);
+        Route::patch('/{id}/product', [ActivityController::class, 'updateActivityProduct']);
+        Route::patch('/{id}/role', [ActivityController::class, 'updateActivityRole']);
     });
 
     Route::prefix('/visit')->middleware('validity.token')->group(function (){

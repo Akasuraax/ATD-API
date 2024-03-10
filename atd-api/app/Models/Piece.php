@@ -12,7 +12,7 @@ class Piece extends Model
     protected $fillable = [
         'expired_date',
         'count',
-        'measure',
+        'location',
         'id_warehouse',
         'id_product',
         'archive'

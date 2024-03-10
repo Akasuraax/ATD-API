@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->string('name', 128);
             $table->text('description')->nullable();
+            $table->string('image')->nullable();
+            $table->boolean('display');
             $table->boolean('access_to_warehouse');
             $table->boolean('access_to_journey');
             $table->boolean('archive')->default(false);;

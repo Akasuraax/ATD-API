@@ -10,11 +10,13 @@ class Type extends Model
     use HasFactory;
 
     protected $fillable = [
-      'name',
-      'description',
-      'access_to_warehouse',
-      'access_to_journey',
-      'archive'
+        'name',
+        'description',
+        'image',
+        'display',
+        'access_to_warehouse',
+        'access_to_journey',
+        'archive'
     ];
 
 }

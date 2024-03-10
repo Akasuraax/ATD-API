@@ -15,7 +15,8 @@ class ProductController extends Controller
     public function createProduct(Request $request){
         try{
             $validateData = $request->validate([
-                'name' => 'required|string|max:255'
+                'name' => 'required|string|max:255',
+                'measure' => 'nullable|string'
             ]);
         }catch (ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -26,7 +27,8 @@ class ProductController extends Controller
             return response()->json(['message' => 'This product already exist !'], 409);
 
         $product = Product::create([
-            'name' => ucfirst(strtolower($validateData['name']))
+            'name' => ucfirst(strtolower($validateData['name'])),
+            'measure' => isset($validateData['measure']) ? strtolower($validateData['measure']) : null
         ]);
 
         return Response(['product' => $product], 201);
@@ -44,7 +46,7 @@ class ProductController extends Controller
 
         $field = "products." . $field;
 
-        $product = Product::select('id','name', 'archive')
+        $product = Product::select('id','name', 'measure', 'archive')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -81,7 +83,7 @@ class ProductController extends Controller
 
     public function getProduct($id)
     {
-        return Product::find($id) ? Product::select('id', 'name', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Product::find($id) ? Product::select('id', 'name', 'measure', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteProduct($id){
@@ -116,6 +118,7 @@ class ProductController extends Controller
             try{
                 $requestData = $request->validate([
                     'name' => 'string|max:255',
+                    'measure' => 'string',
                     'archive' => 'boolean'
                 ]);
             }catch(ValidationException $e){
@@ -132,6 +135,8 @@ class ProductController extends Controller
                 if(in_array($key, $product->getFillable()))
                     if($key == 'name')
                         $product->$key = ucfirst(strtolower($value));
+                    else if($key == 'measure')
+                        $product->$key = strtolower($value);
                     else
                         $product->$key = $value;
             }

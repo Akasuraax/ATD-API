@@ -16,4 +16,8 @@ class Annexe extends Model
         'archive'
     ];
 
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class, 'id_annexe', 'id');
+    }
 }

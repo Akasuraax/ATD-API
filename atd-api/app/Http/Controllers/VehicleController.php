@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Annexe;
 use App\Services\DeleteService;
 use App\Models\Vehicle;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class VehicleController extends Controller
@@ -93,15 +95,30 @@ class VehicleController extends Controller
     }
 
     public function getVehicle($id){
-        return Vehicle::find($id) ? Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.average_consumption', 'vehicles.fuel_type', 'annexes.name as annexe_name','vehicles.archive')
-            ->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')
-            ->where('vehicles.id', $id)
-            ->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        $vehicle = Vehicle::where('id', $id)
+            ->with('annexe')
+            ->first();
+        if ($vehicle) {
+            return $vehicle;
+        } else {
+            return response()->json(['message' => 'Element doesn\'t exist'], 404);
+        }
     }
 
     public function deleteVehicle($id){
-        $service = new DeleteService();
-        return $service->deleteVehicleService($id);
+        $vehicle = Vehicle::find($id);
+
+        if ($vehicle) {
+            $vehicle->archive();
+            $deletedVehicle = Vehicle::with('annexe')->find($id);
+            $respons = [
+                'vehicle' => $deletedVehicle,
+                'message' => "Deleted !"
+            ];
+            return response()->json($respons, 200);
+        } else {
+            return response()->json(['message' => 'Element doesn\'t exist'], 404);
+        }
     }
 
     public function updateVehicle($id, Request $request){
@@ -109,35 +126,30 @@ class VehicleController extends Controller
             $vehicle = Vehicle::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'name' => 'string|max:255',
-                    'license_plate' => 'string|max:9',
-                    'average_consumption' => 'numeric',
-                    'fuel_type' => 'string',
-                    'id_annexe' => 'int',
-                    'archive' => 'boolean'
+                    'name' => 'required','string|max:255',
+                    'license_plate' => 'required',
+                    'string',
+                    'email',
+                    'max:9',
+                     Rule::unique('users')->ignore($id),
+                    'average_consumption' => 'required','numeric',
+                    'fuel_type' => 'required','string',
+                    'annexe.id' => 'required','int',
+                    'archive' => 'required','boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            if(isset($requestData['license_plate'])){
-                $exist = Vehicle::where('license_plate', strtoupper($requestData['license_plate']))->first();
-                if($exist)
-                    return response()->json(['message' => 'This product already exist !'], 409);
+            try {
+                $annexe = Annexe::where('id', $requestData['annexe']['id'])->where('archive', false)->firstOrFail();
+                $vehicle->update($requestData);
+                $vehicle->annexe()->associate($annexe->id);
+                $vehicle->save();
+                $vehicle->load('annexe:id,name');
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The annexe you selected is not found'], 404);
             }
-
-            foreach($requestData as $key => $value){
-                if(in_array($key, $vehicle->getFillable()))
-                    if($key == 'license_plate')
-                        $vehicle->$key = strtoupper($value);
-                    else
-                        $vehicle->$key = $value;
-            }
-
-            $annexe = Annexe::findOrFail($vehicle->id_annexe);
-            if($annexe->archive)
-                return response()->json(['message' => 'The annexe you selected is archived.'], 405);
-            $vehicle->save();
 
             return response()->json(['vehicle' => $vehicle], 200);
         }catch(ValidationException $e){

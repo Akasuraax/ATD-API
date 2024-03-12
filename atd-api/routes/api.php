@@ -65,7 +65,7 @@ use App\Http\Controllers\LanguageController;
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){
         Route::get('/', [UserController::class, 'getUsers'])->middleware('validity.token');
-        Route::get('/{id}', [UserController::class, 'getUser']);
+        Route::get('/{id}', [UserController::class, 'getUser'])->middleware('ValidateUserId');
         Route::patch('/{id}', [UserController::class, 'patchUser']);
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
         Route::get('/{id}/tickets', [TicketController::class, 'getMyTickets'])->middleware('ValidateUserId');

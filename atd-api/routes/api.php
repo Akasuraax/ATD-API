@@ -62,6 +62,7 @@ use App\Http\Controllers\LanguageController;
         Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
+    Route::get('/types', [TypeController::class, 'getTypeAll'])->middleware('validity.token');
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){
         Route::get('/', [UserController::class, 'getUsers'])->middleware('validity.token');
@@ -113,6 +114,7 @@ use App\Http\Controllers\LanguageController;
 
     Route::prefix('/journey')->middleware('validity.token')->group(function(){
         Route::post('/', [JourneyController::class, 'createJourney'])->middleware('authorization:' . serialize([1]));
+        Route::post('/{journey_id}', [StepController::class, 'calculusJourney'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [JourneyController::class, 'getJourneys']);
         Route::get('/{id}', [JourneyController::class, 'getJourney']);
         Route::delete('/{id}', [JourneyController::class, 'deleteJourney'])->middleware('authorization:' . serialize([1]));

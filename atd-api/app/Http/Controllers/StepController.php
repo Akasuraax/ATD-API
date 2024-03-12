@@ -96,6 +96,14 @@ class StepController extends Controller
         return response()->json($step);
     }
 
+    public function calculusJourney(int $journey_id, Request $req){
+        $steps = Step::query()->where('id_journey', $journey_id)
+            ->orderBy('time', 'asc')
+            ->get();
+
+
+    }
+
     public function getJourneySteps($id_journey){
         return Journey::findOrFail($id_journey) ? Step::where('id_journey', $id_journey)->where('archive', false)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }

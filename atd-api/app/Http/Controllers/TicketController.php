@@ -22,18 +22,17 @@ class TicketController extends Controller
 
     try {
         $validatedData = $request->validate([
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'type' => 'required|int',
+            'ticket.title' => 'required|string',
+            'ticket.description' => 'required|string',
+            'ticket.type' => 'required|int',
         ]);
     } catch (ValidationException $e) {
         return response()->json(['errors' => $e->errors()], 422);
     }
-
         $ticket = Ticket::create([
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'type' => $validatedData['type']
+            'title' => $validatedData['ticket']['title'],
+            'description' => $validatedData['ticket']['description'],
+            'type' => $validatedData['ticket']['type']
         ]);
 
         $ticket->users()->attach(TokenController::decodeToken($request->header('Authorization'))->id);

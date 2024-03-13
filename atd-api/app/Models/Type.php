@@ -19,4 +19,9 @@ class Type extends Model
         'archive'
     ];
 
+    public function activities(){
+        return $this->hasMany(Activity::class, 'id_type', 'id');
+    }
+
+
 }

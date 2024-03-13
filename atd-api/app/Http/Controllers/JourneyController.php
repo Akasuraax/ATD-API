@@ -19,7 +19,8 @@ class JourneyController extends Controller
                 'distance' => 'int|required',
                 'cost' => 'int|required',
                 'fuel_cost' => 'int|required',
-                'id_vehicle' => 'int|required'
+                'id_vehicle' => 'int|required',
+                'id_activity' => 'nullable|int'
              ]);
         }catch (ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -35,7 +36,8 @@ class JourneyController extends Controller
             'duration' => $validateData['duration'],
             'distance' => $validateData['distance'],
             'cost' => $validateData['cost'],
-            'fuel_cost' => $validateData['fuel_cost']
+            'fuel_cost' => $validateData['fuel_cost'],
+            'id_activity' => $validateData['id_activity'] ?? null
         ]);
 
         $journey->vehicles()->attach($validateData['id_vehicle'], ['archive' => false]);
@@ -55,7 +57,7 @@ class JourneyController extends Controller
 
         $field = "journeys." . $field;
 
-        $journey = Journey::select('journeys.id', 'journeys.name', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost', 'journeys.id_activity', 'vehicles.name as vehicle_name', 'vehicles.license_plate','journeys.archive')
+        $journey = Journey::select('journeys.id', 'journeys.name', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost', 'journeys.id_activity', 'vehicles.name as vehicle_name', 'vehicles.license_plate','journeys.archive', 'journeys.id_activity')
             ->join('drives', 'drives.id_journey', '=', 'journeys.id')
             ->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
@@ -114,6 +116,7 @@ class JourneyController extends Controller
                     'archive' => 'boolean',
                     'fuel_cost' => 'int',
                     'id_vehicle' => 'int',
+                    'id_activity' => 'int'
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);

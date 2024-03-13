@@ -148,8 +148,8 @@ class ActivityController extends Controller
 
         $field = "activities." . $field;
 
-        $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
-            ->join('types', 'types.id', '=', 'activities.id_type')
+        $activities = Activity::select('id','title', 'description', 'address', 'zipcode', 'start_date', 'end_date', 'donation')
+            ->with('type')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -180,7 +180,6 @@ class ActivityController extends Controller
             })
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
-
         return response()->json($activities);
     }
 
@@ -193,17 +192,9 @@ class ActivityController extends Controller
             $activity = Activity::findOrFail($id);
             if($activity->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $activity->archive = true;
 
-            $journeys = Journey::where('id_activity', $id)->where('archive', false)->get();
-            if(!$journeys->isEmpty()){
-                foreach($journeys as $journey){
-                    $service = new DeleteService();
-                    $service->deleteJourneyService($journey->id);
-                }
-            }
+            $activity->archive();
 
-            $activity->save();
             return response()->json(['activity' => $activity], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
@@ -466,7 +457,6 @@ class ActivityController extends Controller
         }
         return $totalCount;
     }
-
 
     public function calculateToKgOrL($assets, $measure){
         $totalCount = 0;

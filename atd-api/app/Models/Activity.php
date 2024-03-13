@@ -40,4 +40,26 @@ class Activity extends Model
     public function recipes(){
         return $this->belongsToMany(Recipe::class, 'contains', 'id_activity', 'id_recipe')->withPivot('count', 'archive');
     }
+
+    public function type(){
+        return $this->belongsTo(Type::class, 'id_type', 'id');
+    }
+
+    public function journeys()
+    {
+        return $this->hasMany(Journey::class, 'id_activity');
+    }
+
+    public function archive()
+    {
+        $journeyIds = $this->journeys()->pluck('id')->toArray();
+
+        $this->archive = true;
+        $this->save();
+
+        $this->journeys()->update(['archive' => true]);
+
+        return $journeyIds;
+    }
+
 }

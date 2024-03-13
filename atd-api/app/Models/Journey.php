@@ -16,10 +16,19 @@ class Journey extends Model
         'distance',
         'cost',
         'fuel_cost',
-        'archive'
+        'archive',
+        'id_activity'
     ];
 
     public function vehicles(){
         return $this->belongsToMany(Vehicle::class, 'drives', 'id_journey', 'id_vehicle')->withPivot('archive');
     }
+
+    public function activity()
+    {
+        return $this->belongsTo(Activity::class, 'id_activity');
+    }
+
+
+
 }

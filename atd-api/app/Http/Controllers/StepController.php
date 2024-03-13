@@ -93,8 +93,17 @@ class StepController extends Controller
     }
 
     public function deleteStep($id){
-        $service = new DeleteService();
-        return $service->deleteService($id, 'App\Models\Step');
+        try{
+            $step = Step::findOrFail($id);
+            if($step->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
+
+            $step->archive();
+            $step = Step::findOrFail($id);
+            return response()->json(['step' => $step,  'message' => "Deleted !"], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 
     public function updateStep($id, Request $request){

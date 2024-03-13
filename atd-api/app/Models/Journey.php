@@ -29,6 +29,16 @@ class Journey extends Model
         return $this->belongsTo(Activity::class, 'id_activity');
     }
 
+    public function steps(){
+        return $this->hasMany(Step::class, 'id_journey');
+    }
+
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+        $this->steps()->update(['archive' => true]);
+    }
+
 
 
 }

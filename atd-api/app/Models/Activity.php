@@ -52,14 +52,10 @@ class Activity extends Model
 
     public function archive()
     {
-        $journeyIds = $this->journeys()->pluck('id')->toArray();
-
         $this->archive = true;
         $this->save();
 
         $this->journeys()->update(['archive' => true]);
-
-        return $journeyIds;
     }
 
 }

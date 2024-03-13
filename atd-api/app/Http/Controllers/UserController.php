@@ -262,9 +262,10 @@ class UserController extends Controller
         }
 
         if($ban == "true") {
-            $user->update(['ban' => true, 'archive' => true]);
+            $user->update(['ban' => true]);
+            $user->archive();
         } else {
-            $user->update(['archive' => true]);
+            $user->archive();
         }
             $response = [
                 'message' => 'Deleted !',

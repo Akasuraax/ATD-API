@@ -152,15 +152,11 @@ class RecipeController extends Controller
             $recipe = Recipe::findOrFail($id);
             if($recipe->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $recipe->archive = true;
-            $makes = Make::where('id_recipe', $id)->get();
 
-            if(!$makes->isEmpty()){
-                foreach ($makes as $make)
-                    Make::where('id_recipe', $make->id_recipe)->update(['archive' => true]);
-            }
-            $recipe->save();
-            return response()->json(['message' => 'Deleted successfully, everything linked to the recipe was also deleted.'], 200);
+            $recipe->archive();
+            $recipe = Recipe::findOrFail($id);
+
+            return response()->json(['recipe' => $recipe,  'message' => "Deleted !"], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

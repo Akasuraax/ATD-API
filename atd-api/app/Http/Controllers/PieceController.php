@@ -103,8 +103,17 @@ class PieceController extends Controller
 
     public function deletePiece($id)
     {
-        $service = new DeleteService();
-        return $service->deleteService($id, 'App\Models\Piece');
+        try{
+            $piece = Piece::findOrFail($id);
+            if($piece->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
+
+            $piece->archive();
+            $piece = Piece::findOrFail($id);
+            return response()->json(['piece' => $piece,  'message' => "Deleted !"], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 
     public function updatePiece($id, Request $request)

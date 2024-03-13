@@ -28,5 +28,16 @@ class Product extends Model
         return $this->hasMany(Piece::class, 'id_product');
     }
 
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+        $recipesIds = $this->recipes->pluck('id')->toArray();
+        $activityIds = $this->activities->pluck('id')->toArray();
+
+        $this->pieces()->update(['archive' => true]);
+        $this->activities()->updateExistingPivot($activityIds, ['archive' => true]);
+        $this->recipes()->updateExistingPivot($recipesIds, ['archive' => true]);
+    }
+
 
 }

@@ -23,5 +23,17 @@ class Type extends Model
         return $this->hasMany(Activity::class, 'id_type', 'id');
     }
 
+    public function demands(){
+        return $this->hasMany(Demand::class,  'id_type', 'id');
+    }
+
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+
+        $this->activities()->update(['archive' => true]);
+        $this->demands()->update(['archive' => true]);
+    }
+
 
 }

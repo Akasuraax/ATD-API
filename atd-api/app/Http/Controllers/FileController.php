@@ -203,14 +203,8 @@ class FileController extends Controller
             $file = File::findOrFail($idFile);
             if($file->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $file->archive = true;
-            $activity_files= ActivityFile::where('id_activity', $id)->get();
-
-            if(!$activity_files->isEmpty())
-                ActivityFile::where('id_activity', $id)->update(['archive' => true]);
-
-            $file->save();
-            unlink(public_path() . '/storage/activities/' . $id . '/' . $file->name);
+            $file->archive($idFile, $file->name);
+            $file = File::findOrFail($idFile);
             return response()->json(['file' => $file], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());

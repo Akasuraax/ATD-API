@@ -110,24 +110,21 @@ class ActivityController extends Controller
         }
 
         //enregistrement des fichiers
-        try{
-            if ($request->activity_files) {
 
-                foreach ($request->activity_files as $file) {
-                    $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
-                    $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
+        if ($request->activity_files) {
+            foreach ($request->activity_files as $file) {
+                $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
+                $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
 
-                    $newFile = File::create([
-                        'name' => $name,
-                        'link' => '/storage/activities/' . $activity->id . '/' . $name,
-                    ]);
+                $newFile = File::create([
+                    'name' => $name,
+                    'link' => '/storage/activities/' . $activity->id . '/' . $name,
+                ]);
 
-                    $newFile->activities()->attach($activity->id, ['archive' => false]);
-                }
+                $newFile->activities()->attach($activity->id, ['archive' => false]);
             }
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
+
 
         return Response(['activity' => $activity], 200);
     }
@@ -148,8 +145,8 @@ class ActivityController extends Controller
 
         $field = "activities." . $field;
 
-        $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
-            ->join('types', 'types.id', '=', 'activities.id_type')
+        $activities = Activity::select('id','title', 'description', 'address', 'zipcode', 'start_date', 'end_date', 'donation', 'archive')
+            ->with('type')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -195,13 +192,7 @@ class ActivityController extends Controller
                 return response()->json(['message' => 'Element is already archived.'], 405);
             $activity->archive = true;
 
-            $journeys = Journey::where('id_activity', $id)->where('archive', false)->get();
-            if(!$journeys->isEmpty()){
-                foreach($journeys as $journey){
-                    $service = new DeleteService();
-                    $service->deleteJourneyService($journey->id);
-                }
-            }
+            $activity->archive($id);
 
             $activity->save();
             return response()->json(['activity' => $activity], 200);

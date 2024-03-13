@@ -50,12 +50,25 @@ class Activity extends Model
         return $this->hasMany(Journey::class, 'id_activity');
     }
 
-    public function archive()
+    public function archive($id)
     {
         $this->archive = true;
         $this->save();
 
+        $productIds = $this->products->pluck('id')->toArray();
+        $recipeIds = $this->recipes->pluck('id')->toArray();
+        $roleIds = $this->roles->pluck('id')->toArray();
+        $fileIds = $this->files->pluck('id')->toArray();
+
         $this->journeys()->update(['archive' => true]);
+        $this->products()->updateExistingPivot($productIds, ['archive' => true]);
+        $this->recipes()->updateExistingPivot($recipeIds, ['archive' => true]);
+        $this->roles()->updateExistingPivot($roleIds, ['archive' => true]);
+        $this->files()->updateExistingPivot($fileIds, ['archive' => true]);
+
+        File::whereIn('id', $fileIds)->get()->each(function($file) use ($id) {
+            $file->archiveActivity($id, $file->name);
+        });
     }
 
 }

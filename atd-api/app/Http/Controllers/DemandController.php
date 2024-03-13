@@ -98,8 +98,18 @@ class DemandController extends Controller
     }
 
     public function deleteDemand($id){
-        $service = new DeleteService();
-        return $service->deleteService($id, 'App\Models\Demand');
+        try{
+            $demand = Demand::findOrFail($id);
+            if($demand->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
+
+            $demand->archive();
+            $demand = Demand::findOrFail($id);
+
+            return response()->json(['demand' => $demand], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 
     public function updateDemand($id, Request $request){

@@ -22,7 +22,7 @@ class TicketController extends Controller
 
     try {
         $validatedData = $request->validate([
-            'ticket.title' => 'required|string',
+            'ticket.title' => 'required|string|max:255',
             'ticket.description' => 'required|string',
             'ticket.type' => 'required|int',
         ]);

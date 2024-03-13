@@ -63,6 +63,7 @@ use App\Http\Controllers\ActivityController;
         Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
         Route::post('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
+    Route::get('/types', [TypeController::class, 'getTypeAll'])->middleware('validity.token');
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){
         Route::get('/', [UserController::class, 'getUsers'])->middleware('validity.token');
@@ -116,20 +117,19 @@ use App\Http\Controllers\ActivityController;
 
     Route::prefix('/journey')->middleware('validity.token')->group(function(){
         Route::post('/', [JourneyController::class, 'createJourney'])->middleware('authorization:' . serialize([1]));
+        Route::post('/{journey_id}', [StepController::class, 'calculusJourney'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [JourneyController::class, 'getJourneys']);
         Route::get('/{id}', [JourneyController::class, 'getJourney']);
         Route::delete('/{id}', [JourneyController::class, 'deleteJourney'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [JourneyController::class, 'updateJourney'])->middleware('authorization:' . serialize([1]));
+        Route::post('/{journey_id}/step', [StepController::class, 'createStep'])->middleware('authorization:' . serialize([1]));
+        Route::get('/{journey_id}/step', [StepController::class, 'getJourneySteps']);
+        Route::get('/{journey_id}/step/{step_id}', [StepController::class, 'getOneStep']);
+        Route::delete('/{journey_id}/step/{step_id}', [StepController::class, 'deleteStep'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/{journey_id}/step/{step_id}', [StepController::class, 'updateStep'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('step')->middleware('validity.token')->group(function(){
-       Route::post('/', [StepController::class, 'createStep'])->middleware('authorization:' . serialize([1]));
-       Route::get('/', [StepController::class, 'getSteps']);
-       Route::get('/{id}', [StepController::class, 'getJourneySteps']);
-       Route::delete('/{id}', [StepController::class, 'deleteStep'])->middleware('authorization:' . serialize([1]));
-       Route::patch('/{id}', [StepController::class, 'updateStep'])->middleware('authorization:' . serialize([1]));
-    });
-
+    Route::get('/step', [StepController::class, 'getSteps'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
 
     Route::prefix('/product')->middleware('validity.token')->group(function (){
         Route::post('/', [ProductController::class, 'createProduct'])->middleware('authorization:' . serialize([1]));

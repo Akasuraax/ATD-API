@@ -19,8 +19,8 @@ class JourneyController extends Controller
                 'distance' => 'int|required',
                 'cost' => 'int|required',
                 'fuel_cost' => 'int|required',
-                'id_vehicle' => 'int|required',
-                'id_activity' => 'nullable|int'
+                'id_activity' => 'int|nullable',
+                'id_vehicle' => 'int|required'
              ]);
         }catch (ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -110,13 +110,13 @@ class JourneyController extends Controller
             try{
                 $requestData = $request->validate([
                     'name' => 'string|max:255',
-                    'duration' => 'int',
-                    'distance' => 'int',
-                    'cost' => 'int',
-                    'archive' => 'boolean',
-                    'fuel_cost' => 'int',
-                    'id_vehicle' => 'int',
-                    'id_activity' => 'int'
+                    'duration' => 'int|nullable',
+                    'distance' => 'int|nullable',
+                    'cost' => 'int|nullable',
+                    'archive' => 'boolean|nullable',
+                    'fuel_cost' => 'int|nullable',
+                    'id_vehicle' => 'int|nullable',
+                    'id_activity' => 'int|nullable'
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);

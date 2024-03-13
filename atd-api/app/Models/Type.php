@@ -12,11 +12,13 @@ class Type extends Model
     protected $fillable = [
         'name',
         'description',
-        'image',
-        'display',
         'access_to_warehouse',
         'access_to_journey',
-        'archive'
+        'image',
+        'display',
+        'archive',
+        'created_at',
+        'updated_at'
     ];
 
     public function activities(){

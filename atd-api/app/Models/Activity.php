@@ -59,12 +59,14 @@ class Activity extends Model
         $recipeIds = $this->recipes->pluck('id')->toArray();
         $roleIds = $this->roles->pluck('id')->toArray();
         $fileIds = $this->files->pluck('id')->toArray();
+        $userIds = $this->users->pluck('id')->toArray();
 
         $this->journeys()->update(['archive' => true]);
         $this->products()->updateExistingPivot($productIds, ['archive' => true]);
         $this->recipes()->updateExistingPivot($recipeIds, ['archive' => true]);
         $this->roles()->updateExistingPivot($roleIds, ['archive' => true]);
         $this->files()->updateExistingPivot($fileIds, ['archive' => true]);
+        $this->users()->updateExistingPivot($userIds, ['archive' => true]);
 
         File::whereIn('id', $fileIds)->get()->each(function($file) use ($id) {
             $file->archiveActivity($id, $file->name);

@@ -93,13 +93,18 @@ class RoleController extends Controller
     }
 
     public function deleteRole($id){
-        $role = Role::findOrFail($id);
-        $have_role = HaveRole::where('id_role', $id)->get();
-        if(!$have_role->isEmpty())
-            return response()->json(['message' => 'You can\'t archive this role ! It\'s used'], 405);
+        try{
+            $role = Role::findOrFail($id);
+            if($role->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
 
-        $service = new DeleteService();
-        return $service->deleteService($id, 'App\Models\Role');
+            $role->archive();
+            $role = Role::findOrFail($id);
+
+            return response()->json(['role' => $role,  'message' => "Deleted !"], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 
     public function updateRole($id, Request $request){

@@ -23,4 +23,14 @@ class Role extends Model
     public function activities(){
         return $this->belongsToMany(Activity::class, 'limits', 'id_role', 'id_activity')->withPivot('min', 'max', 'count', 'archive');
     }
+
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+
+        $userIds = $this->users->pluck('id')->toArray();
+        $activityIds = $this->activities->pluck('id')->toArray();
+        $this->users()->updateExistingPivot($userIds, ['archive' => true]);
+        $this->activities()->updateExistingPivot($activityIds, ['archive' => true]);
+    }
 }

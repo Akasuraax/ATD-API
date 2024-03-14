@@ -165,6 +165,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/activity')->middleware('validity.token')->group(function (){
         Route::post('/', [ActivityController::class, 'createActivity']);
         Route::get('/', [ActivityController::class, 'getActivities']);
+        Route::get('/between', [ActivityController::class, 'getActivitiesBetween']);
         Route::get('/{id}', [ActivityController::class, 'getActivity']);
         Route::delete('/{id}', [ActivityController::class, 'deleteActivity']);
         Route::post('/{id}/file', [FileController::class, 'createActivityFile']);

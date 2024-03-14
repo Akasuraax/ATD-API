@@ -184,6 +184,20 @@ class ActivityController extends Controller
         return response()->json($activities);
     }
 
+    public function getActivitiesBetween(Request $request){
+
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+        return $startDate;
+
+        $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
+            ->join('types', 'types.id', '=', 'activities.id_type')
+            ->where('activities.start_date', '<=', $endDate)
+            ->where('activities.end_date', '>=', $startDate)
+            ->get();
+
+        return response()->json($activities);
+    }
     public function getActivity($id){
         return Activity::find($id) ? Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')->join('types', 'types.id', '=', 'activities.id_type')->where('activities.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }

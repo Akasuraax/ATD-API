@@ -197,4 +197,6 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/problem')->middleware('validity.token')->group(function (){
         Route::post('/', [ProblemController::class, 'createProblem'])->middleware('authorization:' . serialize([1, 5]));
         Route::delete('/{problem_id}', [ProblemController::class, 'deleteProblem'])->middleware('authorization:' . serialize([1, 5]));
+        Route::patch('/{problem_id}', [ProblemController::class, 'patchProblem'])->middleware('authorization:' . serialize([1, 5]));
+        Route::get('/', [ProblemController::class, 'getProblems']);
     });

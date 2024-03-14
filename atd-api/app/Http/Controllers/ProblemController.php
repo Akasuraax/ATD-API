@@ -26,4 +26,16 @@ class ProblemController extends Controller
             'problem' => $problem
         ]);
     }
+
+    public function deleteProblem(int $problem_id){
+        $problem = Problem::findOrFail($problem_id);
+        $problem->archive = true;
+        $problem->save();
+        $problem->touch();
+
+        return response()->json([
+            'problem' => $problem
+        ]);
+    }
 }
+

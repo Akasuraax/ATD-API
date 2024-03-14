@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProblemController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TicketController;
@@ -191,4 +192,8 @@ use App\Http\Controllers\ActivityController;
         Route::post('/', [LanguageController::class, 'createLanguage'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
         Route::get('/{abbreviation}', [LanguageController::class, 'getLanguageJSON']);
         Route::get('/', [LanguageController::class, 'getLanguages']);
+    });
+
+    Route::prefix('/problem')->middleware('validity.token')->group(function (){
+        Route::post('/', [ProblemController::class, 'createProblem'])->middleware('authorization:' . serialize([1, 5]));
     });

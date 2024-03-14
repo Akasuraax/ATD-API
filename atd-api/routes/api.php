@@ -199,4 +199,5 @@ use App\Http\Controllers\ActivityController;
         Route::delete('/{problem_id}', [ProblemController::class, 'deleteProblem'])->middleware('authorization:' . serialize([1, 5]));
         Route::patch('/{problem_id}', [ProblemController::class, 'patchProblem'])->middleware('authorization:' . serialize([1, 5]));
         Route::get('/', [ProblemController::class, 'getProblems']);
+        Route::get('/admin', [ProblemController::class, 'getAdminProblems'])->middleware('authorization:' . serialize([1, 5]));
     });

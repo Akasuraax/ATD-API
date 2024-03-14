@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\HaveRole;
 use App\Models\Message;
+use App\Models\Role;
 use App\Models\Send;
 use App\Models\Type;
 use App\Models\User;
@@ -225,20 +226,19 @@ class TicketController extends Controller
         ]);
     }
 
-    public function deleteTicket(int $id_ticket){
-        $ticket = Ticket::findOrFail($id_ticket);
-        $ticket->archive = true;
+    public function deleteTicket(int $id){
+        try{
+            $ticket = Ticket::findOrFail($id);
+            if($ticket->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
 
-        $messages = Message::where('id_ticket', $id_ticket)->get();
+            $ticket->archive();
+            $ticket = Ticket::findOrFail($id);
 
-        foreach($messages as $message){
-            $message->archive = true;
+            return response()->json(['role' => $ticket,  'message' => "Deleted !"], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        return response()->json([
-            'ticket' => $ticket,
-            'messages' => $messages
-        ], 200);
     }
 
 

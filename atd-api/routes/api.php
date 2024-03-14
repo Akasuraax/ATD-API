@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProblemController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TicketController;
@@ -66,9 +67,10 @@ use App\Http\Controllers\ActivityController;
     Route::get('/types', [TypeController::class, 'getTypeAll'])->middleware('validity.token');
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){
-        Route::get('/', [UserController::class, 'getUsers'])->middleware('validity.token');
-        Route::get('/{id}', [UserController::class, 'getUser']);
+        Route::get('/', [UserController::class, 'getUsers']);
+        Route::get('/{id}', [UserController::class, 'getUser'])->middleware('ValidateUserId');
         Route::patch('/{id}', [UserController::class, 'patchUser']);
+        Route::patch('/a/{id}', [UserController::class, 'patchUserAdmin'])->middleware('authorization:' . serialize([1]));
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
         Route::get('/{id}/tickets', [TicketController::class, 'getMyTickets'])->middleware('ValidateUserId');
     });
@@ -190,4 +192,12 @@ use App\Http\Controllers\ActivityController;
         Route::post('/', [LanguageController::class, 'createLanguage'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
         Route::get('/{abbreviation}', [LanguageController::class, 'getLanguageJSON']);
         Route::get('/', [LanguageController::class, 'getLanguages']);
+    });
+
+    Route::prefix('/problem')->middleware('validity.token')->group(function (){
+        Route::post('/', [ProblemController::class, 'createProblem'])->middleware('authorization:' . serialize([1, 5]));
+        Route::delete('/{problem_id}', [ProblemController::class, 'deleteProblem'])->middleware('authorization:' . serialize([1, 5]));
+        Route::patch('/{problem_id}', [ProblemController::class, 'patchProblem'])->middleware('authorization:' . serialize([1, 5]));
+        Route::get('/', [ProblemController::class, 'getProblems']);
+        Route::get('/admin', [ProblemController::class, 'getAdminProblems'])->middleware('authorization:' . serialize([1, 5]));
     });

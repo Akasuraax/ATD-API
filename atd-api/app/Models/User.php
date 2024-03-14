@@ -76,4 +76,35 @@ class User extends Authenticatable
     public function activities(){
         return $this->belongsToMany(Activity::class, 'participates', 'id_user', 'id_activity')->withPivot('count', 'archive');
     }
+
+    public function files()
+    {
+        return $this->hasMany(File::class, 'id_user');
+    }
+
+    public function demands(){
+        return $this->hasMany(Demand::class, 'id_user');
+    }
+
+    public function visits(){
+        return $this->hasMany(Visit::class, 'id_volunteer');
+    }
+    public function messages(){
+        return $this->hasMany(Message::class, 'id_user');
+    }
+
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+
+        $roleIds = $this->roles->pluck('id')->toArray();
+        $activityIds = $this->activities->pluck('id')->toArray();
+        $ticketIds = $this->tickets->pluck('id')->toArray();
+        $this->roles()->updateExistingPivot($roleIds, ['archive' => true]);
+        $this->activities()->updateExistingPivot($activityIds, ['archive' => true]);
+        $this->files()->update(['archive' => true]);
+        $this->demands()->update(['archive' => true]);
+        $this->visits()->update(['archive' => true]);
+        $this->tickets()->updateExistingPivot($ticketIds, ['archive' => true]);
+    }
 }

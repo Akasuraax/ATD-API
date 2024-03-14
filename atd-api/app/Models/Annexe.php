@@ -20,4 +20,14 @@ class Annexe extends Model
     {
         return $this->hasMany(Vehicle::class, 'id_annexe', 'id');
     }
+
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+
+        $vehicleIds = $this->vehicles->pluck('id')->toArray();
+        Vehicle::whereIn('id', $vehicleIds)->get()->each(function($vehicle){
+            $vehicle->archive();
+        });
+    }
 }

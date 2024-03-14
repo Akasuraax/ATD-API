@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Journey;
 
 class Vehicle extends Model
 {
@@ -29,12 +30,16 @@ class Vehicle extends Model
 
     public function archive()
     {
-
         $this->archive = true;
         $this->save();
 
         $journeyIds = $this->journeys->pluck('id')->toArray();
-        $this->journeys()->sync($journeyIds, ['archive' => true]);
+        Journey::whereIn('id', $journeyIds)->get()->each(function($journey) {
+            $journey->archive();
+        });
+
+        $this->journeys()->updateExistingPivot($journeyIds, ['archive' => true]);
     }
+
 }
 

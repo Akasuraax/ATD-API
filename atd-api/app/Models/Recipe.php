@@ -27,6 +27,18 @@ class Recipe extends Model
         return $this->hasMany(Make::class, 'id_recipe');
     }
 
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+
+        $productIds = $this->products->pluck('id')->toArray();
+        $activityIds = $this->activities->pluck('id')->toArray();
+        $this->products()->updateExistingPivot($productIds, ['archive' => true]);
+        $this->activities()->updateExistingPivot($activityIds, ['archive' => true]);
+    }
+
+
+
 
 
 }

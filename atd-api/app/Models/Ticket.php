@@ -22,5 +22,18 @@ class Ticket extends Model
     {
         return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user')->withTimestamps();
     }
+
+    public function messages(){
+        return $this->hasMany(Message::class, 'id_ticket');
+    }
+
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+
+        $this->messages()->update(['archive' => true]);
+        $userIds = $this->users->pluck('id')->toArray();
+        $this->users()->updateExistingPivot($userIds, ['archive' => true]);
+    }
 }
 

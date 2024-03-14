@@ -113,16 +113,9 @@ class TypeController extends Controller
             $type = Type::findOrFail($id);
             if($type->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $type->archive = true;
 
-            $demands = Demand::where('id_type', $id)->where('archive', false)->get();
-            if(!$demands->isEmpty()){
-                foreach($demands as $demand){
-                    $service = new DeleteService();
-                    $service->deleteService($demand->id, 'App\Models\Demand');
-                }
-            }
-            $type->save();
+            $type->archive();
+            $type = Type::findOrFail($id);
 
             return response()->json(['type' => $type], 200);
         }catch(ValidationException $e){

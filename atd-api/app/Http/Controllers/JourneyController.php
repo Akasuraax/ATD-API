@@ -100,8 +100,17 @@ class JourneyController extends Controller
     }
 
     public function deleteJourney($id){
-        $service = new DeleteService();
-        return $service->deleteJourneyService($id);
+        try{
+            $journey = Journey::findOrFail($id);
+            if($journey->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
+
+            $journey->archive();
+            $journey = Journey::findOrFail($id);
+            return response()->json(['journey' => $journey,  'message' => "Deleted !"], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 
     public function updateJourney($id, Request $request){

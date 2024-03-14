@@ -89,24 +89,12 @@ class ProductController extends Controller
     public function deleteProduct($id){
         try{
             $product = Product::findOrFail($id);
-            $service = new DeleteService();
             if($product->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $product->archive = true;
 
-            $pieces = Piece::where('id_product', $id)->where('archive', false)->get();
-            if(!$pieces->isEmpty()){
-                foreach($pieces as $piece)
-                    $service->deleteService($piece->id, 'App\Models\Piece');
-            }
-
-            $makes = Make::where('id_product', $id)->where('archive', false)->get();
-            if(!$makes->isEmpty()) {
-                foreach ($makes as $make)
-                    Make::where('id_product', $make->id_product)->update(['archive' => true]);
-            }
-            $product->save();
-            return response()->json(['product' => $product], 200);
+            $product->archive();
+            $product = Product::findOrFail($id);
+            return response()->json(['product' => $product,  'message' => "Deleted !"], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

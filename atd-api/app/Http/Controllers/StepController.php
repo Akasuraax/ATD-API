@@ -108,11 +108,18 @@ class StepController extends Controller
         return Journey::findOrFail($id_journey) ? Step::where('id_journey', $id_journey)->where('archive', false)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
-    public function deleteStep(int $id_journey, int $id_step){
-        Journey::findOrFail($id_journey);
-        Step::findOrFail($id_step);
-        $service = new DeleteService();
-        return $service->deleteService($id_step, 'App\Models\Step');
+    public function deleteStep($id){
+        try{
+            $step = Step::findOrFail($id);
+            if($step->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
+
+            $step->archive();
+            $step = Step::findOrFail($id);
+            return response()->json(['step' => $step,  'message' => "Deleted !"], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 
     public function updateStep(int $id_journey, int $id_step, Request $request){

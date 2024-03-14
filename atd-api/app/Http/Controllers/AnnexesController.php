@@ -101,17 +101,10 @@ class AnnexesController extends Controller
             $annexe = Annexe::findOrFail($id);
             if($annexe->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $annexe->archive = true;
 
-            $vehicles = Vehicle::where('id_annexe', $annexe->id)->where('archive', false)->get();
-            if(!$vehicles->isEmpty()) {
-                foreach ($vehicles as $vehicle) {
-                    $service = new DeleteService();
-                    $service->deleteVehicleService($vehicle->id);
-                }
-            }
-            $annexe->save();
-            return response()->json(['annexe' => $annexe], 200);
+            $annexe->archive();
+            $annexe = Annexe::findOrFail($id);
+            return response()->json(['annexe' => $annexe,  'message' => "Deleted !"], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

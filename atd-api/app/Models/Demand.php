@@ -15,4 +15,17 @@ class Demand extends Model
         'id_type',
         'archive'
     ];
+
+    public function type(){
+        return $this->belongsTo(Type::class, 'id_type');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function archive(){
+        $this->archive = true;
+        $this->save();
+    }
 }

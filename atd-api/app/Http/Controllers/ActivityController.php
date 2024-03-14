@@ -110,24 +110,21 @@ class ActivityController extends Controller
         }
 
         //enregistrement des fichiers
-        try{
-            if ($request->activity_files) {
 
-                foreach ($request->activity_files as $file) {
-                    $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
-                    $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
+        if ($request->activity_files) {
+            foreach ($request->activity_files as $file) {
+                $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
+                $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
 
-                    $newFile = File::create([
-                        'name' => $name,
-                        'link' => '/storage/activities/' . $activity->id . '/' . $name,
-                    ]);
+                $newFile = File::create([
+                    'name' => $name,
+                    'link' => '/storage/activities/' . $activity->id . '/' . $name,
+                ]);
 
-                    $newFile->activities()->attach($activity->id, ['archive' => false]);
-                }
+                $newFile->activities()->attach($activity->id, ['archive' => false]);
             }
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
+
 
         return Response(['activity' => $activity], 200);
     }
@@ -138,7 +135,7 @@ class ActivityController extends Controller
 
     public function getActivities(Request $request){
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 
@@ -148,7 +145,7 @@ class ActivityController extends Controller
 
         $field = "activities." . $field;
 
-        $activities = Activity::select('id','title', 'description', 'address', 'zipcode', 'start_date', 'end_date', 'donation')
+        $activities = Activity::select('id','title', 'description', 'address', 'zipcode', 'start_date', 'end_date', 'donation', 'archive')
             ->with('type')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
@@ -180,6 +177,7 @@ class ActivityController extends Controller
             })
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
+
         return response()->json($activities);
     }
 
@@ -192,9 +190,11 @@ class ActivityController extends Controller
             $activity = Activity::findOrFail($id);
             if($activity->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
+            $activity->archive = true;
 
-            $activity->archive();
+            $activity->archive($id);
 
+            $activity->save();
             return response()->json(['activity' => $activity], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
@@ -457,6 +457,7 @@ class ActivityController extends Controller
         }
         return $totalCount;
     }
+
 
     public function calculateToKgOrL($assets, $measure){
         $totalCount = 0;

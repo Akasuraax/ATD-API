@@ -149,7 +149,7 @@ class UserController extends Controller
         return Response($response, $status);
     }
 
-    public function patchUser(int $userId, Request $request)
+    public function patchUserAdmin(int $userId, Request $request)
     {
         try {
 
@@ -210,6 +210,42 @@ class UserController extends Controller
         }
     }
 
+    public function patchUser(int $userId, Request $request)
+    {
+        try {
+
+            $fields = $request->validate([
+                'name' => 'required|string|max:255',
+                'forname' => 'required|string|max:255',
+                'email' => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    Rule::unique('users')->ignore($userId),
+                ],
+                'phone_number' => 'nullable|string|max:15',
+                'gender' => 'required|int|max:1',
+                'birth_date' => 'required|date',
+                'address' => 'required|string',
+                'zipcode' => 'required|string|max:5',
+                'siret_number' => 'nullable|string|max:14',
+                'compagny' => 'nullable|string',
+            ]);
+
+            $user = User::findOrFail($userId);
+            $user->update($fields);
+            $user->load('roles');
+
+            return response()->json([
+                'message' => 'User updated successfully',
+                'user' => $user
+            ], 200);
+        }catch (ValidationException $e){
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+    }
+
     public function deleteUser(int $userId, Request $request)
     {
 
@@ -226,9 +262,10 @@ class UserController extends Controller
         }
 
         if($ban == "true") {
-            $user->update(['ban' => true, 'archive' => true]);
+            $user->update(['ban' => true]);
+            $user->archive();
         } else {
-            $user->update(['archive' => true]);
+            $user->archive();
         }
             $response = [
                 'message' => 'Deleted !',

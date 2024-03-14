@@ -112,17 +112,11 @@ class WarehouseController extends Controller
             $warehouse = Warehouse::findOrFail($id);
             if($warehouse->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $warehouse->archive = true;
 
-            $pieces = Piece::where('id_warehouse', $id)->where('archive', false)->get();
-            if(!$pieces->isEmpty()){
-                foreach($pieces as $piece) {
-                    $service = new DeleteService();
-                    $service->deleteService($piece->id, 'App\Models\Piece');
-                }
-            }
-            $warehouse->save();
-            return response()->json(['warehouse' => $warehouse], 200);
+            $warehouse->archive();
+            $warehouse = Warehouse::findOrFail($id);
+
+            return response()->json(['warehouse' => $warehouse,  'message' => "Deleted !"], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

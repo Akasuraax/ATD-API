@@ -80,27 +80,16 @@ class TicketController extends Controller
     public function getTicket(int $id_ticket, Request $request)
     {
         $ticket = Ticket::findOrFail($id_ticket);
-        $messages = Message::where('id_ticket', $ticket->id)->get();
-
         $admin = $request->attributes->parameters['admin'];
         $support = $request->attributes->parameters['support'];
         $demand_user = $request->attributes->parameters['demand_user'];
 
-        $messagesData = [];
-
-        foreach ($messages as $message) {
-            $user = User::where('id', $message->id_user)->get()->first();
-            $messagesData[] = [
-                'description' => $message->description,
-                'created_at' => $message->created_at,
-                'user' => [
-                    'name' => $user->name,
-                    'forname' => $user->forname
-                ]
-            ];
-        }
 
         $user = User::where('id', $demand_user)->first();
+        $messages = Message::with('userWhoSendTheMessage')
+            ->select( 'description', 'created_at', 'id_user')
+            ->where('id_ticket', $id_ticket)
+            ->get();
 
         if(isset($admin) || isset($support)){
             return response()->json([
@@ -117,10 +106,19 @@ class TicketController extends Controller
                     'user' => [
                         'name' => $user->name,
                         'forname' => $user->forname
-                    ]
-                ],
-                'messages' => $messagesData
-            ]);
+                    ],
+                    'messages' => $messages->map(function ($message) {
+                        return [
+                            'description' => $message->description,
+                            'created_at' => $message->created_at,
+                            'user' => [
+                                'id' => $message->userWhoSendTheMessage->id,
+                                'name' => $message->userWhoSendTheMessage->name,
+                                'forname' => $message->userWhoSendTheMessage->forname
+                            ]
+                        ];
+                    })
+            ]]);
         }
 
         return response()->json([
@@ -132,9 +130,19 @@ class TicketController extends Controller
                 'user' => [
                     'name' => $user->name,
                     'forname' => $user->forname
-                ]
-            ],
-            'messages' => $messagesData
+                ],
+                'messages' => $messages->map(function ($message) {
+                    return [
+                        'description' => $message->description,
+                        'created_at' => $message->created_at,
+                        'user' => [
+                            'id' => $message->userWhoSendTheMessage->id,
+                            'name' => $message->userWhoSendTheMessage->name,
+                            'forname' => $message->userWhoSendTheMessage->forname
+                        ]
+                    ];
+                })
+            ]
         ]);
     }
 
@@ -188,7 +196,6 @@ class TicketController extends Controller
             'tickets' => $tickets
         ]);
     }
-
 
     public function patchTicket(int $id_ticket, Request $request){
         try{

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Annexe;
 use App\Models\Vehicle;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -116,33 +117,25 @@ class AnnexesController extends Controller
             $annexe = Annexe::findOrFail($id);
             try {
                 $requestData = $request->validate([
-                    'name' => 'string|max:255',
-                    'address' => 'string',
-                    'zipcode' => 'digits:5|integer',
-                    'archive' => 'boolean'
+                    'name' => 'required|string|max:255',
+                    'address' => 'required|string',
+                    'zipcode' => 'required|digits:5|integer',
+                    'archive' => 'required|boolean'
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            if(isset($requestData['address'])){
-                if(isset($requestData['zipcode']))
-                    $exist = Annexe::where('address', $requestData['address'])->where('zipcode', $requestData['zipcode'])->first();
-                else
-                    $exist = Annexe::where('address', $requestData['address'])->where('zipcode', $annexe->zipcode)->first();
-                if ($exist)
-                    return response()->json(['message' => 'This annexe with this address already exist !'], 409);
-            }else if(isset($requestData['zipcode'])) {
-                $exist = Annexe::where('address', $annexe->address)->where('zipcode', $requestData['zipcode'])->first();
-                if ($exist)
-                    return response()->json(['message' => 'This annexe with this address already exist !'], 409);
-            }
+            $exist = Annexe::where('address', $requestData['address'])->where('zipcode', $requestData['zipcode'])->whereNotIn('id', [$id])->first();
+            if ($exist)
+                return response()->json(['message' => 'This annexe with this address already exist !'], 409);
 
-            foreach ($requestData as $key => $value) {
-                if (in_array($key, $annexe->getFillable()))
-                    $annexe->$key = $value;
+            try{
+                $annexe->update($requestData);
+                $annexe->save();
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The annexe you selected is not found'], 404);
             }
-            $annexe->save();
 
             return response()->json(['annexe' => $annexe], 200);
         } catch (ValidationException $e) {

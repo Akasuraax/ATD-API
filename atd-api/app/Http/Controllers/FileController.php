@@ -199,6 +199,7 @@ class FileController extends Controller
 
     public function deleteActivityFile($id, $idFile){
         try{
+            $activity = Activity::findOrFail($id);
             $file = File::findOrFail($idFile);
             if($file->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
@@ -216,7 +217,7 @@ class FileController extends Controller
             $file = File::findOrFail($idFile);
             if($file->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $file->archiveUser($file->link, $user->id);
+            $file->archiveUser($file->link);
             $file = File::findOrFail($idFile);
             return response()->json(['file' => $file], 200);
         }catch(ValidationException $e){

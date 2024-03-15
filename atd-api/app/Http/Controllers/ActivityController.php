@@ -225,7 +225,7 @@ class ActivityController extends Controller
             }
 
             try{
-                $type = Type::findOrFail($validateData['type']['id']);
+                $type = Type::where('id', $validateData['type']['id'])->where('archive', false)->firstOrFail();
                 $activity->update($validateData);
                 $activity->type()->associate($type->id);
                 $activity->save();

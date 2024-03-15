@@ -7,6 +7,7 @@ use App\Models\Type;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -117,19 +118,26 @@ class DemandController extends Controller
             $demand = Demand::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'description' => 'string',
-                    'id_user' => 'int',
-                    'id_type' => 'int',
-                    'archive' => 'boolean'
+                    'description' => 'required|string',
+                    'user.id' => 'required|int',
+                    'type.id' => 'required|int',
+                    'archive' => 'required|boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            foreach($requestData as $key => $value){
-                if(in_array($key, $demand->getFillable()))
-                    $demand->$key = $value;
+            try{
+                $user = User::where('id', $requestData['user']['id'])->where('archive', false)->firstOrFail();
+                $type = Type::where('id', $requestData['type']['id'])->where('archive', false)->firstOrFail();
+                $demand->update($requestData);
+                $demand->user()->associate($user->id);
+                $demand->type()->associate($type->id);
+                $demand->load('type:id,name');
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The demand you selected is not found'], 404);
             }
+
             $demand->save();
             return response()->json(['demand' => $demand], 200);
         }catch(ValidationException $e){

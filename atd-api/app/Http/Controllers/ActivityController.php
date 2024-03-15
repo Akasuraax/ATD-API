@@ -188,7 +188,6 @@ class ActivityController extends Controller
 
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
-        return $startDate;
 
         $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
             ->join('types', 'types.id', '=', 'activities.id_type')
@@ -196,7 +195,21 @@ class ActivityController extends Controller
             ->where('activities.end_date', '>=', $startDate)
             ->get();
 
-        return response()->json($activities);
+        $renamedActivities = $activities->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'title' => $activity->title,
+                'description' => $activity->description,
+                'address' => $activity->address,
+                'zipcode' => $activity->zipcode,
+                'start' => $activity->start_date,
+                'end' => $activity->end_date,
+                'donation_amount' => $activity->donation,
+                'type_name' => $activity->type_name
+            ];
+        });
+
+        return response()->json($renamedActivities);
     }
     public function getActivity($id){
         return Activity::find($id) ? Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')->join('types', 'types.id', '=', 'activities.id_type')->where('activities.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);

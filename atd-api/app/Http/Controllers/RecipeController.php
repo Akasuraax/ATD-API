@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Make;
 use App\Models\Recipe;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -168,48 +169,46 @@ class RecipeController extends Controller
             $recipe = Recipe::findOrFail($id);
             try {
                 $requestData = $request->validate([
-                    'name' => 'string|max:255',
-                    'description' => 'string',
-                    'listProduct' => 'array',
-                    'archive' => 'boolean'
+                    'name' => 'required|string|max:255',
+                    'description' => 'required|string',
+                    'list_product' => 'required|array',
+                    'archive' => 'required|boolean'
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            if(isset($requestData['name'])) {
-                $exist = Recipe::where('name', ucfirst(strtolower($requestData['name'])))->first();
-                if ($exist)
-                    return response()->json(['message' => 'This product already exist !'], 409);
-            }
-            foreach ($requestData as $key => $value) {
-                if (in_array($key, $recipe->getFillable())) {
-                    if($key == 'name')
-                        $recipe->$key = ucfirst(strtolower($value));
-                    else
-                        $recipe->$key = $value;
+            $exist = Recipe::where('name', ucfirst(strtolower($requestData['name'])))->whereNotIn('id', [$id])->first();
+            if ($exist)
+                return response()->json(['message' => 'This recipe already exist !'], 409);
+
+            $requestData['name'] = ucfirst(strtolower($requestData['name']));
+
+            try {
+                $recipe->update($requestData);
+                $recipe->products()->detach();
+
+                if (isset($requestData['list_product'])) {
+                    foreach ($requestData['list_product'] as $productId => $tab) {
+                        if (!Product::find($productId) || Product::find($productId)->archive)
+                            return response()->json(['message' => 'The product with the id ' . $productId . ' doesn\'t exist or is archived.'], 404);
+                        if (!isset($tab[0]))
+                            return response()->json(['message' => 'You have to put the count of your product'], 422);
+                        if (!is_numeric($tab[0]))
+                            return response()->json(['message' => 'You have to put an numeric value !'], 422);
+                        if (isset($tab[1]) && !is_string($tab[1]))
+                            return response()->json(['message' => 'You have to put an string value !'], 422);
+
+
+                        $existingMake = Make::where('id_product', $productId)->where('id_recipe', $id)->first();
+                        $recipe->products()->attach($productId, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
+                    }
                 }
+                $recipe->save();
+                $recipe->load('products:id,name');
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The element you selected is not found'], 404);
             }
-
-            $recipe->products()->detach();
-
-            if (isset($requestData['listProduct'])) {
-                foreach ($requestData['listProduct'] as $productId => $tab) {
-                    if (!Product::find($productId) || Product::find($productId)->archive)
-                        return response()->json(['message' => 'The product with the id ' . $productId . ' doesn\'t exist or is archived.'], 404);
-                    if(!isset($tab[0]))
-                        return response()->json(['message' => 'You have to put the count of your product'], 422);
-                    if(!is_numeric($tab[0]))
-                        return response()->json(['message' => 'You have to put an numeric value !'], 422);
-                    if(isset($tab[1]) && !is_string($tab[1]))
-                        return response()->json(['message' => 'You have to put an string value !'], 422);
-
-
-                    $existingMake = Make::where('id_product', $productId)->where('id_recipe', $id)->first();
-                    $recipe->products()->attach($productId, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
-                }
-            }
-            $recipe->save();
 
             return response()->json(['element' => $recipe], 200);
         }catch(ValidationException $e){

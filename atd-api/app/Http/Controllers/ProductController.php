@@ -7,6 +7,7 @@ use App\Models\Piece;
 use App\Models\Product;
 use App\Services\DeleteService;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -105,30 +106,27 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'name' => 'string|max:255',
-                    'measure' => 'string',
-                    'archive' => 'boolean'
+                    'name' => 'required|string|max:255',
+                    'measure' => 'required|string',
+                    'archive' => 'required|boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            if(isset($requestData['name'])) {
-                $exist = Product::where('name', ucfirst(strtolower($requestData['name'])))->first();
-                if ($exist)
-                    return response()->json(['message' => 'This product already exist !'], 409);
-            }
+            $exist = Product::where('name', ucfirst(strtolower($requestData['name'])))->whereNotIn('id', [$id])->first();
+            if ($exist)
+                return response()->json(['message' => 'This product already exist !'], 409);
 
-            foreach($requestData as $key => $value){
-                if(in_array($key, $product->getFillable()))
-                    if($key == 'name')
-                        $product->$key = ucfirst(strtolower($value));
-                    else if($key == 'measure')
-                        $product->$key = strtolower($value);
-                    else
-                        $product->$key = $value;
+            $requestData['name'] = ucfirst(strtolower($requestData['name']));
+            $requestData['measure'] = strtolower($requestData['measure']);
+
+            try{
+                $product->update($requestData);
+                $product->save();
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The element you selected is not found'], 404);
             }
-            $product->save();
 
             return response()->json(['product' => $product], 200);
         }catch (ValidationException $e) {

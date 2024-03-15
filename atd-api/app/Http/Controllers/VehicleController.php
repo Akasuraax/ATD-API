@@ -141,6 +141,12 @@ class VehicleController extends Controller
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
+            $exist = Vehicle::where('license_plate', strtoupper($request['license_plate']))->first();
+            if($exist)
+                return response()->json(['message' => 'This product already exist !'], 409);
+
+            $requestData['license_plate'] = strtoupper($requestData['license_plate']);
+
             try {
                 $annexe = Annexe::where('id', $requestData['annexe']['id'])->where('archive', false)->firstOrFail();
                 $vehicle->update($requestData);

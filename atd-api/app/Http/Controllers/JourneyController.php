@@ -145,7 +145,7 @@ class JourneyController extends Controller
             }catch (ModelNotFoundException $e) {
                 return response()->json(['error' => 'The element you selected is not found'], 404);
             }
-            
+
             return response()->json(['journey' => $journey], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());

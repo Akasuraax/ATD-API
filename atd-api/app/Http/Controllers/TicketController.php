@@ -55,16 +55,21 @@ class TicketController extends Controller
 
     public function getMyTickets(Request $request){
         $id_user = $request->route('id');
+
         $tickets_id = Send::select('id_ticket')->where('id_user', $id_user)->get();
 
         $ticketIds = $tickets_id->pluck('id_ticket');
 
-        $tickets = Ticket::select('id', 'title', 'description', 'type', 'created_at')->whereIn('id', $ticketIds)->get();
+        $tickets = Ticket::select('tickets.id', 'tickets.title', 'tickets.description', 'tickets.created_at', 'problems.name')
+            ->join('problems', 'tickets.problem_id', '=', 'problems.id')
+            ->whereIn('tickets.id', $ticketIds)
+            ->get();
 
         return response()->json([
             'ticket' => $tickets,
         ]);
     }
+
 
     public function getTicket(int $id_ticket, Request $request)
     {

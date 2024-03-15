@@ -183,7 +183,6 @@ class ActivityController extends Controller
 
         return response()->json($activities);
     }
-
     public function getActivitiesBetween(Request $request){
 
         $startDate = $request->input('startDate');
@@ -191,6 +190,7 @@ class ActivityController extends Controller
 
         $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
             ->join('types', 'types.id', '=', 'activities.id_type')
+            ->with('roles')
             ->where('activities.start_date', '<=', $endDate)
             ->where('activities.end_date', '>=', $startDate)
             ->get();
@@ -205,7 +205,8 @@ class ActivityController extends Controller
                 'start' => $activity->start_date,
                 'end' => $activity->end_date,
                 'donation_amount' => $activity->donation,
-                'type_name' => $activity->type_name
+                'type_name' => $activity->type_name,
+                'roles' => $activity->roles
             ];
         });
 

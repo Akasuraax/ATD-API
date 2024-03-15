@@ -12,7 +12,7 @@ class ProblemController extends Controller
     public function createProblem(Request $request){
         try {
             $validatedData = $request->validate([
-                'problem.name' => 'required|string|max:255',
+                'problem.name' => 'required|unique|string|max:255',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -89,7 +89,7 @@ class ProblemController extends Controller
 
         try {
             $validatedData = $request->validate([
-                'problem.name' => 'required|string|max:255',
+                'problem.name' => 'required|unique|string|max:255',
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);

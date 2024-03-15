@@ -19,4 +19,10 @@ class Problem extends Model
     protected $guarded = [
         'id'
     ];
+
+    public function ticket()
+    {
+        return $this->hasMany(Ticket::class, 'problem_id');
+    }
+
 }

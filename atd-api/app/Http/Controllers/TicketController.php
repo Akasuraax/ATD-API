@@ -32,7 +32,7 @@ class TicketController extends Controller
         return response()->json(['errors' => $e->errors()], 422);
     }
 
-        $problem = Problem::findOrfail($validatedData['ticket']['type']);
+        Problem::findOrfail($validatedData['ticket']['type']);
         $ticket = Ticket::create([
             'title' => $validatedData['ticket']['title'],
             'description' => $validatedData['ticket']['description'],
@@ -45,7 +45,7 @@ class TicketController extends Controller
             'ticket' => [
                 'id' => $ticket->id,
                 'description' => $ticket->description,
-                'problem' => $problem->name,
+                'problem' => $ticket->problem->name,
                 'created_at' => $ticket->created_at
             ]
         ];
@@ -65,8 +65,14 @@ class TicketController extends Controller
             ->whereIn('tickets.id', $ticketIds)
             ->get();
 
+        $tickets = $tickets->map(function ($ticket) {
+            $ticket['problem'] = $ticket['name'];
+            unset($ticket['name']);
+            return $ticket;
+        });
+
         return response()->json([
-            'ticket' => $tickets,
+            'tickets' => $tickets,
         ]);
     }
 
@@ -102,7 +108,7 @@ class TicketController extends Controller
                     'id' => $ticket->id,
                     'title' => $ticket->title,
                     'description' => $ticket->description,
-                    'type' => $ticket->type,
+                    'problem' => $ticket->problem->name,
                     'status' => $ticket->status,
                     'severity' => $ticket->severity,
                     'archive' => $ticket->archive,
@@ -121,7 +127,7 @@ class TicketController extends Controller
             'ticket' => [
                 'title' => $ticket->title,
                 'description' => $ticket->description,
-                'type' => $ticket->type,
+                'problem' => $ticket->problem->name ,
                 'created_at' => $ticket->created_at,
                 'user' => [
                     'name' => $user->name,
@@ -145,7 +151,8 @@ class TicketController extends Controller
         $operator = $request->input('operator', '');
         $value = $request->input('value', '%');
 
-        $tickets = Ticket::select('*')
+        $tickets = Ticket::select('tickets.*', 'problems.name as problem_name')
+            ->leftJoin('problems', 'tickets.problem_id', '=', 'problems.id')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -173,7 +180,7 @@ class TicketController extends Controller
                             break;
                     }
                 }
-            } )
+            })
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
 
@@ -181,6 +188,7 @@ class TicketController extends Controller
             'tickets' => $tickets
         ]);
     }
+
 
     public function patchTicket(int $id_ticket, Request $request){
         try{

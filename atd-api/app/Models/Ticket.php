@@ -27,6 +27,10 @@ class Ticket extends Model
         return $this->hasMany(Message::class, 'id_ticket');
     }
 
+    public function problem()
+    {
+        return $this->belongsTo(Problem::class, 'problem_id');
+    }
     public function archive(){
         $this->archive = true;
         $this->save();

@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->string('title', 255);
             $table->text('description');
-            $table->integer('type');
             $table->integer('status')->default(0);
             $table->integer('severity')->default(0);
-            $table->boolean('archive')->default(false);;
+            $table->boolean('archive')->default(false);
             $table->timestamps();
+            $table->integer('problem_id');
+            $table->foreign('problem_id')->references('id')->on('problems')->onDelete('restrict');
         });
     }
 

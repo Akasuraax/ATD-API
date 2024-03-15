@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\HaveRole;
 use App\Models\Message;
+use App\Models\Problem;
 use App\Models\Role;
 use App\Models\Send;
 use App\Models\Type;
@@ -30,6 +31,8 @@ class TicketController extends Controller
     } catch (ValidationException $e) {
         return response()->json(['errors' => $e->errors()], 422);
     }
+
+        Problem::findOrfail(['ticket']['type']);
         $ticket = Ticket::create([
             'title' => $validatedData['ticket']['title'],
             'description' => $validatedData['ticket']['description'],

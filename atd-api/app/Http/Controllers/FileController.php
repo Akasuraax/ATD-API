@@ -6,7 +6,6 @@ use App\Models\Activity;
 use App\Models\ActivityFile;
 use App\Models\User;
 use App\Models\File;
-use App\Services\DeleteService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -40,7 +39,7 @@ class FileController extends Controller
                     $file->move(public_path() . '/storage/users/' . $id . '/', $name);
 
                     File::create([
-                        'name' => $validateData['names'][$index],
+                        'name' => $name,
                         'link' => '/storage/users/' . $id . '/' . $name,
                         'id_user' => $id
                     ]);
@@ -72,7 +71,7 @@ class FileController extends Controller
         try {
             if ($request->activity_files) {
                 foreach ($request->activity_files as $file) {
-                    $name = $id . '-' . time() . rand(1, 99) . '.' . $file->extension();
+                    $name = $id . '-' . strtolower(str_replace(' ', '-', $file->getClientOriginalName()));
                     $file->move(public_path() . '/storage/activities/' . $id . '/', $name);
 
                     $newFile = File::create([
@@ -203,7 +202,7 @@ class FileController extends Controller
             $file = File::findOrFail($idFile);
             if($file->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $file->archive($idFile, $file->name);
+            $file->archiveActivity($file->link);
             $file = File::findOrFail($idFile);
             return response()->json(['file' => $file], 200);
         }catch(ValidationException $e){
@@ -212,9 +211,16 @@ class FileController extends Controller
     }
 
     public function deleteUserFile($id, $idFile){
-        User::findOrFail($id);
-
-        $service = new DeleteService();
-        return $service->deleteService($idFile, 'App\Models\File');
+        try{
+            $user = User::findOrFail($id);
+            $file = File::findOrFail($idFile);
+            if($file->archive)
+                return response()->json(['message' => 'Element is already archived.'], 405);
+            $file->archiveUser($file->link, $user->id);
+            $file = File::findOrFail($idFile);
+            return response()->json(['file' => $file], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
+        }
     }
 }

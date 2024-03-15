@@ -12,10 +12,10 @@ class Ticket extends Model
     protected $fillable = [
         'title',
         'description',
-        'type',
         'status',
         'severity',
-        'archive'
+        'archive',
+        'problem_id'
     ];
 
     public function users()

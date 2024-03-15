@@ -32,11 +32,11 @@ class TicketController extends Controller
         return response()->json(['errors' => $e->errors()], 422);
     }
 
-        Problem::findOrfail(['ticket']['type']);
+        $problem = Problem::findOrfail($validatedData['ticket']['type']);
         $ticket = Ticket::create([
             'title' => $validatedData['ticket']['title'],
             'description' => $validatedData['ticket']['description'],
-            'type' => $validatedData['ticket']['type']
+            'problem_id' => $validatedData['ticket']['type']
         ]);
 
         $ticket->users()->attach(TokenController::decodeToken($request->header('Authorization'))->id);
@@ -45,7 +45,7 @@ class TicketController extends Controller
             'ticket' => [
                 'id' => $ticket->id,
                 'description' => $ticket->description,
-                'type' => $ticket->type,
+                'problem' => $problem->name,
                 'created_at' => $ticket->created_at
             ]
         ];

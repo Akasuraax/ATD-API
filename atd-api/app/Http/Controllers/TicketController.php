@@ -180,30 +180,32 @@ class TicketController extends Controller
     public function patchTicket(int $id_ticket, Request $request){
         try{
             $validatedData = $request->validate([
-                'title' => 'string',
-                'description' => 'string',
-                'type' => 'integer',
-                'status' => 'integer',
-                'severity' => 'integer',
-                'archive' => 'boolean'
+                'ticket.title' => 'string',
+                'ticket.description' => 'string',
+                'ticket.type' => 'integer',
+                'ticket.status' => 'integer',
+                'ticket.severity' => 'integer',
+                'ticket.archive' => 'boolean'
             ]);
         }catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
         $ticket = Ticket::findOrFail($id_ticket);
-        if(isset($validatedData['title']))
-            $ticket->title = $validatedData['title'];
-        if(isset($validatedData['description']))
-            $ticket->description = $validatedData['description'];
-        if(isset($validatedData['type']))
-            $ticket->type = $validatedData['type'];
-        if(isset($validatedData['status']))
-            $ticket->status = $validatedData['status'];
-        if(isset($validatedData['severity']))
-            $ticket->severity = $validatedData['severity'];
-        if(isset($validatedData['archive']))
-            $ticket->archive = $validatedData['archive'];
+        $problem = Problem::findOrFail($validatedData['ticket']['type']);
+
+        if(isset($validatedData['ticket']['title']))
+            $ticket->title = $validatedData['ticket']['title'];
+        if(isset($validatedData['ticket']['description']))
+            $ticket->description = $validatedData['ticket']['description'];
+        if(isset($validatedData['ticket']['type']))
+            $ticket->problem_id = $validatedData['ticket']['type'];
+        if(isset($validatedData['ticket']['status']))
+            $ticket->status = $validatedData['ticket']['status'];
+        if(isset($validatedData['ticket']['severity']))
+            $ticket->severity = $validatedData['ticket']['severity'];
+        if(isset($validatedData['ticket']['archive']))
+            $ticket->archive = $validatedData['ticket']['archive'];
 
         if(!$ticket->archive){
             $messages = Message::where('id_ticket', $id_ticket)->get();
@@ -218,13 +220,24 @@ class TicketController extends Controller
                 $message->archive = false;
             }
         }
+
         $ticket->save();
         $ticket->touch();
 
         $messages = Message::where('id_ticket', $id_ticket)->get();
 
         return response()->json([
-            'ticket' => $ticket,
+            'ticket' => [
+                'id' => $ticket->id,
+                'title' => $ticket->title,
+                'description' => $ticket->description,
+                'severity' => $ticket->severity,
+                'status' => $ticket->status,
+                'problem' => $problem->name,
+                'archive' => $ticket->archive,
+                'created_at' => $ticket->created_at,
+                'updated_at' => $ticket->updated_at
+            ],
             'messages' => $messages
         ]);
     }

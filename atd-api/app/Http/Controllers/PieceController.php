@@ -19,16 +19,16 @@ class PieceController extends Controller
                 'expired_date' => 'required|date_format:Y-m-d H:i|after:today',
                 'count' => 'required|numeric',
                 'location' => 'nullable|int',
-                'id_warehouse' => 'required|int',
-                'id_product' => 'required|int'
+                'warehouse.id' => 'required|int',
+                'product.id' => 'required|int'
             ]);
 
         }catch (ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $warehouse = Warehouse::findOrFail($validateData['id_warehouse']);
-        $product = Product::findOrFail($validateData['id_product']);
+        $warehouse = Warehouse::findOrFail($validateData['warehouse']['id']);
+        $product = Product::findOrFail($validateData['product']['id']);
 
         if($warehouse->archive)
             return response()->json(['message' => 'The warehouse you selected is archived.'], 404);
@@ -40,8 +40,8 @@ class PieceController extends Controller
             'expired_date' => $validateData['expired_date'],
             'count' => $validateData['count'],
             'location' => $validateData['location'] ?? null,
-            'id_warehouse' => $validateData['id_warehouse'],
-            'id_product' => $validateData['id_product']
+            'id_warehouse' => $validateData['warehouse']['id'],
+            'id_product' => $validateData['id_product']['id']
         ]);
 
         return Response(['piece' => $piece], 201);

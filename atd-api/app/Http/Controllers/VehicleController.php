@@ -20,7 +20,7 @@ class VehicleController extends Controller
                 'license_plate' => 'string|required|max:9',
                 'average_consumption' => 'required|numeric',
                 'fuel_type' => 'string|required',
-                'id_annexe' => 'required|int'
+                'annexe.id' => 'required|int'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -30,7 +30,7 @@ class VehicleController extends Controller
         if($exist)
             return response()->json(['message' => 'This product already exist !'], 409);
 
-        $annexe = Annexe::findOrFail($validateData['id_annexe']);
+        $annexe = Annexe::findOrFail($validateData['annexe']['id']);
         if($annexe->archive)
             return response()->json(['message' => 'The annexe you selected is archived.'], 405);
 
@@ -39,7 +39,7 @@ class VehicleController extends Controller
             'license_plate' => strtoupper($validateData['license_plate']),
             'average_consumption' => $validateData['average_consumption'],
             'fuel_type' => $validateData['fuel_type'],
-            'id_annexe' => $validateData['id_annexe']
+            'id_annexe' => $validateData['annexe']['id']
         ]);
 
         return Response(['vehicle' => $vehicle], 201);

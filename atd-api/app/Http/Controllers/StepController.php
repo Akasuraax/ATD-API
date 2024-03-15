@@ -18,24 +18,24 @@ class StepController extends Controller
                 'address' => 'string|required',
                 'zipcode' => 'int|required|digits:5',
                 'time' => 'date_format:H:i|required',
-                'id_journey' => 'required|int'
+                'journey.id' => 'required|int'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $journey = Journey::findOrFail($validateData['id_journey']);
+        $journey = Journey::findOrFail($validateData['journey']['id']);
         if($journey->archive)
             return response()->json(['message' => 'The journey selected is archived.'], 405);
 
-        $defaultDate = date('Y-m-d'); // Use today's date
+        $defaultDate = date('Y-m-d');
         $timeWithDefaultDate = $defaultDate . ' ' . $validateData['time'];
 
         $step = Step::create([
             'address' => $validateData['address'],
             'zipcode' =>  $validateData['zipcode'],
             'time' => $timeWithDefaultDate,
-            'id_journey' =>  $validateData['id_journey']
+            'id_journey' =>  $validateData['journey']['id']
         ]);
 
         return Response(['step' => $step], 201);

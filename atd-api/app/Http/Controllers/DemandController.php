@@ -17,15 +17,15 @@ class DemandController extends Controller
         try{
             $validateData = $request->validate([
                 'description' => 'required|string',
-                'id_user' => 'required|int',
-                'id_type' => 'required|int'
+                'user.id' => 'required|int',
+                'type.id' => 'required|int'
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $user = User::findOrFail($validateData['id_user']);
-        $type = Type::findOrFail($validateData['id_type']);
+        $user = User::findOrFail($validateData['user']['id']);
+        $type = Type::findOrFail($validateData['type']['id']);
 
         if($user->archive)
             return response()->json(['message' => 'The user you put is archived.'], 405);
@@ -34,8 +34,8 @@ class DemandController extends Controller
 
         $demand = Demand::create([
             'description' => $validateData['description'],
-            'id_user' => $validateData['id_user'],
-            'id_type' => $validateData['id_type']
+            'id_user' => $validateData['user']['id'],
+            'id_type' => $validateData['type']['id']
         ]);
 
         $response = [

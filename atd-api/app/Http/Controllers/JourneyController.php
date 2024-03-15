@@ -21,8 +21,8 @@ class JourneyController extends Controller
                 'distance' => 'int|required',
                 'cost' => 'int|required',
                 'fuel_cost' => 'int|required',
-                'id_vehicle' => 'int|required',
-                'id_activity' => 'nullable|int'
+                'vehicle.id' => 'int|required',
+                'activity.id' => 'nullable|int'
              ]);
         }catch (ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -39,10 +39,10 @@ class JourneyController extends Controller
             'distance' => $validateData['distance'],
             'cost' => $validateData['cost'],
             'fuel_cost' => $validateData['fuel_cost'],
-            'id_activity' => $validateData['id_activity'] ?? null
+            'id_activity' => $validateData['activity']['id'] ?? null
         ]);
 
-        $journey->vehicles()->attach($validateData['id_vehicle'], ['archive' => false]);
+        $journey->vehicles()->attach($validateData['vehicle']['id'], ['archive' => false]);
 
         return Response(['journey' => $journey], 201);
     }

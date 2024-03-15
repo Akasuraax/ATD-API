@@ -9,6 +9,7 @@ use App\Models\Recipe;
 use App\Models\Role;
 use App\Models\Product;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\Type;
@@ -36,6 +37,7 @@ class ActivityController extends Controller
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
+
 
         $type = Type::findOrFail($validateData['id_type']);
         if($type->archive)
@@ -109,11 +111,12 @@ class ActivityController extends Controller
             }
         }
 
+
         //enregistrement des fichiers
 
         if ($request->activity_files) {
             foreach ($request->activity_files as $file) {
-                $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
+                $name = $activity->id . '-' . strtolower(str_replace(' ', '-', $file->getClientOriginalName()));
                 $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
 
                 $newFile = File::create([
@@ -207,27 +210,28 @@ class ActivityController extends Controller
 
             try{
                 $validateData = $request->validate([
-                    'title' => 'string|max:255',
-                    'description' => 'string|max:255',
-                    'address' => 'string',
-                    'zipcode' => 'numeric:5',
-                    'start_date' => 'date|after_or_equal:today',
-                    'end_date' => 'date|after:start_date',
-                    'donation' => 'int',
-                    'id_type' => 'int',
-                    'archive' => 'boolean'
+                    'title' => 'required|string|max:255',
+                    'description' => 'required|string|max:255',
+                    'address' => 'nullable|string',
+                    'zipcode' => 'nullable|numeric:5',
+                    'start_date' => 'required|date|after_or_equal:today',
+                    'end_date' => 'required|date|after:start_date',
+                    'donation' => 'nullable|int',
+                    'type.id' => 'required|int',
+                    'archive' => 'required|boolean'
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            $type = Type::findOrFail($validateData['id_type']);
-            if($type->archive)
-                return Response(['message'=>'The type you selected is archived.'], 404);
-
-            foreach($validateData as $key => $value){
-                if(in_array($key, $activity->isFillable()))
-                    $activity->$key = $value;
+            try{
+                $type = Type::findOrFail($validateData['type']['id']);
+                $activity->update($validateData);
+                $activity->type()->associate($type->id);
+                $activity->save();
+                $activity->load('type:id,name');
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The activity you selected is not found'], 404);
             }
 
             return response()->json(['activity' => $activity], 200);

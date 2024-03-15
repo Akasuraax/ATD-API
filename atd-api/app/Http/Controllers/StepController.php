@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Journey;
 use App\Models\Step;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -111,27 +112,27 @@ class StepController extends Controller
             $step = Step::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'address' => 'string',
-                    'zipcode' => 'int|digits:5',
-                    'time' => 'date_format:H:i',
-                    'id_journey' => 'int',
-                    'archive' => 'boolean'
+                    'address' => 'required|string',
+                    'zipcode' => 'required|int|digits:5',
+                    'time' => 'required|date_format:H:i',
+                    'journey.id' => 'required|int',
+                    'archive' => 'required|boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            foreach($requestData as $key => $value){
-                if(in_array($key, $step->getFillable())) {
-                    if($key == "time"){
-                        $defaultDate = date('Y-m-d'); // Use today's date
-                        $timeWithDefaultDate = $defaultDate . ' ' . $value;
-                        $step->$key = $timeWithDefaultDate;
-                    }else
-                        $step->$key = $value;
-                }
+            $requestData['time'] = date('Y-m-d') . ' ' . $requestData['time'];
+
+            try{
+                $journey = Journey::where('id', $requestData['journey']['id'])->where('archive', false)->firstOrFail();
+                $step->update($requestData);
+                $step->journey()->associate($journey->id);
+                $step->save();
+                $step->load('journey:id,name');
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The journey you selected is not found'], 404);
             }
-            $step->save();
 
             return response()->json(['step' => $step], 200);
         }catch(ValidationException $e){

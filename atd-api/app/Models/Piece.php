@@ -20,7 +20,7 @@ class Piece extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class, 'id_products');
+        return $this->belongsTo(Product::class, 'id_product');
     }
 
     public function warehouse()

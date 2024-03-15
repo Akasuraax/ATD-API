@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\Send;
 use App\Models\Type;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Response;
 
 use App\Models\Ticket;
@@ -176,55 +177,33 @@ class TicketController extends Controller
     }
 
     public function patchTicket(int $id_ticket, Request $request){
-        try{
-            $validatedData = $request->validate([
-                'title' => 'string',
-                'description' => 'string',
-                'type' => 'integer',
-                'status' => 'integer',
-                'severity' => 'integer',
-                'archive' => 'boolean'
-            ]);
-        }catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        }
-
-        $ticket = Ticket::findOrFail($id_ticket);
-        if(isset($validatedData['title']))
-            $ticket->title = $validatedData['title'];
-        if(isset($validatedData['description']))
-            $ticket->description = $validatedData['description'];
-        if(isset($validatedData['type']))
-            $ticket->type = $validatedData['type'];
-        if(isset($validatedData['status']))
-            $ticket->status = $validatedData['status'];
-        if(isset($validatedData['severity']))
-            $ticket->severity = $validatedData['severity'];
-        if(isset($validatedData['archive']))
-            $ticket->archive = $validatedData['archive'];
-
-        if(!$ticket->archive){
-            $messages = Message::where('id_ticket', $id_ticket)->get();
-
-            foreach($messages as $message){
-                $message->archive = true;
+        try {
+            $ticket = Ticket::findOrFail($id_ticket);
+            try {
+                $validatedData = $request->validate([
+                    'title' => 'required|string',
+                    'description' => 'required|string',
+                    'type' => 'required|integer',
+                    'status' => 'required|integer',
+                    'severity' => 'required|integer',
+                    'archive' => 'required|boolean'
+                ]);
+            } catch (ValidationException $e) {
+                return response()->json(['errors' => $e->errors()], 422);
             }
-        }else{
-            $messages = Message::where('id_ticket', $id_ticket)->get();
 
-            foreach($messages as $message){
-                $message->archive = false;
+            try{
+                $ticket->update($validatedData);
+                $ticket->save();
+                $messages = $ticket->messages()->get();
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The element you selected is not found'], 404);
             }
+
+            return response()->json(['ticket' => $ticket, "messages" => $messages], 200);
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-        $ticket->save();
-        $ticket->touch();
-
-        $messages = Message::where('id_ticket', $id_ticket)->get();
-
-        return response()->json([
-            'ticket' => $ticket,
-            'messages' => $messages
-        ]);
     }
 
     public function deleteTicket(int $id){

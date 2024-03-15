@@ -6,6 +6,7 @@ use App\Models\Piece;
 use App\Models\Product;
 use App\Models\Warehouse;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -122,31 +123,29 @@ class PieceController extends Controller
             $piece = Piece::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'expired_date' => 'date_format:Y-m-d H:i|date|after:today',
-                    'count' => 'numeric',
-                    'location' => 'int',
-                    'id_warehouse' => 'int',
-                    'id_product' => 'int',
-                    'archive' => 'boolean'
+                    'expired_date' => 'required|date_format:Y-m-d H:i|date|after:today',
+                    'count' => 'required|numeric',
+                    'location' => 'nullable|int',
+                    'warehouse.id' => 'required|int',
+                    'product.id' => 'required|int',
+                    'archive' => 'required|boolean'
                 ]);
             }catch(ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            foreach($requestData as $key => $value){
-                if(in_array($key, $piece->getFillable())) {
-                    if($key == 'id_warehouse'){
-                        if(!Warehouse::find($value) || Warehouse::find($value)->archive)
-                            return response()->json(['message' => 'The warehouse you put doesn\'t exist'], 404);
-                    }else if($key == 'id_product'){
-                        if(!Warehouse::find($value) || Product::find($value)->archive)
-                            return response()->json(['message' => 'The product you put doesn\'t exist'], 404);
-                    }else {
-                        $piece->$key = $value;
-                    }
-                }
+            try{
+                $warehouse = Warehouse::where('id', $requestData['warehouse']['id'])->where('archive', false)->firstOrFail();
+                $product = Product::where('id', $requestData['product']['id'])->where('archive', false)->firstOrFail();
+                $piece->update($requestData);
+                $piece->warehouse()->associate($warehouse->id);
+                $piece->product()->associate($product->id);
+                $piece->load('warehouse:id,name');
+                $piece->load('product:id,name');
+                $piece->save();
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The element you selected is not found'], 404);
             }
-            $piece->save();
 
             return response()->json(['piece' => $piece], 200);
         }catch(ValidationException $e){

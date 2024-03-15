@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Piece;
 use App\Models\Warehouse;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\Product;
@@ -127,35 +128,26 @@ class WarehouseController extends Controller
             $warehouse = Warehouse::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'name' => 'string|max:255',
-                    'address' => 'string',
-                    'zipcode' => 'digits:5|integer',
-                    'capacity' => 'integer',
-                    'archive' => 'boolean'
+                    'name' => 'required|string|max:255',
+                    'address' => 'required|string',
+                    'zipcode' => 'required|digits:5|integer',
+                    'capacity' => 'required|integer',
+                    'archive' => 'required|boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            if(isset($requestData['address'])){
-                if(isset($requestData['zipcode']))
-                    $exist = Warehouse::where('address', $requestData['address'])->where('zipcode', $requestData['zipcode'])->first();
-                else
-                    $exist = Warehouse::where('address', $requestData['address'])->where('zipcode', $warehouse->zipcode)->first();
-                if ($exist)
-                    return response()->json(['message' => 'This warehouse with this address already exist !'], 409);
-            }else if(isset($requestData['zipcode'])) {
-                $exist = Warehouse::where('address', $warehouse->address)->where('zipcode', $requestData['zipcode'])->first();
-                if ($exist)
-                    return response()->json(['message' => 'This warehouse with this address already exist !'], 409);
-            }
+            $exist = Warehouse::where('address', $requestData['address'])->where('zipcode', $requestData['zipcode'])->whereNotIn('id', [$id])->first();
+            if ($exist)
+                return response()->json(['message' => 'This warehouse with this address already exist !'], 409);
 
-            foreach($requestData as $key => $value){
-                if(in_array($key, $warehouse->getFillable()))
-                    $warehouse->$key = $value;
+            try{
+                $warehouse->update($requestData);
+                $warehouse->save();
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The element you selected is not found'], 404);
             }
-            $warehouse->save();
-
             return response()->json(['warehouse' => $warehouse], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());

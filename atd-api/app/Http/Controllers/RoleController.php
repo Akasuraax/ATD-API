@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\DeleteService;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
@@ -112,27 +113,25 @@ class RoleController extends Controller
             $role = Role::findOrFail($id);
             try{
                 $validateData = $request->validate([
-                    'name' => 'string|max:255',
-                    'archive' => 'boolean'
+                    'name' => 'required|string|max:255',
+                    'archive' => 'required|boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            if(isset($validateData['name'])){
-                $exist = Role::where('name', strtolower($validateData['name']))->first();
-                if($exist)
-                    return response()->json(['message' => 'This role already exist !'], 409);
-            }
+            $exist = Role::where('name', strtolower($validateData['name']))->whereNotIn('id', [$id])->first();
+            if($exist)
+                return response()->json(['message' => 'This role already exist !'], 409);
 
-            foreach($validateData as $key => $value){
-                if(in_array($key, $role->getFillable()))
-                    if($key == 'name')
-                        $role->$key = strtolower($value);
-                    else
-                        $role->$key = $value;
+            $validateData['name'] = strtolower($validateData['name']);
+
+            try{
+                $role->update($validateData);
+                $role->save();
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The annexe you selected is not found'], 404);
             }
-            $role->save();
 
             return response()->json(['role' => $role], 200);
         } catch (ValidationException $e) {

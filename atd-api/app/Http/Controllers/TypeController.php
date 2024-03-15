@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Demand;
 use App\Models\Type;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 class TypeController extends Controller
@@ -28,6 +29,8 @@ class TypeController extends Controller
             return response()->json(['message' => 'This type already exists!'], 409);
         if($validateData['display'] == 1 && !$request->type_image)
             return response()->json(['message' => 'You have to put an image if you want to display the type'], 422);
+        if($validateData['display'] == 0 && $request->type_image)
+            return response()->json(['message' => 'You can\'t put an image if you don\'t want to display the type'], 422);
 
         if($file = $request->type_image)
             $nameFile = 'icon' . '.' . $file->getClientOriginalExtension();
@@ -120,21 +123,23 @@ class TypeController extends Controller
             $type = Type::findOrFail($id);
 
             $requestData = $request->validate([
-                'name' => 'string|max:128',
-                'description' => 'string',
-                'display' => 'boolean',
-                'type_image' => 'mimes:png, jpeg, jpg',
-                'access_to_warehouse' => 'boolean',
-                'access_to_journey' => 'boolean',
-                'archive' => 'boolean'
+                'name' => 'required|string|max:128',
+                'description' => 'nullable|string',
+                'display' => 'required|boolean',
+                'type_image' => 'nullable|mimes:png, jpeg, jpg',
+                'access_to_warehouse' => 'required|boolean',
+                'access_to_journey' => 'required|boolean',
+                'archive' => 'required|boolean'
             ]);
 
-            if (isset($requestData['name'])) {
-                $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->where('id', '!=', $id)->first();
-                if ($exist) {
-                    return response()->json(['message' => 'This type already exists!'], 409);
-                }
-            }
+            $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->whereNotIn('id', [$id])->first();
+            if ($exist)
+                return response()->json(['message' => 'This type already exists!'], 409);
+            if($requestData['display'] == 1 && !$request->type_image)
+                return response()->json(['message' => 'You have to put an image if you want to display the type'], 422);
+            if($requestData['display'] == 0 && $request->type_image)
+                return response()->json(['message' => 'You can\'t put an image if you don\'t want to display the type'], 422);
+
 
             if ($request->hasFile('type_image')) {
                 $file = $request->file('type_image');
@@ -143,17 +148,14 @@ class TypeController extends Controller
                 $type->image = $nameFile;
             }
 
-            foreach ($requestData as $key => $value) {
-                if (in_array($key, $type->getFillable())) {
-                    if ($key == 'name') {
-                        $type->$key = ucfirst(strtolower($value));
-                    } else {
-                        $type->$key = $value;
-                    }
-                }
-            }
+            $requestData['name'] = ucfirst(strtolower($requestData['name']));
 
-            $type->save();
+            try{
+                $type->update($requestData);
+                $type->save();
+            } catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The type you selected is not found'], 404);
+            }
 
             return response()->json(['type' => $type], 200);
         } catch (ValidationException $e) {

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Journey;
 use App\Models\Vehicle;
 use App\Services\DeleteService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -118,34 +120,32 @@ class JourneyController extends Controller
             $journey = Journey::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'name' => 'string|max:255',
-                    'duration' => 'int',
-                    'distance' => 'int',
-                    'cost' => 'int',
-                    'archive' => 'boolean',
-                    'fuel_cost' => 'int',
-                    'id_vehicle' => 'int',
-                    'id_activity' => 'int'
+                    'name' => 'required|string|max:255',
+                    'duration' => 'required|int',
+                    'distance' => 'required|int',
+                    'cost' => 'required|int',
+                    'archive' => 'required|boolean',
+                    'fuel_cost' => 'required|int',
+                    'vehicle.id' => 'required|int',
+                    'activity.id' => 'required|int'
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            foreach ($requestData as $key => $value) {
-                if (in_array($key, $journey->getFillable()) || $key === 'id_vehicle') {
-                    if ($key === 'id_vehicle') {
-                        $vehicle = Vehicle::find($value);
-                        if (!$vehicle || $vehicle->archive) {
-                            return response()->json(['message' => 'The vehicle doesn\'t exist'], 404);
-                        }
-                        $journey->vehicles()->sync($value, ['archive' => false]);
-                    } else {
-                        $journey->$key = $value;
-                    }
-                }
+            try{
+                $vehicle = Vehicle::where('id', $requestData['vehicle']['id'])->where('archive', false)->firstOrFail();
+                $activity = Activity::where('id', $requestData['activity']['id'])->where('archive', false)->firstOrFail();
+                $journey->update($requestData);
+                $journey->activity()->associate($activity->id);
+                $journey->vehicles()->sync($vehicle->id, ['archive' => false]);
+                $journey->save();
+                $journey->load('vehicles:id,name,license_plate');
+                $journey->load('activity:id,title');
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The element you selected is not found'], 404);
             }
-            $journey->save();
-
+            
             return response()->json(['journey' => $journey], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());

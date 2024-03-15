@@ -16,7 +16,8 @@ class Vehicle extends Model
         'average_consumption',
         'fuel_type',
         'id_annexe',
-        'vehicle'
+        'vehicle',
+        'archive'
     ];
 
     public function journeys(){

@@ -148,7 +148,7 @@ class VehicleController extends Controller
                 $vehicle->save();
                 $vehicle->load('annexe:id,name');
             } catch (ModelNotFoundException $e) {
-                return response()->json(['error' => 'The vehicle you selected is not found'], 404);
+                return response()->json(['error' => 'The annexe you selected is not found'], 404);
             }
 
             return response()->json(['vehicle' => $vehicle], 200);

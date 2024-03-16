@@ -135,6 +135,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/product')->middleware('validity.token')->group(function (){
         Route::post('/', [ProductController::class, 'createProduct'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [ProductController::class, 'getProducts']);
+        Route::get('/filter', [ProductController::class, 'getProductsFilter']);
         Route::get('/{id}', [ProductController::class, 'getProduct']);
         Route::delete('/{id}', [ProductController::class, 'deleteProduct'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [ProductController::class, 'updateProduct'])->middleware('authorization:' . serialize([1]));

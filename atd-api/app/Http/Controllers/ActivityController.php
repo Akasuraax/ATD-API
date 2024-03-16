@@ -9,7 +9,6 @@ use App\Models\Recipe;
 use App\Models\Role;
 use App\Models\Product;
 use App\Services\DeleteService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\Type;
@@ -37,7 +36,6 @@ class ActivityController extends Controller
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
-
 
         $type = Type::findOrFail($validateData['id_type']);
         if($type->archive)
@@ -111,23 +109,25 @@ class ActivityController extends Controller
             }
         }
 
-
         //enregistrement des fichiers
+        try{
+            if ($request->activity_files) {
 
-        if ($request->activity_files) {
-            foreach ($request->activity_files as $file) {
-                $name = $activity->id . '-' . strtolower(str_replace(' ', '-', $file->getClientOriginalName()));
-                $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
+                foreach ($request->activity_files as $file) {
+                    $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
+                    $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
 
-                $newFile = File::create([
-                    'name' => $name,
-                    'link' => '/storage/activities/' . $activity->id . '/' . $name,
-                ]);
+                    $newFile = File::create([
+                        'name' => $name,
+                        'link' => '/storage/activities/' . $activity->id . '/' . $name,
+                    ]);
 
-                $newFile->activities()->attach($activity->id, ['archive' => false]);
+                    $newFile->activities()->attach($activity->id, ['archive' => false]);
+                }
             }
+        }catch(ValidationException $e){
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
 
         return Response(['activity' => $activity], 200);
     }
@@ -138,7 +138,7 @@ class ActivityController extends Controller
 
     public function getActivities(Request $request){
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 0);
+        $page = $request->input('page', 1);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 
@@ -148,8 +148,8 @@ class ActivityController extends Controller
 
         $field = "activities." . $field;
 
-        $activities = Activity::select('id','title', 'description', 'address', 'zipcode', 'start_date', 'end_date', 'donation', 'archive')
-            ->with('type')
+        $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
+            ->join('types', 'types.id', '=', 'activities.id_type')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -183,7 +183,35 @@ class ActivityController extends Controller
 
         return response()->json($activities);
     }
+    public function getActivitiesBetween(Request $request){
 
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+
+        $activities = Activity::select('activities.id','activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
+            ->join('types', 'types.id', '=', 'activities.id_type')
+            ->with('roles')
+            ->where('activities.start_date', '<=', $endDate)
+            ->where('activities.end_date', '>=', $startDate)
+            ->get();
+
+        $renamedActivities = $activities->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'title' => $activity->title,
+                'description' => $activity->description,
+                'address' => $activity->address,
+                'zipcode' => $activity->zipcode,
+                'start' => $activity->start_date,
+                'end' => $activity->end_date,
+                'donation_amount' => $activity->donation,
+                'type_name' => $activity->type_name,
+                'roles' => $activity->roles
+            ];
+        });
+
+        return response()->json($renamedActivities);
+    }
     public function getActivity($id){
         return Activity::find($id) ? Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')->join('types', 'types.id', '=', 'activities.id_type')->where('activities.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
@@ -195,7 +223,13 @@ class ActivityController extends Controller
                 return response()->json(['message' => 'Element is already archived.'], 405);
             $activity->archive = true;
 
-            $activity->archive($id);
+            $journeys = Journey::where('id_activity', $id)->where('archive', false)->get();
+            if(!$journeys->isEmpty()){
+                foreach($journeys as $journey){
+                    $service = new DeleteService();
+                    $service->deleteJourneyService($journey->id);
+                }
+            }
 
             $activity->save();
             return response()->json(['activity' => $activity], 200);
@@ -210,28 +244,27 @@ class ActivityController extends Controller
 
             try{
                 $validateData = $request->validate([
-                    'title' => 'required|string|max:255',
-                    'description' => 'required|string|max:255',
-                    'address' => 'nullable|string',
-                    'zipcode' => 'nullable|numeric:5',
-                    'start_date' => 'required|date|after_or_equal:today',
-                    'end_date' => 'required|date|after:start_date',
-                    'donation' => 'nullable|int',
-                    'type.id' => 'required|int',
-                    'archive' => 'required|boolean'
+                    'title' => 'string|max:255',
+                    'description' => 'string|max:255',
+                    'address' => 'string',
+                    'zipcode' => 'numeric:5',
+                    'start_date' => 'date|after_or_equal:today',
+                    'end_date' => 'date|after:start_date',
+                    'donation' => 'int',
+                    'id_type' => 'int',
+                    'archive' => 'boolean'
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            try{
-                $type = Type::where('id', $validateData['type']['id'])->where('archive', false)->firstOrFail();
-                $activity->update($validateData);
-                $activity->type()->associate($type->id);
-                $activity->save();
-                $activity->load('type:id,name');
-            } catch (ModelNotFoundException $e) {
-                return response()->json(['error' => 'The activity you selected is not found'], 404);
+            $type = Type::findOrFail($validateData['id_type']);
+            if($type->archive)
+                return Response(['message'=>'The type you selected is archived.'], 404);
+
+            foreach($validateData as $key => $value){
+                if(in_array($key, $activity->isFillable()))
+                    $activity->$key = $value;
             }
 
             return response()->json(['activity' => $activity], 200);

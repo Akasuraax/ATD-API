@@ -164,19 +164,20 @@ use App\Http\Controllers\ActivityController;
         Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteUserFile']);
     });
 
-    Route::prefix('/activity')->middleware('validity.token')->group(function (){
-        Route::post('/', [ActivityController::class, 'createActivity']);
-        Route::get('/', [ActivityController::class, 'getActivities']);
-        Route::get('/{id}', [ActivityController::class, 'getActivity']);
-        Route::delete('/{id}', [ActivityController::class, 'deleteActivity']);
-        Route::post('/{id}/file', [FileController::class, 'createActivityFile']);
-        Route::get('/{id}/file', [FileController::class, 'getActivityFiles']);
-        Route::get('/{id}/file/{idFile}', [FileController::class, 'getActivityFile']);
-        Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteActivityFile']);
-        Route::patch('/{id}', [ActivityController::class, 'updateActivity']);
-        Route::patch('/{id}/recipe', [ActivityController::class, 'updateActivityRecipe']);
-        Route::patch('/{id}/product', [ActivityController::class, 'updateActivityProduct']);
-        Route::patch('/{id}/role', [ActivityController::class, 'updateActivityRole']);
+    Route::prefix('/activity')->group(function (){
+        Route::post('/', [ActivityController::class, 'createActivity'])->middleware('validity.token');
+        Route::get('/', [ActivityController::class, 'getActivities'])->middleware('validity.token');
+        Route::get('/between', [ActivityController::class, 'getActivitiesBetween']);
+        Route::get('/{id}', [ActivityController::class, 'getActivity'])->middleware('validity.token');
+        Route::delete('/{id}', [ActivityController::class, 'deleteActivity'])->middleware('validity.token');
+        Route::post('/{id}/file', [FileController::class, 'createActivityFile'])->middleware('validity.token');
+        Route::get('/{id}/file', [FileController::class, 'getActivityFiles'])->middleware('validity.token');
+        Route::get('/{id}/file/{idFile}', [FileController::class, 'getActivityFile'])->middleware('validity.token');
+        Route::delete('/{id}/file/{idFile}', [FileController::class, 'deleteActivityFile'])->middleware('validity.token');
+        Route::patch('/{id}', [ActivityController::class, 'updateActivity'])->middleware('validity.token');
+        Route::patch('/{id}/recipe', [ActivityController::class, 'updateActivityRecipe'])->middleware('validity.token');
+        Route::patch('/{id}/product', [ActivityController::class, 'updateActivityProduct'])->middleware('validity.token');
+        Route::patch('/{id}/role', [ActivityController::class, 'updateActivityRole'])->middleware('validity.token');
     });
 
     Route::prefix('/visit')->middleware('validity.token')->group(function (){

@@ -19,8 +19,8 @@ class VisitController extends Controller
         try {
             $fields = $request->validate([
                 'checking' => 'required|integer|max:1',
-                'id_volunteer' => 'integer',
-                'id_beneficiary' => 'required|integer',
+                'volunteer.id' => 'integer',
+                'beneficiary.id' => 'required|integer',
             ]);
 
             User::findOrFail($fields['id_volunteer']);
@@ -29,18 +29,18 @@ class VisitController extends Controller
             $volunteer = User::where('id', $fields['id_volunteer'])->get()->first();
             $beneficiary = User::where('id', $fields['id_beneficiary'])->get()->first();
 
-            if(!HaveRole::where('id_user', $fields['id_beneficiary'])->where('id_role', 3)->get()->first()){
-                $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a beneficiary'];
+            if(!HaveRole::where('id_user', $fields['beneficiary']['id'])->where('id_role', 3)->get()->first()){
+                $error['beneficiary']['id'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a beneficiary'];
                 throw ValidationException::withMessages($error);
             }
 
-            if(!HaveRole::where('id_user', $fields['id_volunteer'])->where('id_role', 2)->get()->first()){
-                $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a volunteer'];
+            if(!HaveRole::where('id_user', $fields['volunteer']['id'])->where('id_role', 2)->get()->first()){
+                $error['beneficiary']['id'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a volunteer'];
                 throw ValidationException::withMessages($error);
             }
 
-            if(Visit::where('id_beneficiary', $fields['id_beneficiary'])->where('archive', false)->get()->first()){
-                $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' already has a visit'];
+            if(Visit::where('id_beneficiary', $fields['beneficiary']['id'])->where('archive', false)->get()->first()){
+                $error['beneficiary']['id'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' already has a visit'];
                 throw ValidationException::withMessages($error);
             }
 
@@ -50,8 +50,8 @@ class VisitController extends Controller
 
         $visit = Visit::create([
             'checking' => $fields['checking'],
-            'id_volunteer' => $fields['id_volunteer'],
-            'id_beneficiary' => $fields['id_beneficiary'],
+            'id_volunteer' => $fields['volunteer']['id'],
+            'id_beneficiary' => $fields['beneficiary']['id'],
         ]);
 
         return response()->json([
@@ -230,10 +230,10 @@ class VisitController extends Controller
 
         try {
             $fields = $request->validate([
-                'checking' => 'integer|max:1',
-                'id_volunteer' => 'integer',
-                'id_beneficiary' => 'integer',
-                'archive' => 'nullable|boolean'
+                'checking' => 'required|integer|max:1',
+                'volunteer.id' => 'required|integer',
+                'beneficiary.id' => 'required|integer',
+                'archive' => 'required||boolean'
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -242,10 +242,10 @@ class VisitController extends Controller
         //if it's an administrator
 
         if(HaveRole::where('id_user', TokenController::decodeToken($request->header('Authorization'))->id)->where('id_role', 1)->get()->first()){
-            if(isset($fields['id_volunteer']))
-                $visit->id_volunteer = $fields['id_volunteer'];
+            if(isset($fields['volunteer']['id']))
+                $visit->id_volunteer = $fields['volunteer']['id'];
             if(isset($fields['id_beneficiary']))
-                $visit->id_beneficiary = $fields['id_beneficiary'];
+                $visit->id_beneficiary = $fields['beneficiary']['id'];
             if(isset($fields['checking']))
                 $visit->checking = $fields['checking'];
             if(isset($fields['archive']))

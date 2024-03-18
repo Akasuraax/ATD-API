@@ -39,7 +39,14 @@ class MessageController extends Controller
 
         return response()->json([
             'message' => [
-                'description' => $message->description
+                'description' => $message->description,
+                'created_at' => $message->created_at,
+                'user' => [
+                    'id' => $message->userWhoSendTheMessage->id,
+                    'name' => $message->userWhoSendTheMessage->name,
+                    'forname' => $message->userWhoSendTheMessage->forname
+                ]
+
             ]
         ], 201);
     }

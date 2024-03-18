@@ -49,7 +49,7 @@ class LanguageController extends Controller
     {
         $languages = [];
         foreach (glob(public_path() . '/storage/languages/*', GLOB_ONLYDIR) as $dir) {
-            $languages[] = str_replace("/Users/linaphe/Documents/ATD-API/atd-api/public/storage/languages/", "", $dir);
+            $languages[] = str_replace( public_path() . '/storage/languages/', "", $dir);
         };
 
         return response($languages)->header('Content-Type', 'application/json');

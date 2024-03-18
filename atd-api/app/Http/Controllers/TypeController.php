@@ -53,7 +53,7 @@ class TypeController extends Controller
     public function getTypes(Request $request)
     {
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 
@@ -99,7 +99,7 @@ class TypeController extends Controller
     }
 
     public function getType($id){
-        return Type::find($id) ? Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Type::find($id) ? Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'display','archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
 
     }
 

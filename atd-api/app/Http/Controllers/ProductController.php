@@ -82,6 +82,17 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
+    public function getProductsFilter(Request $request){
+
+        $filter = $request->input('filter', '%');
+        $product = Product::select('id','name', 'measure', 'archive')
+            ->where('name', 'ilike', '%' . strtolower($filter) . '%')
+            ->take(10)
+            ->get();
+        
+        return response()->json($product);
+    }
+
     public function getProduct($id)
     {
         return Product::find($id) ? Product::select('id', 'name', 'measure', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);

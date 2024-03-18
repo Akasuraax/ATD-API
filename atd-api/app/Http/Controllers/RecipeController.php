@@ -17,7 +17,7 @@ class RecipeController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'required|string',
-                'list_product' => 'required|array'
+                'products' => 'required|array'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -25,16 +25,21 @@ class RecipeController extends Controller
 
         $exist = Recipe::where('name', ucfirst(strtolower($validateData['name'])))->first();
         if($exist)
-            return response()->json(['message' => 'This product already exist !'], 409);
+            return response()->json(['message' => 'This recipe already exist !'], 409);
 
-        foreach($validateData['list_product'] as $id => $tab){
+        foreach($validateData['products'] as $product) {
+            $id = $product['id'];
+            $measure = $product['measure'];
+            $count = $product['count'];
             if(!Product::find($id) || Product::find($id)->archive)
                 return response()->json(['message' => 'The product with the id ' . $id .' doesn\'t exist or is archived.'], 404);
-            if(!isset($tab[0]))
+            if(!isset($count))
                 return response()->json(['message' => 'You have to put the count of your product'], 422);
-            if(!is_numeric($tab[0]))
+
+            if(!is_numeric($count))
                 return response()->json(['message' => 'You have to put an numeric value !'], 422);
-            if(isset($tab[1]) && !is_string($tab[1]))
+
+            if(isset($measure) && !is_string($measure))
                 return response()->json(['message' => 'You have to put an string value !'], 422);
         }
 
@@ -43,9 +48,18 @@ class RecipeController extends Controller
             'description' => $validateData['description'],
         ]);
 
-        foreach($validateData['list_product'] as $id => $tab) {
-            $recipe->products()->attach($id, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
+        foreach ($validateData['products'] as $productData) {
+            $productId = $productData['id'];
+            $count = $productData['count'];
+            $measure = $productData['measure'];
+            $recipe->products()->attach($productId, [
+                'archive' => false,
+                'count' => $count,
+                'measure' => $measure,
+            ]);
         }
+
+        $recipe->load('products');
 
         return Response(['recipe' => $recipe], 201);
     }
@@ -63,8 +77,7 @@ class RecipeController extends Controller
         $field = "recipes." . $field;
 
         $recipes = Recipe::select('recipes.id', 'recipes.name', 'recipes.description', 'recipes.archive')
-            ->join('makes', 'makes.id_recipe', '=', 'recipes.id')
-            ->join('products', 'makes.id_product', '=', 'products.id')
+            ->with('products')
             ->where('recipes.archive', false)
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
@@ -96,28 +109,6 @@ class RecipeController extends Controller
             })
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page);
-
-        $recipes->getCollection()->transform(function ($recipe) {
-            $recipe->load('products');
-            $productNames = $recipe->products->map(function ($product) {
-                return [
-                    'name' => $product->name,
-                    'archive' => $product->archive,
-                    'pivot' => [
-                        'count' => $product->pivot->count,
-                        'measure' => $product->pivot->measure,
-                    ]
-                ];
-            });
-
-            return [
-                'id' => $recipe->id,
-                'name' => $recipe->name,
-                'description' => $recipe->description,
-                'archive' => $recipe->archive,
-                'product_names' => $productNames,
-            ];
-        });
 
         return response()->json($recipes);
     }

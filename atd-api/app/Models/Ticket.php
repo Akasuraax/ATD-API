@@ -12,10 +12,10 @@ class Ticket extends Model
     protected $fillable = [
         'title',
         'description',
-        'type',
         'status',
         'severity',
-        'archive'
+        'archive',
+        'problem_id'
     ];
 
     public function users()
@@ -27,6 +27,10 @@ class Ticket extends Model
         return $this->hasMany(Message::class, 'id_ticket');
     }
 
+    public function problem()
+    {
+        return $this->belongsTo(Problem::class, 'problem_id');
+    }
     public function archive(){
         $this->archive = true;
         $this->save();

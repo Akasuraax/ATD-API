@@ -11,8 +11,10 @@ use Illuminate\Validation\ValidationException;
 
 class StepController extends Controller
 {
-    public function createStep(Request $request)
+    public function createStep(int $journey_id, Request $request)
     {
+
+        $journey = Journey::findOrFail($journey_id);
         try{
             $validateData = $request->validate([
                 'address' => 'string|required',
@@ -41,6 +43,14 @@ class StepController extends Controller
         return Response(['step' => $step], 201);
     }
 
+    public function getOneStep(int $journey_id, int $step_id, Request $request){
+        Journey::findOrFail($journey_id);
+        Step::findOrFail($step_id);
+        $step = Step::where('id', $step_id)->get();
+        return response()->json([
+            'step' => $step
+        ]);
+    }
     public function getSteps(Request $request){
         $perPage = $request->input('pageSize', 10);
         $page = $request->input('page', 1);
@@ -89,8 +99,16 @@ class StepController extends Controller
         return response()->json($step);
     }
 
-    public function getJourneySteps($id){
-        return Journey::find($id) ? Step::select('steps.id', 'steps.address', 'steps.zipcode', 'steps.time', 'journeys.name as journey_name' ,'steps.archive')->join('journeys', 'steps.id_journey', '=', 'journeys.id')->where('steps.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+    public function calculusJourney(int $journey_id, Request $req){
+        $steps = Step::query()->where('id_journey', $journey_id)
+            ->orderBy('time', 'asc')
+            ->get();
+
+
+    }
+
+    public function getJourneySteps($id_journey){
+        return Journey::findOrFail($id_journey) ? Step::where('id_journey', $id_journey)->where('archive', false)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteStep($id){
@@ -107,9 +125,10 @@ class StepController extends Controller
         }
     }
 
-    public function updateStep($id, Request $request){
+    public function updateStep(int $id_journey, int $id_step, Request $request){
         try{
-            $step = Step::findOrFail($id);
+            Journey::findOrFail($id_journey);
+            $step = Step::findOrFail($id_step);
             try{
                 $requestData = $request->validate([
                     'address' => 'required|string',

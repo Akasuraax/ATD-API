@@ -192,4 +192,10 @@ use App\Http\Controllers\ActivityController;
         Route::post('/', [LanguageController::class, 'createLanguage'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
         Route::get('/{abbreviation}', [LanguageController::class, 'getLanguageJSON']);
         Route::get('/', [LanguageController::class, 'getLanguages']);
+        Route::delete('/{abbreviation}', [LanguageController::class, 'deleteLanguage'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
+    });
+
+    Route::prefix('/languages')->group(function (){
+        Route::get('/', [LanguageController::class, 'getLanguagesList'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
+        Route::get('/{abbreviation}', [LanguageController::class, 'getLanguageDetails'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
     });

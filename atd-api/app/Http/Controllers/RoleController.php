@@ -39,7 +39,7 @@ class RoleController extends Controller
     public function getRoles(Request $request)
     {
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 
@@ -82,6 +82,10 @@ class RoleController extends Controller
             ->paginate($perPage, ['*'], 'page', $page + 1);
 
         return response()->json($roles);
+    }
+
+    public function getRole($id){
+        return Role::find($id) ? Role::select('id', 'name', 'archive')->where('id', $id)->first() : response(["Not found!"], 404);
     }
 
     public function getAllRoles(Request $request): Collection

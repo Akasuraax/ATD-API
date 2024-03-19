@@ -116,26 +116,31 @@ class RecipeController extends Controller
 
     public function getRecipe($id)
     {
-        $recipe = Recipe::findOrFail($id);
-        $recipe->load('products');
-            $productNames = $recipe->products->map(function ($product) {
-                return [
-                    'name' => $product->name,
-                    'archive' => $product->archive,
-                    'pivot' => [
-                        'count' => $product->pivot->count,
-                        'measure' => $product->pivot->measure,
-                    ]
-                ];
-            });
+        $recipe = Recipe::with('products')->findOrFail($id);
 
-            return [
-                'id' => $recipe->id,
-                'name' => $recipe->name,
-                'description' => $recipe->description,
-                'archive' => $recipe->archive,
-                'product_names' => $productNames,
-            ];
+        if ($recipe->archive) {
+            return response()->json(['message' => 'Element is already archived.'], 405);
+        }
+
+        $formattedRecipe = [
+            'id' => $recipe->id,
+            'name' => $recipe->name,
+            'description' => $recipe->description,
+            'archive' => $recipe->archive,
+            'created_at' => $recipe->created_at,
+            'updated_at' => $recipe->updated_at,
+            'products' => $recipe->products->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'measure' => $product->measure,
+                    'archive' => $product->archive,
+                    'count' => $product->pivot->count,
+                ];
+            }),
+        ];
+
+        return response()->json($formattedRecipe);
     }
 
     public function deleteRecipe($id)

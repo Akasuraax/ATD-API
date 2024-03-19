@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->string('name', 128);
             $table->text('description')->nullable();
+            $table->string('color', 7)->nullable();
             $table->string('image')->nullable();
             $table->boolean('display');
             $table->boolean('access_to_warehouse');

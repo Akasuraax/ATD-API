@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('visits', function (Blueprint $table) {
             $table->id()->autoIncrement();
-            $table->integer('checking')->default(0);
             $table->boolean('archive')->default(false);
             $table->timestamps();
             $table->integer('id_volunteer');

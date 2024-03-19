@@ -18,6 +18,7 @@ class TypeSeeder extends Seeder
             'name' => 'Maraude',
             'access_to_warehouse' => true,
             'access_to_journey' => true,
+            'color' => '#c09eea',
             'display' => false
         ]);
 
@@ -25,6 +26,7 @@ class TypeSeeder extends Seeder
             'name' => 'Services admnistratifs',
             'access_to_warehouse' => false,
             'access_to_journey' => false,
+            'color' => '#f67c7c',
             'display' => false
         ]);
 
@@ -32,6 +34,7 @@ class TypeSeeder extends Seeder
             'name' => 'Navettes/délplacements',
             'access_to_warehouse' => false,
             'access_to_journey' => true,
+            'color' => '#7cf694',
             'display' => false
         ]);
 
@@ -39,6 +42,7 @@ class TypeSeeder extends Seeder
             'name' => 'Cours d\'alphabétisation',
             'access_to_warehouse' => false,
             'access_to_journey' => true,
+            'color' => '#7cf6ec',
             'display' => false
         ]);
 
@@ -46,6 +50,7 @@ class TypeSeeder extends Seeder
             'name' => 'Soutien scolaire pour enfant',
             'access_to_warehouse' => false,
             'access_to_journey' => false,
+            'color' => '#7cc5f6',
             'display' => false
         ]);
 
@@ -53,6 +58,7 @@ class TypeSeeder extends Seeder
             'name' => 'Récolte de fonds',
             'access_to_warehouse' => false,
             'access_to_journey' => true,
+            'color' => '#f6ec7c',
             'display' => false
         ]);
 

@@ -15,6 +15,7 @@ class Type extends Model
         'access_to_warehouse',
         'access_to_journey',
         'image',
+        'color',
         'display',
         'archive',
         'created_at',

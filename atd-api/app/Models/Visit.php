@@ -10,7 +10,6 @@ class Visit extends Model
     use HasFactory;
 
     protected $fillable = [
-        'checking',
         'id_volunteer',
         'id_beneficiary',
         'archive',

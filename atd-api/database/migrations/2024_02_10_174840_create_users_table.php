@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('siret_number', 14)->nullable();
             $table->string('compagny')->nullable();
             $table->integer('status')->default(0);
+            $table->boolean('visited')->default(false);
             $table->boolean('ban')->default(false);
             $table->boolean('notification')->default(false);
             $table->boolean('archive')->default(false);

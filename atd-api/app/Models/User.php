@@ -26,6 +26,7 @@ class User extends Authenticatable
         'siret_number',
         'compagny',
         'status',
+        'visited',
         'ban',
         'notification',
         'archive'

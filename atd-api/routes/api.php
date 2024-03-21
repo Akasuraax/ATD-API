@@ -79,8 +79,8 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/role')->group(function(){
         Route::post('/', [RoleController::class, 'createRole'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [RoleController::class, 'getRoles']);
+        Route::get('/all', [RoleController::class, 'getAllRoles'])->middleware('authorization:' . serialize([1]));
         Route::get('/{id}', [RoleController::class, 'getRole']);
-        Route::get('/all', [RoleController::class, 'getAllRoles']);
         Route::delete('/{id}', [RoleController::class, 'deleteRole'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [RoleController::class, 'updateRole'])->middleware('authorization:' . serialize([1]));
     });

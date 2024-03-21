@@ -89,13 +89,13 @@ class ProductController extends Controller
             ->where('name', 'ilike', '%' . strtolower($filter) . '%')
             ->take(10)
             ->get();
-        
+
         return response()->json($product);
     }
 
     public function getProduct($id)
     {
-        return Product::find($id) ? Product::select('id', 'name', 'measure', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Product::find($id) ? Product::select('id', 'name', 'measure', 'archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteProduct($id){

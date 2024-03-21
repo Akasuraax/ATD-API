@@ -112,32 +112,34 @@ class RecipeController extends Controller
 
         return response()->json($recipes);
     }
-
-
     public function getRecipe($id)
     {
-        $recipe = Recipe::findOrFail($id);
-        $recipe->load('products');
-            $productNames = $recipe->products->map(function ($product) {
+        $recipe = Recipe::with('products')->findOrFail($id);
+
+        if ($recipe->archive) {
+            return response()->json(['message' => 'Element is already archived.'], 405);
+        }
+
+        $formattedRecipe = [
+            'id' => $recipe->id,
+            'name' => $recipe->name,
+            'description' => $recipe->description,
+            'archive' => $recipe->archive,
+            'created_at' => $recipe->created_at,
+            'updated_at' => $recipe->updated_at,
+            'products' => $recipe->products->map(function ($product) {
                 return [
+                    'id' => $product->id,
                     'name' => $product->name,
+                    'measure' => $product->measure,
                     'archive' => $product->archive,
-                    'pivot' => [
-                        'count' => $product->pivot->count,
-                        'measure' => $product->pivot->measure,
-                    ]
+                    'count' => $product->pivot->count,
                 ];
-            });
+            }),
+        ];
 
-            return [
-                'id' => $recipe->id,
-                'name' => $recipe->name,
-                'description' => $recipe->description,
-                'archive' => $recipe->archive,
-                'product_names' => $productNames,
-            ];
+        return response()->json($formattedRecipe);
     }
-
     public function deleteRecipe($id)
     {
         try{
@@ -153,7 +155,6 @@ class RecipeController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
-
     public function updateRecipe($id, Request $request)
     {
         try{
@@ -162,14 +163,18 @@ class RecipeController extends Controller
                 $requestData = $request->validate([
                     'name' => 'required|string|max:255',
                     'description' => 'required|string',
-                    'list_product' => 'required|array',
+                    'products' => 'required|array',
                     'archive' => 'required|boolean'
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            $exist = Recipe::where('name', ucfirst(strtolower($requestData['name'])))->whereNotIn('id', [$id])->first();
+            $exist = Recipe::where('name', ucfirst(strtolower($requestData['name'])))
+                ->whereNotIn('id', [$id])
+                ->where('archive', false)
+                ->first();
+
             if ($exist)
                 return response()->json(['message' => 'This recipe already exist !'], 409);
 
@@ -179,24 +184,34 @@ class RecipeController extends Controller
                 $recipe->update($requestData);
                 $recipe->products()->detach();
 
-                if (isset($requestData['list_product'])) {
-                    foreach ($requestData['list_product'] as $productId => $tab) {
+                if (isset($requestData['products'])) {
+                    foreach ($requestData['products'] as $product) {
+                        $productId = $product['id'];
+                        $measure = $product['measure'];
+                        $count = $product['count'];
                         if (!Product::find($productId) || Product::find($productId)->archive)
                             return response()->json(['message' => 'The product with the id ' . $productId . ' doesn\'t exist or is archived.'], 404);
-                        if (!isset($tab[0]))
+                        if (!isset($count))
                             return response()->json(['message' => 'You have to put the count of your product'], 422);
-                        if (!is_numeric($tab[0]))
+                        if (!is_numeric($count))
                             return response()->json(['message' => 'You have to put an numeric value !'], 422);
-                        if (isset($tab[1]) && !is_string($tab[1]))
+                        if (isset($measure) && !is_string($measure))
                             return response()->json(['message' => 'You have to put an string value !'], 422);
-
-
-                        $existingMake = Make::where('id_product', $productId)->where('id_recipe', $id)->first();
-                        $recipe->products()->attach($productId, ['archive' => false, 'count' => $tab[0], 'measure' => $tab[1] ?? null]);
                     }
                 }
-                $recipe->save();
-                $recipe->load('products:id,name');
+
+                foreach ($requestData['products'] as $productData) {
+                    $productId = $productData['id'];
+                    $count = $productData['count'];
+                    $measure = $productData['measure'];
+                    $recipe->products()->attach($productId, [
+                        'archive' => false,
+                        'count' => $count,
+                        'measure' => $measure,
+                    ]);
+                }
+
+                $recipe->load('products');
             }catch (ModelNotFoundException $e) {
                 return response()->json(['error' => 'The element you selected is not found'], 404);
             }

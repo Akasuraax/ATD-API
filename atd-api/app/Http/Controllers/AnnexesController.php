@@ -84,8 +84,7 @@ class AnnexesController extends Controller
 
     public function getAnnexesAll(Request $request){
 
-        $annexes = Annexe::select('id', 'name')
-                            ->get();
+        $annexes = Annexe::select('id', 'name')->get();
 
         if($annexes) {
             return response()->json($annexes);
@@ -94,7 +93,7 @@ class AnnexesController extends Controller
         }
     }
     public function getAnnexe($id){
-        return  Annexe::find($id) ? Annexe::select('id', 'name', 'address', 'zipcode', 'archive')->where('id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return  Annexe::find($id) ? Annexe::select('id', 'name', 'address', 'zipcode', 'archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deleteAnnexe($id){

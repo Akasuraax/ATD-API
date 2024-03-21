@@ -109,8 +109,18 @@ class TypeController extends Controller
             if($type->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
 
+            $path = public_path() . '/storage/types/' . $type->id ;
+            if(is_dir($path)) {
+                $files = scandir($path);
+                foreach ($files as $file) {
+                    if ($file != '.' && $file != '..')
+                        unlink($path . '/' . $file);
+                }
+                rmdir($path);
+            }
             $type->archive();
             $type = Type::findOrFail($id);
+
 
             return response()->json(['type' => $type], 200);
         }catch(ValidationException $e){
@@ -129,22 +139,33 @@ class TypeController extends Controller
                 'type_image' => 'nullable|mimes:png, jpeg, jpg',
                 'access_to_warehouse' => 'required|boolean',
                 'access_to_journey' => 'required|boolean',
-                'archive' => 'required|boolean'
+                'archive' => 'nullable|boolean'
             ]);
 
+            $path = public_path() . '/storage/types/' . $type->id ;
             $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->whereNotIn('id', [$id])->first();
             if ($exist)
                 return response()->json(['message' => 'This type already exists!'], 409);
-            if($requestData['display'] == 1 && !$request->type_image)
+            if($requestData['display'] == 1 && !is_dir($path) && !$request->type_image)
                 return response()->json(['message' => 'You have to put an image if you want to display the type'], 422);
-            if($requestData['display'] == 0 && $request->type_image)
-                return response()->json(['message' => 'You can\'t put an image if you don\'t want to display the type'], 422);
+            if($requestData['display'] == 0){
+                if(is_dir($path)) {
+                    $files = scandir($path);
+                    foreach ($files as $file) {
+                        if ($file != '.' && $file != '..')
+                            unlink($path . '/' . $file);
+                    }
+                    rmdir($path);
+                }
+                if ($request->hasFile('type_image'))
+                    return response()->json(['message' => "You can't put an image if you don't want to display the type"], 422);
+            }
 
 
             if ($request->hasFile('type_image')) {
                 $file = $request->file('type_image');
                 $nameFile = 'icon' . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path() . '/storage/types/' . $id . '/', $nameFile);
+                $file->move($path . '/', $nameFile);
                 $type->image = $nameFile;
             }
 

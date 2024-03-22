@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
                 'phone_number' => '123456789',
                 'address' => '123 Street',
                 'zipcode' => '12345',
+                'visited' => 'false',
                 'siret_number' => '12345678901234',
                 'compagny' => 'Company' . $i,
             ]);
@@ -44,6 +45,7 @@ class DatabaseSeeder extends Seeder
                 'phone_country' => '+33',
                 'phone_number' => '123456789',
                 'gender' => '0',
+                'visited' => 'false',
                 'birth_date' => '1990-01-01',
                 'address' => '123 Street',
                 'zipcode' => '12345',
@@ -63,6 +65,7 @@ class DatabaseSeeder extends Seeder
                 'phone_country' => '+33',
                 'phone_number' => '123456789',
                 'gender' => '0',
+                'visited' => 'false',
                 'birth_date' => '1990-01-01',
                 'address' => '123 Street',
                 'zipcode' => '12345',
@@ -83,6 +86,7 @@ class DatabaseSeeder extends Seeder
                 'phone_number' => '123456789',
                 'gender' => '0',
                 'birth_date' => '1990-01-01',
+                'visited' => 'false',
                 'address' => '123 Street',
                 'zipcode' => '12345',
             ]);
@@ -101,12 +105,31 @@ class DatabaseSeeder extends Seeder
                 'phone_country' => '+33',
                 'phone_number' => '123456789',
                 'gender' => '1',
+                'visited' => 'false',
                 'birth_date' => '1990-01-01',
                 'address' => '123 Street',
                 'zipcode' => '12345',
             ]);
 
             $user->roles()->attach(5);
+        }
+
+        for ($i = 0; $i < 5; $i++) {
+            $user = User::create([
+                'name' => 'Ribat' . $i,
+                'forname' => 'Jacques' . $i,
+                'email' => 'ribat' . $i . '@example.com',
+                'password' => 'motdepasse123', // Utilisation de Hash::make pour hasher le mot de passe
+                'phone_country' => '+33',
+                'phone_number' => '123456789',
+                'gender' => '1',
+                'visited' => 'true',
+                'birth_date' => '1990-01-01',
+                'address' => '123 Street',
+                'zipcode' => '12345',
+            ]);
+
+            $user->roles()->attach(3);
         }
     }
 }

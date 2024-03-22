@@ -14,11 +14,10 @@ class FileController extends Controller
     public function createUserFile(Request $request, $id){
         try{
             $validateData = $request->validate([
-                'names' => 'array|required',
-                'links' => 'required',
-                'links.*' => 'mimes:pdf,jpg,jpeg,png'
+                'name' => 'string|required|max:255',
+                'link' => 'required|mimes:pdf,jpg,jpeg,png'
             ]);
-        }catch(ValidationException $e){
+        } catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
@@ -26,38 +25,33 @@ class FileController extends Controller
         if($user->archive)
             return response()->json(['message' => 'The user you selected is archived.'], 405);
 
-        foreach($validateData['names'] as $name){
-            if(!is_string($name) || strlen($name) > 255)
-                return Response(['message'=>'The name ' . $name  . ' should be a string and have less than 255 characters.'], 422);
-        }
-
-
-        $index = 0;
         try {
-            if ($request->links) {
-                foreach ($request->links as $file) {
-                    $isFile = File::where('name',  $validateData['names'][$index])->where('id_user', $id)->first();
-                    if($isFile)
-                        return Response(['message'=>'This file already exist'], 409);
-
-
-                    $name = $id . '-' . strtolower(str_replace(' ', '-', $validateData['names'][$index])) . '.' . $file->extension();
-                    $file->move(public_path() . '/storage/users/' . $id . '/', $name);
-
-                    File::create([
-                        'name' => $validateData['names'][$index],
-                        'link' => 'storage/users/' . $id . '/' . $name,
-                        'id_user' => $id
-                    ]);
-
-                    $index++;
+            if ($request->hasFile('link')) {
+                $file = $request->file('link');
+                $isFile = File::where('name', $validateData['name'])->where('id_user', $id)->where('archive', false)->first();
+                if($isFile) {
+                    if ($validateData['name'] == "Autre") {
+                        $count = File::where('name', 'LIKE', 'Autre %')->where('id_user', $id)->count();
+                        $validateData['name'] = $validateData['name'] . ' ' . $count+1;
+                    }
+                    else
+                        return Response(['message' => 'This file already exists'], 409);
                 }
+                $name = $id . '-' . strtolower(str_replace(' ', '-', $validateData['name'])) . '.' . $file->getClientOriginalExtension();
+
+                $file->move(public_path() . '/storage/users/' . $id . '/', $name);
+
+                $newFile = File::create([
+                    'name' => $validateData['name'],
+                    'link' => 'storage/users/' . $id . '/' . $name,
+                    'id_user' => $id
+                ]);
             }
-        }catch(ValidationException $e){
+        } catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
-        return Response(['message' => 'Created !'], 201);
+        return Response(['file' => $newFile], 201);
     }
 
     public function createActivityFile(Request $request, $id){
@@ -115,6 +109,7 @@ class FileController extends Controller
 
         $files = File::select('id', 'name', 'link', 'archive')
             ->where('id_user', $id)
+            ->where('archive', false)
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -171,6 +166,7 @@ class FileController extends Controller
         $activities = File::select('files.id', 'files.name', 'files.link', 'files.archive')
             ->join('activity_files', 'activity_files.id_file', '=', 'files.id')
             ->where('activity_files.id_activity', '=', $id)
+            ->where('archive', false)
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {

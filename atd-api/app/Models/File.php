@@ -34,7 +34,7 @@ class File extends Model
     public function archiveUser($name){
         $this->archive = true;
         $this->save();
-        unlink(public_path() . $name);
+        unlink(public_path() . '/' . $name);
     }
 
 }

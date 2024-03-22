@@ -210,3 +210,7 @@ use App\Http\Controllers\ActivityController;
         Route::get('/', [ProblemController::class, 'getProblems']);
         Route::get('/admin', [ProblemController::class, 'getAdminProblems'])->middleware('authorization:' . serialize([1, 5]));
     });
+
+    Route::prefix('/file')->middleware('validity.token')->group(function (){
+        Route::get('/{id}', [FileController::class, 'downloadFile']);
+    });

@@ -31,16 +31,22 @@ class FileController extends Controller
                 return Response(['message'=>'The name ' . $name  . ' should be a string and have less than 255 characters.'], 422);
         }
 
+
         $index = 0;
         try {
             if ($request->links) {
                 foreach ($request->links as $file) {
+                    $isFile = File::where('name',  $validateData['names'][$index])->where('id_user', $id)->first();
+                    if($isFile)
+                        return Response(['message'=>'This file already exist'], 409);
+
+
                     $name = $id . '-' . strtolower(str_replace(' ', '-', $validateData['names'][$index])) . '.' . $file->extension();
                     $file->move(public_path() . '/storage/users/' . $id . '/', $name);
 
                     File::create([
-                        'name' => $name,
-                        'link' => '/storage/users/' . $id . '/' . $name,
+                        'name' => $validateData['names'][$index],
+                        'link' => 'storage/users/' . $id . '/' . $name,
                         'id_user' => $id
                     ]);
 
@@ -71,12 +77,13 @@ class FileController extends Controller
         try {
             if ($request->activity_files) {
                 foreach ($request->activity_files as $file) {
-                    $name = $id . '-' . strtolower(str_replace(' ', '-', $file->getClientOriginalName()));
+                    $newFile = $file->getClientOriginalName();
+                    $name = $id . '-' . strtolower(str_replace(' ', '-', $newFile));
                     $file->move(public_path() . '/storage/activities/' . $id . '/', $name);
 
                     $newFile = File::create([
-                        'name' => $name,
-                        'link' => '/storage/activities/' . $id . '/' . $name,
+                        'name' => pathinfo($newFile, PATHINFO_FILENAME),
+                        'link' => 'storage/activities/' . $id . '/' . $name,
                     ]);
 
                     $newFile->activities()->attach($id, ['archive' => false]);
@@ -89,9 +96,14 @@ class FileController extends Controller
         return Response(['message' => "Added !"], 201);
     }
 
+    public function downloadFile($id){
+        $file = File::findOrFail($id);
+        return response()->download(public_path() . '/' . $file->link);
+    }
+
     public function getUserFiles(Request $request, $id){
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 
@@ -143,7 +155,7 @@ class FileController extends Controller
 
     public function getActivityFiles(Request $request, $id){
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 

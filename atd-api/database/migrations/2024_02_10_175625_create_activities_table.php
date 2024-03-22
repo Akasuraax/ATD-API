@@ -20,6 +20,7 @@ return new class extends Migration
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->integer('donation')->nullable();
+            $table->boolean('public')->default(false);
             $table->integer('id_type');
             $table->foreign('id_type')->references('id')->on('types')->onDelete('restrict');
             $table->boolean('archive')->default(false);

@@ -144,7 +144,7 @@ class TypeController extends Controller
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
                 'display' => 'required|boolean',
-                'type_image' => 'nullable|mimes:png, jpeg, jpg',
+                'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'access_to_warehouse' => 'required|boolean',
                 'access_to_journey' => 'required|boolean',
                 'archive' => 'nullable|boolean'

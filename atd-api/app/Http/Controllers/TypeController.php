@@ -15,7 +15,7 @@ class TypeController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
-                'type_image' => 'nullable|mimes:png,jpg,jpeg',
+                'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'display' => 'required|boolean',
                 'access_to_warehouse' => 'required|boolean',
                 'access_to_journey' => 'required|boolean',

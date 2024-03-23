@@ -31,7 +31,7 @@ class ActivityController extends Controller
                 'list_recipes' => 'nullable|array',
                 'role_limits' => 'required|array',
                 'activity_files' => 'nullable',
-                'activity_files.*' => 'mimes:pdf,jpg,png,jpeg'
+                'activity_files.*' => 'mimes:pdf,jpg,png,jpeg|max:20000'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);

@@ -15,7 +15,7 @@ class FileController extends Controller
         try{
             $validateData = $request->validate([
                 'name' => 'string|required|max:255',
-                'link' => 'required|mimes:pdf,jpg,jpeg,png'
+                'link' => 'required|mimes:pdf,jpg,jpeg,png|max:20000'
             ]);
         } catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -58,7 +58,7 @@ class FileController extends Controller
         try{
             $validateData = $request->validate([
                 'activity_files' => "required",
-                'activity_files.*' => 'mimes:pdf,jpg,png,jpeg'
+                'activity_files.*' => 'mimes:pdf,jpg,png,jpeg|max:20000'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);

@@ -70,7 +70,7 @@ use App\Http\Controllers\ActivityController;
         Route::get('/', [UserController::class, 'getUsers']);
         Route::get('/{id}', [UserController::class, 'getUser'])->middleware('ValidateUserId');
         Route::patch('/{id}', [UserController::class, 'patchUser']);
-        Route::patch('/a/{id}', [UserController::class, 'patchUserAdmin'])->middleware('authorization:' . serialize([1]));
+        Route::patch('/admin/{id}', [UserController::class, 'patchUserAdmin'])->middleware('authorization:' . serialize([1]));
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
         Route::get('/{id}/tickets', [TicketController::class, 'getMyTickets'])->middleware('ValidateUserId');
     });

@@ -39,15 +39,21 @@ class TypeController extends Controller
             'name' => ucfirst(strtolower($validateData['name'])),
             'description' => $validateData['description'],
             'display' => $validateData['display'],
-            'image' => $nameFile ?? null,
             'access_to_warehouse' => $validateData['access_to_warehouse'],
             'access_to_journey' => $validateData['access_to_journey'],
         ]);
 
-        if($request->type_image)
+        if($request->type_image) {
             $file->move(public_path() . '/storage/types/' . $type->id . '/', $nameFile);
+            $type->update(['image' => '/storage/types/' . $type->id . '/' . $nameFile ]);
+        }
 
         return response()->json(['type' => $type], 201);
+    }
+
+    public function downloadTypeFile($idType){
+        $file = Type::findOrFail($idType);
+        return response()->download(public_path() . $file->image);
     }
 
     public function getTypes(Request $request)
@@ -107,7 +113,7 @@ class TypeController extends Controller
     }
 
     public function getType($id){
-        return Type::find($id) ? Type::select('id', 'name', 'description', 'access_to_warehouse', 'access_to_journey', 'display','archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Type::find($id) ? Type::select('id', 'name', 'description', 'image', 'access_to_warehouse', 'access_to_journey', 'display','archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
 
     }
 
@@ -136,6 +142,7 @@ class TypeController extends Controller
         }
     }
 
+
     public function updateType($id, Request $request){
         try {
             $type = Type::findOrFail($id);
@@ -159,6 +166,7 @@ class TypeController extends Controller
             if($requestData['display'] == 0){
                 if(is_dir($path)) {
                     $files = scandir($path);
+                    $type->image = null;
                     foreach ($files as $file) {
                         if ($file != '.' && $file != '..')
                             unlink($path . '/' . $file);
@@ -174,7 +182,7 @@ class TypeController extends Controller
                 $file = $request->file('type_image');
                 $nameFile = 'icon' . '.' . $file->getClientOriginalExtension();
                 $file->move($path . '/', $nameFile);
-                $type->image = $nameFile;
+                $type->image = '/storage/types/' . $id . '/' . $nameFile;
             }
 
             $requestData['name'] = ucfirst(strtolower($requestData['name']));

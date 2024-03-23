@@ -12,7 +12,7 @@ class LanguageController extends Controller
         try{
             $validateRequest = $request->validate([
                 'abbreviation' => 'string|max:2|required',
-                'language_file' => 'required|file|mimes:application/json',
+                'language_file' => 'required|mimetypes:application/json',
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);

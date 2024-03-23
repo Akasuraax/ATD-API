@@ -199,7 +199,7 @@ class UserController extends Controller
             $user->update($fields);
             $user->roles()->sync($roleIds);
             $user->load('roles');
-            
+
             return response()->json([
                 'message' => 'User updated successfully',
                 'user' => $user

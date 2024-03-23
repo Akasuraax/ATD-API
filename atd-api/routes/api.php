@@ -155,6 +155,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/recipe')->middleware('validity.token')->group(function (){
         Route::post('/', [RecipeController::class, 'createRecipe'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [RecipeController::class, 'getRecipes']);
+        Route::get('/filter', [RecipeController::class, 'getRecipesFilter'])->middleware('authorization:' . serialize([1]));
         Route::get('/{id}', [RecipeController::class, 'getRecipe']);
         Route::delete('/{id}', [RecipeController::class, 'deleteRecipe'])->middleware('authorization:' . serialize([1]));
         Route::delete('/{id}/product', [RecipeController::class, 'deleteRecipeProduct'])->middleware('authorization:' . serialize([1]));

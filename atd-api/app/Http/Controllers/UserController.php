@@ -195,12 +195,11 @@ class UserController extends Controller
 
            }
 
-
             $user = User::findOrFail($userId);
             $user->update($fields);
             $user->roles()->sync($roleIds);
             $user->load('roles');
-
+            
             return response()->json([
                 'message' => 'User updated successfully',
                 'user' => $user
@@ -224,6 +223,7 @@ class UserController extends Controller
                     'max:255',
                     Rule::unique('users')->ignore($userId),
                 ],
+                'status' => 'required|int|max:1',
                 'phone_number' => 'nullable|string|max:15',
                 'gender' => 'required|int|max:1',
                 'birth_date' => 'required|date',

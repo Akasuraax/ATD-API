@@ -21,12 +21,26 @@ return new class extends Migration
         });
 
         DB::table('roles')->insert([
-            ['name' => 'admin', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
-            ['name' => 'volunteer', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
-            ['name' => 'beneficiary', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
-            ['name' => 'partner', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
-            ['name' => 'support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]
+            ['name' => 'admin', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //1
+            ['name' => 'volunteer', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //2
+            ['name' => 'beneficiary', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //3
+            ['name' => 'partner', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //4
+            ['name' => 'support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //5
+            ['name' => 'super_support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //6
+            ['name' => 'driver', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //7
+            ['name' => 'teacher', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //8
+        ]);
 
+
+        DB::table('users')->insert([
+            'name' => 'anonymous',
+            'forname' => 'anonymous',
+            'email' => 'autempsdonne@example.com',
+            'password' => 'motdepasse123',
+            'phone_country' => '+33',
+            'phone_number' => '123456789',
+            'address' => 'Rue de Guise',
+            'zipcode' => '02100',
         ]);
     }
 

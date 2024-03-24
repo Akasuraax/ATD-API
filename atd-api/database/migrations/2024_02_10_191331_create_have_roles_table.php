@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -20,6 +22,14 @@ return new class extends Migration
             $table->boolean('archive')->default(false);
             $table->timestamps();
         });
+
+        DB::table('have_roles')->insert([
+            'id_user' => 1,
+            'id_role' => 2,
+            'archive' => false,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
     }
 
     /**

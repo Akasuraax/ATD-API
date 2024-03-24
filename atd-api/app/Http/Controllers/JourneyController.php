@@ -151,5 +151,57 @@ class JourneyController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
+    public function callGoogleApi(Request $request, array $nodes){
+        $graph = [];
+
+        foreach ($nodes as $node) {
+            $relations = [];
+            foreach ($nodes as $otherNode) {
+                if ($node !== $otherNode) {
+                    $weight = rand(1, 10);
+
+                    $relations[] = [$otherNode, $weight];
+                    $graph[$otherNode][] = [$node, $weight];
+                }
+            }
+
+            $graph[$node] = $relations;
+        }
+        return $this->executeScript($graph);
+
+    }
+    public function executeScript(array $graph)
+    {
+        $graph = json_encode($graph);
+
+        $descriptorspec = [
+            0 => ["pipe", "r"],
+            1 => ["pipe", "w"],
+            2 => ["pipe", "w"]
+        ];
+
+        $pythonScript = base_path('python_scripts/main.py');
+
+        $process = proc_open("python3 $pythonScript", $descriptorspec, $pipes);
+
+        if (is_resource($process)) {
+            fwrite($pipes[0], $graph);
+            fclose($pipes[0]);
+
+            $output = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+
+            $return_value = proc_close($process);
+
+            if ($return_value !== 0) {
+                return response()->json(['error' => 'Une erreur est survenue lors de l\'exécution du script.']);
+            } else {
+                return response()->json(['output' => trim($output)]);
+            }
+        } else {
+            return response()->json(['error' => 'Impossible de démarrer le processus.']);
+        }
+    }
+
 
 }

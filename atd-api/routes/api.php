@@ -215,3 +215,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/file')->middleware('validity.token')->group(function (){
         Route::get('/{id}', [FileController::class, 'downloadFile']);
     });
+
+    Route::get('/execute-python-script', function (Request $request) {
+        return app(JourneyController::class)->callGoogleApi($request, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']);
+    });

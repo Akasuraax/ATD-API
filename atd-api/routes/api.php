@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\ProblemController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MessageController;
@@ -220,6 +221,6 @@ use App\Http\Controllers\StripeController;
     });
 
     Route::prefix('/payment')->group(function(){
-        Route::post('/', [StripeController::class, 'savePayment']);
-        Route::get('/{session}', [StripeController::class, 'retrieveData']);
+        Route::post('/', [DonationController::class, 'savePayment']);
+        Route::get('/{session}', [DonationController::class, 'retrieveData']);
     });

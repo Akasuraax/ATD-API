@@ -129,7 +129,7 @@ class ActivityController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
-        a
+        return response()->json(['activity' => $activity], 200);
     }
 
     public function participate($idActivity, $idUser){
@@ -221,15 +221,8 @@ class ActivityController extends Controller
             $activity = Activity::findOrFail($id);
             if($activity->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
-            $activity->archive = true;
 
-            $journeys = Journey::where('id_activity', $id)->where('archive', false)->get();
-            if(!$journeys->isEmpty()){
-                foreach($journeys as $journey){
-                    $service = new DeleteService();
-                    $service->deleteJourneyService($journey->id);
-                }
-            }
+            $activity->archive();
 
             $activity->save();
             return response()->json(['activity' => $activity], 200);
@@ -396,11 +389,16 @@ class ActivityController extends Controller
                 $product = Product::findOrFail($make->id_product);
                 $pieces = $product->pieces()->get();
 
-                $recipeCount = $this->makesToKgOrL($make, $recipe["count"]);
-                $piecesCount = $this->calculateToKgOrL($pieces, $product->measure);
+                if(!is_null($make->measure)&&!is_null($product->measure)) {
+                    $recipeCount = $this->makesToKgOrL($make, $recipe["count"]);
+                    $piecesCount = $this->calculateToKgOrL($pieces, $product->measure);
+                }else{
+                    $recipeCount = $recipe["count"] * $make["count"];
+                    $piecesCount = $this->calculateToUnit($pieces);
+                }
 
                 if ($recipeCount > $piecesCount)
-                    return ['status' => 'error', 'message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock ! You are asking for ' . $recipeCount . ' kg or l and we have ' . $piecesCount . ' kg or l in stock.' ];
+                    return ['status' => 'error', 'message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock !' ];
             }
         }
 
@@ -514,6 +512,15 @@ class ActivityController extends Controller
                     break;
             }
         }
+        return $totalCount;
+    }
+
+    public function calculateToUnit($assets){
+        $totalCount = 0;
+        foreach ($assets as $asset) {
+            $totalCount += $asset->count;
+        }
+
         return $totalCount;
     }
 

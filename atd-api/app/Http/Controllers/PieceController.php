@@ -41,7 +41,7 @@ class PieceController extends Controller
             'count' => $validateData['count'],
             'location' => $validateData['location'] ?? null,
             'id_warehouse' => $validateData['warehouse']['id'],
-            'id_product' => $validateData['id_product']['id']
+            'id_product' => $validateData['product']['id']
         ]);
 
         return Response(['piece' => $piece], 201);

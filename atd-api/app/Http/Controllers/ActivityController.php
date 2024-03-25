@@ -129,7 +129,7 @@ class ActivityController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
-        return Response(['activity' => $activity], 200);
+        a
     }
 
     public function participate($idActivity, $idUser){

@@ -13,8 +13,6 @@ class Donation extends Model
         'amount',
         'user_id',
         'archive',
-        'created_at',
-        'updated_at'
     ];
 
     protected $guarded = [

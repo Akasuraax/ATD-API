@@ -218,5 +218,6 @@ use App\Http\Controllers\StripeController;
     });
 
     Route::prefix('/payment')->group(function(){
+        Route::post('/', [StripeController::class, 'savePayment']);
         Route::get('/{session}', [StripeController::class, 'retrieveData']);
     });

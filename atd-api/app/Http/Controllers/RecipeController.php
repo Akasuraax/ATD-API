@@ -112,6 +112,19 @@ class RecipeController extends Controller
 
         return response()->json($recipes);
     }
+
+    public function getRecipesFilter(Request $request){
+
+        $filter = $request->input('filter', '%');
+        $recipes = Recipe::select('id','name')
+            ->with('products')
+            ->where('name', 'ilike', '%' . strtolower($filter) . '%')
+            ->where('archive', false)
+            ->take(10)
+            ->get();
+
+        return response()->json($recipes);
+    }
     public function getRecipe($id)
     {
         $recipe = Recipe::with('products')->findOrFail($id);

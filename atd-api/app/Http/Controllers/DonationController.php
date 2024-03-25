@@ -18,26 +18,29 @@ class DonationController extends Controller
 
         try{
             $validateData = $request->validate([
-                'cs_id' => 'required','string', Rule::unique('donations', 'checkout_session')
+                'checkout_session' => ['required', 'string', Rule::unique('donations', 'checkout_session')],
             ]);
+
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        if(!$request->header('Authorization'))
+        try {
+            $decodedToken = TokenController::decodeToken($request->header('Authorization'));
+            $idDonator = $decodedToken->id;
+        } catch (\Exception $e) {
             $idDonator = 1;
-        else
-            $idDonator = TokenController::decodeToken($request->header('Authorization'))->id;
+        }
 
         $amount = $stripe->checkout->sessions->retrieve(
-            $validateData['cs_id'],
+            $validateData['checkout_session'],
             []
         );
 
         $donation = Donation::create([
             'amount' => $amount['amount_total']/100,
             'user_id' => $idDonator,
-            'checkout_session' => $validateData['cs_id']
+            'checkout_session' => $validateData['checkout_session']
         ]);
 
         return Response(['donation' => $donation], 200);

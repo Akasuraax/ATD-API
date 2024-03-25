@@ -22,6 +22,7 @@ use App\Http\Controllers\DemandController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\StripeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -214,4 +215,8 @@ use App\Http\Controllers\ActivityController;
 
     Route::prefix('/file')->middleware('validity.token')->group(function (){
         Route::get('/{id}', [FileController::class, 'downloadFile']);
+    });
+
+    Route::prefix('/payment')->group(function(){
+        Route::get('/{session}', [StripeController::class, 'retrieveData']);
     });

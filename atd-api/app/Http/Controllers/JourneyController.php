@@ -5,13 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Journey;
 use App\Models\Vehicle;
-use App\Services\DeleteService;
+use App\Http\Services\DistanceMatrixService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class JourneyController extends Controller
 {
+    protected DistanceMatrixService $distanceMatrixService;
+
+    public function __construct()
+    {
+        $this->distanceMatrixService = new DistanceMatrixService();
+    }
     public function createJourney(Request $request)
     {
         try{
@@ -151,8 +157,14 @@ class JourneyController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
+
     public function callGoogleApi(Request $request, array $nodes){
         $graph = [];
+        dd($this->distanceMatrixService->getDistance('5 rue des pommiers, 94300', '21 rue Erard, 75012'));
+
+        foreach ($nodes as $node) {
+            $graph[$node] = [];
+        }
 
         foreach ($nodes as $node) {
             $relations = [];

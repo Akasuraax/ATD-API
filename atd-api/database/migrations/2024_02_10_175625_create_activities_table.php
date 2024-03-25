@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('title', 255);
-            $table->string('description', 255);
+            $table->string('description');
             $table->text('address')->nullable();
             $table->string('zipcode',5)->nullable();
             $table->dateTime('start_date');

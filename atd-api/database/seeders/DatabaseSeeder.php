@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
         //Create partner
         for ($i = 0; $i < 10; $i++) {
             $user = User::create([

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('donations', function (Blueprint $table) {
             $table->id();
             $table->double('amount');
+            $table->string('checkout_session');
             $table->integer('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
             $table->boolean('archive')->default(false);

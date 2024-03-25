@@ -11,6 +11,7 @@ class Donation extends Model
 
     protected $fillable = [
         'amount',
+        'checkout_session',
         'user_id',
         'archive',
     ];

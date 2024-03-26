@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Carbon;
 
 class DistanceMatrixService
 {
@@ -20,6 +21,7 @@ class DistanceMatrixService
         $url = 'https://maps.googleapis.com/maps/api/distancematrix/json?' . http_build_query([
                 'origins' => $origin,
                 'destinations' => $destination,
+                'departure_time' => Carbon::now()->timestamp,
                 'key' => $this->apiKey,
             ]);
 

@@ -216,6 +216,4 @@ use App\Http\Controllers\ActivityController;
         Route::get('/{id}', [FileController::class, 'downloadFile']);
     });
 
-    Route::get('/execute-python-script', function (Request $request) {
-        return app(JourneyController::class)->callGoogleApi($request, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']);
-    });
+    Route::get('/execute-python-script', [JourneyController::class, 'callGoogleApi']);

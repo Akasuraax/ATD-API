@@ -25,7 +25,10 @@ def prim(graph):
 def main():
     json_data = sys.stdin.read()
     data = json.loads(json_data)
-    minimum_spanning_tree = prim(data)
+    formatted_data = {}
+    for node, neighbors in json.loads(json_data).items():
+        formatted_data[node] = [(neighbor, weight) for neighbor, weight in neighbors.items()]
+    minimum_spanning_tree = prim(formatted_data)
     print(minimum_spanning_tree)
 
 

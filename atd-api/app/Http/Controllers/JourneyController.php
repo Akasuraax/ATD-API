@@ -158,26 +158,24 @@ class JourneyController extends Controller
         }
     }
 
-    public function callGoogleApi(Request $request, array $nodes){
-        $graph = [];
-        dd($this->distanceMatrixService->getDistance('5 rue des pommiers, 94300', '21 rue Erard, 75012'));
+    public function callGoogleApi(Request $request){
 
-        foreach ($nodes as $node) {
-            $graph[$node] = [];
+        $nodes = [];
+        $steps = json_decode($request->getContent(), true);
+        foreach ($steps['steps'] as $step) {
+            $nodes[] = $step["address"] . " " . $step["zipcode"];
         }
 
-        foreach ($nodes as $node) {
-            $relations = [];
-            foreach ($nodes as $otherNode) {
-                if ($node !== $otherNode) {
-                    $weight = rand(1, 10);
+        $graph = [];
+        foreach ($nodes as $i => $node) {
+            foreach ($nodes as $j => $otherNode) {
+                if ($i < $j && !isset($graph[$node][$otherNode])) {
+                    $weight = $this->distanceMatrixService->getDistance($node, $otherNode)['rows'][0]['elements'][0]['duration_in_traffic']['value'];
 
-                    $relations[] = [$otherNode, $weight];
-                    $graph[$otherNode][] = [$node, $weight];
+                    $graph[$node][$otherNode] = $weight;
+                    $graph[$otherNode][$node] = $weight;
                 }
             }
-
-            $graph[$node] = $relations;
         }
         return $this->executeScript($graph);
 

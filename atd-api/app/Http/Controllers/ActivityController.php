@@ -23,26 +23,27 @@ class ActivityController extends Controller
                 'description' => 'required|string|max:255',
                 'address' => 'nullable|string',
                 'zipcode' => 'nullable|numeric:5',
-                'start_date' => 'required|date|after_or_equal:today|date_format:Y-m-d H:i',
-                'end_date' => 'required|date|after:start_date|date_format:Y-m-d H:i',
+                'start_date' => 'required|date|after_or_equal:today|date_format:Y-m-d\TH:i:sP',
+                'end_date' => 'required|date|after:start_date|date_format:Y-m-d\TH:i:sP',
                 'donation' => 'nullable|int',
-                'id_type' => 'required|int',
+                'type' => 'required|int',
                 'list_products' => 'nullable|array',
                 'list_recipes' => 'nullable|array',
-                'role_limits' => 'required|array',
+                'roles' => 'required|array',
                 'activity_files' => 'nullable',
                 'activity_files.*' => 'mimes:pdf,jpg,png,jpeg|max:20000'
             ]);
+
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $type = Type::findOrFail($validateData['id_type']);
+        $type = Type::findOrFail($validateData['type']);
         if($type->archive)
             return Response(['message'=>'The type you selected is archived.'], 404);
 
         //vérifications de rôle
-        $validateRole = $this->validateRoles($validateData['role_limits']);
+        $validateRole = $this->validateRoles($validateData['roles']);
 
         if ($validateRole['status'] === 'error')
             return response()->json(['message' => $validateRole['message']], 422);
@@ -72,13 +73,11 @@ class ActivityController extends Controller
             'start_date' => $validateData['start_date'],
             'end_date' => $validateData['end_date'],
             'donation' => $validateData['donation'] ?? null,
-            'id_type' => $validateData['id_type']
+            'id_type' => $validateData['type']
         ]);
-
         //enregistrement des roles (id min max)
         try {
-            foreach ($validateData['role_limits'] as $limits) {
-                $limits = json_decode($limits, true);
+            foreach ($validateData['roles'] as $limits) {
                 $activity->roles()->attach($limits['id'], ['archive' => false, 'min' => $limits["limits"]["min"], 'max' => $limits["limits"]["max"], 'count' => 0]);
             }
         }catch(ValidationException $e){
@@ -129,7 +128,7 @@ class ActivityController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
 
-        return response()->json(['activity' => $activity], 200);
+        return response()->json(["activity"=> $activity]);
     }
 
     public function participate($idActivity, $idUser){

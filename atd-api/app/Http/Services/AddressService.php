@@ -33,7 +33,9 @@ class AddressService
         $options = [
             'verify' => false,
         ];
-        return $this->client->request('GET', $url, $options);
+        $response = $this->client->request('GET', $url, $options);
+        $data = json_decode($response->getBody()->getContents(), true);
+        return $data;
     }
 
 }

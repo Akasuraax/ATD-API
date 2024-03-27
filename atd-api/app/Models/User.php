@@ -78,6 +78,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Activity::class, 'participates', 'id_user', 'id_activity')->withPivot('count', 'archive');
     }
 
+    public function donations(){
+        return $this->hasMany(Donation::class, 'user_id');
+    }
+
     public function files()
     {
         return $this->hasMany(File::class, 'id_user');

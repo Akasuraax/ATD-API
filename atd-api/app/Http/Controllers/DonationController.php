@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Donation;
 use Illuminate\Support\Facades\Auth;
@@ -46,14 +47,17 @@ class DonationController extends Controller
         return Response(['donation' => $donation], 200);
     }
 
-    public function retrieveData($session){
-        $stripe = new StripeClient($this->public_key);
+    public function getDataPayment($userId){
+        $user = User::findOrFail($userId);
 
-        $paymentDetails = $stripe->checkout->sessions->retrieve(
-            $session,
-            []
-        );
+        $donations = $user->donations()->get()->select('id', 'amount', 'created_at');
 
-        return $paymentDetails['amount_total']/100;
+        $total = $user->donations()->sum('amount');
+        return response(["donations" => $donations, "total" => $total], 200);
+
+    }
+
+    public function getTotalDonation(){
+        return Donation::all()->sum('amount');
     }
 }

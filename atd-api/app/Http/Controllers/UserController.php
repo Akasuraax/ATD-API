@@ -83,7 +83,7 @@ class UserController extends Controller
     {
 
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 

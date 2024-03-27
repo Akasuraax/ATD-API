@@ -222,5 +222,6 @@ use App\Http\Controllers\StripeController;
 
     Route::prefix('/payment')->group(function(){
         Route::post('/', [DonationController::class, 'savePayment']);
-        Route::get('/{session}', [DonationController::class, 'retrieveData']);
+        Route::get('/{id}', [DonationController::class, 'getDataPayment']);
+        Route::get('/', [DonationController::class, 'getTotalDonation']);
     });

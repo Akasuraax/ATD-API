@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProblemController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MessageController;
@@ -225,4 +226,8 @@ use App\Http\Controllers\StripeController;
         Route::post('/', [DonationController::class, 'savePayment']);
         Route::get('/{id}', [DonationController::class, 'getDataPayment']);
         Route::get('/', [DonationController::class, 'getTotalDonation']);
+    });
+
+    Route::prefix('/address')->group(function(){
+        Route::post('/', [AddressController::class, 'address']);
     });

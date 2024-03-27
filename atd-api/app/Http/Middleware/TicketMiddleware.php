@@ -40,8 +40,7 @@ class TicketMiddleware
 
         foreach ($user_ids as $user_id) {
             $user = HaveRole::select('id_user')->where('id_user', $user_id->id_user)
-                ->whereNotIn('id_role', [1, 5])
-                ->get()
+                ->orderBy('created_at')
                 ->first();
             if ($user)
                 break;

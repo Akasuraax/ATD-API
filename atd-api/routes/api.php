@@ -61,14 +61,13 @@ use App\Http\Controllers\StripeController;
 
     Route::prefix('/type')->middleware('validity.token')->group(function(){
         Route::post('/', [TypeController::class, 'createType'])->middleware('authorization:' . serialize([1]));
-        Route::get('/', [TypeController::class, 'getTypes']);
-        Route::get('/all', [TypeController::class, 'getTypesAll'])->middleware('authorization:' . serialize([1]));
+        Route::get('/', [TypeController::class, 'getTypes'])->middleware('authorization:' . serialize([1]));
+        Route::get('/all', [TypeController::class, 'getTypesAll']);
         Route::get('/{id}/file', [TypeController::class, 'downloadTypeFile']);
         Route::get('/{id}', [TypeController::class, 'getType']);
         Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
         Route::post('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
-    Route::get('/types', [TypeController::class, 'getTypeAll'])->middleware('validity.token');
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){
         Route::get('/', [UserController::class, 'getUsers']);

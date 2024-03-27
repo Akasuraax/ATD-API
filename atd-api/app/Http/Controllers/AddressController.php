@@ -2,27 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\AddressService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class AddressController extends Controller
 {
 
+    protected AddressService $addressService;
+
+    public function __construct()
+    {
+        $this->addressService = new AddressService();
+    }
     public function address(Request $request) {
         $input = $request->input('input');
-        $apiKey = env('GOOGLE_MAPS_API_KEY');
 
-        try {
-            $response = Http::get('https://maps.googleapis.com/maps/api/place/autocomplete/json', [
-                'input' => $input,
-                'key' => $apiKey,
-                'types' => '(cities)',
-            ]);
+            $res = $this->addressService->address($input);
+            return response()->json(['data' => $res]);
 
-            return $response->json();
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th], 500);
-        }
     }
 
 }

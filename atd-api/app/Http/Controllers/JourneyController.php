@@ -5,13 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Journey;
 use App\Models\Vehicle;
-use App\Services\DeleteService;
+use App\Http\Services\DistanceMatrixService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class JourneyController extends Controller
 {
+    protected DistanceMatrixService $distanceMatrixService;
+
+    public function __construct()
+    {
+        $this->distanceMatrixService = new DistanceMatrixService();
+    }
     public function createJourney(Request $request)
     {
         try{
@@ -151,5 +157,61 @@ class JourneyController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
+
+    public function callGoogleApi(Request $request){
+
+        $nodes = [];
+        $steps = json_decode($request->getContent(), true);
+        foreach ($steps['steps'] as $step) {
+            $nodes[] = $step["address"] . " " . $step["zipcode"];
+        }
+
+        $graph = [];
+        foreach ($nodes as $i => $node) {
+            foreach ($nodes as $j => $otherNode) {
+                if ($i < $j && !isset($graph[$node][$otherNode])) {
+                    $weight = $this->distanceMatrixService->getDistance($node, $otherNode)['rows'][0]['elements'][0]['duration_in_traffic']['value'];
+
+                    $graph[$node][$otherNode] = $weight;
+                    $graph[$otherNode][$node] = $weight;
+                }
+            }
+        }
+        return $this->executeScript($graph);
+
+    }
+    public function executeScript(array $graph)
+    {
+        $graph = json_encode($graph);
+
+        $descriptorspec = [
+            0 => ["pipe", "r"],
+            1 => ["pipe", "w"],
+            2 => ["pipe", "w"]
+        ];
+
+        $pythonScript = base_path('public/main.py');
+
+        $process = proc_open("python3 $pythonScript", $descriptorspec, $pipes);
+
+        if (is_resource($process)) {
+            fwrite($pipes[0], $graph);
+            fclose($pipes[0]);
+
+            $output = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+
+            $return_value = proc_close($process);
+
+            if ($return_value !== 0) {
+                return response()->json(['error' => 'Une erreur est survenue lors de l\'exécution du script.']);
+            } else {
+                return response()->json(['output' => trim($output)]);
+            }
+        } else {
+            return response()->json(['error' => 'Impossible de démarrer le processus.']);
+        }
+    }
+
 
 }

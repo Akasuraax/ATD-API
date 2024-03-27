@@ -120,6 +120,7 @@ use App\Http\Controllers\ActivityController;
     });
 
     Route::prefix('/journey')->middleware('validity.token')->group(function(){
+        Route::get('/best_path', [JourneyController::class, 'callGoogleApi'])->middleware('authorization:' . serialize([1]));
         Route::post('/', [JourneyController::class, 'createJourney'])->middleware('authorization:' . serialize([1]));
         Route::post('/{journey_id}', [StepController::class, 'calculusJourney'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [JourneyController::class, 'getJourneys']);
@@ -215,5 +216,3 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/file')->middleware('validity.token')->group(function (){
         Route::get('/{id}', [FileController::class, 'downloadFile']);
     });
-
-    Route::get('/execute-python-script', [JourneyController::class, 'callGoogleApi']);

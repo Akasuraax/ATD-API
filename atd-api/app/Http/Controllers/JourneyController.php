@@ -190,7 +190,7 @@ class JourneyController extends Controller
             2 => ["pipe", "w"]
         ];
 
-        $pythonScript = base_path('python_scripts/main.py');
+        $pythonScript = base_path('public/main.py');
 
         $process = proc_open("python3 $pythonScript", $descriptorspec, $pipes);
 

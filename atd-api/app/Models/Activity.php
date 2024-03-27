@@ -16,6 +16,7 @@ class Activity extends Model
         'zipcode',
         'start_date',
         'end_date',
+        'public',
         'donation',
         'id_type',
         'archive'

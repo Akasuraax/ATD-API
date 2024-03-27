@@ -14,13 +14,16 @@ use function PHPUnit\Framework\isEmpty;
 
 class VisitController extends Controller
 {
+
+    public function test(int $ticket_id){
+
+    }
     public function createVisit(Request $request): JsonResponse
     {
         try {
             $fields = $request->validate([
-                'checking' => 'required|integer|max:1',
-                'volunteer.id' => 'integer',
-                'beneficiary.id' => 'required|integer',
+                'id_volunteer' => 'required|integer',
+                'id_beneficiary' => 'required|integer',
             ]);
 
             User::findOrFail($fields['id_volunteer']);
@@ -29,18 +32,18 @@ class VisitController extends Controller
             $volunteer = User::where('id', $fields['id_volunteer'])->get()->first();
             $beneficiary = User::where('id', $fields['id_beneficiary'])->get()->first();
 
-            if(!HaveRole::where('id_user', $fields['beneficiary']['id'])->where('id_role', 3)->get()->first()){
+            if (!HaveRole::where('id_user', $fields['id_beneficiary'])->where('id_role', 3)->get()->first()) {
                 $error['beneficiary']['id'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a beneficiary'];
                 throw ValidationException::withMessages($error);
             }
 
-            if(!HaveRole::where('id_user', $fields['volunteer']['id'])->where('id_role', 2)->get()->first()){
-                $error['beneficiary']['id'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a volunteer'];
+            if (!HaveRole::where('id_user', $fields['id_volunteer'])->where('id_role', 2)->get()->first()) {
+                $error['volunteer']['id'] = [$volunteer->forname . ' ' . $volunteer->name . ' isn\'t a volunteer'];
                 throw ValidationException::withMessages($error);
             }
 
-            if(Visit::where('id_beneficiary', $fields['beneficiary']['id'])->where('archive', false)->get()->first()){
-                $error['beneficiary']['id'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' already has a visit'];
+            if (!$beneficiary->visited){
+                $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' doesn\'t need to be visited'];
                 throw ValidationException::withMessages($error);
             }
 
@@ -49,15 +52,13 @@ class VisitController extends Controller
         }
 
         $visit = Visit::create([
-            'checking' => $fields['checking'],
-            'id_volunteer' => $fields['volunteer']['id'],
-            'id_beneficiary' => $fields['beneficiary']['id'],
+            'id_volunteer' => $fields['id_volunteer'],
+            'id_beneficiary' => $fields['id_beneficiary'],
         ]);
 
         return response()->json([
             'visit' => [
                 'id' => $visit->id,
-                'checking' => $visit->checking,
                 'volunteer' => [
                     'name' => $volunteer->name,
                     'forname' => $volunteer->forname
@@ -66,28 +67,29 @@ class VisitController extends Controller
                     'name' => $beneficiary->name,
                     'forname' => $beneficiary->forname
                 ],
-            'created_at' => $visit->created_at
+                'created_at' => $visit->created_at,
+                'updated_at' => $visit->updated_at
             ]
         ], 201);
     }
 
-    public function getVisits(Request $request){
+    public function getVisits(Request $request)
+    {
         $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
         $beneficiary = HaveRole::where('id_user', $user_id)->where('id_role', 3)->get()->first();
         $admin = HaveRole::where('id_user', $user_id)->where('id_role', 1)->get()->first();
 
-        if($beneficiary){
+        if ($beneficiary) {
             $visit = Visit::where('id_beneficiary', $user_id)->get()->first();
             return response()->json([
                 "visit" => [
-                    'checking' => $visit->checking,
                     'created_at' => $visit->created_at,
                     'update_at' => $visit->updated_at
                 ]
             ]);
         }
         $perPage = $request->input('pageSize', 10);
-        if($perPage > 50){
+        if ($perPage > 50) {
             $perPage = 50;
         }
         $page = $request->input('page', 1);
@@ -126,22 +128,21 @@ class VisitController extends Controller
                             break;
                     }
                 }
-            } )
+            })
             ->orderBy($field, $sort)
             ->paginate($perPage, ['*'], 'page', $page + 1);
 
-        if($admin){
+        if ($admin) {
             return response()->json([
                 'visits' => $visit
             ]);
-        }else{
+        } else {
             foreach ($visit as $v) {
                 $beneficiary = User::where('id', $v['id_beneficiary'])->get()->first();
                 $filteredVisit = [];
-                if(!$v['archive']){
+                if (!$v['archive']) {
                     $filteredVisit = [
                         'id' => $v['id'],
-                        'checking' => $v['checking'],
                         'updated_at' => $v['updated_at'],
                         'beneficiary' => [
                             'address' => $beneficiary->address,
@@ -150,7 +151,7 @@ class VisitController extends Controller
                     ];
                 }
 
-                if($filteredVisit != [])
+                if ($filteredVisit != [])
                     $filteredVisits[] = $filteredVisit;
             }
 
@@ -162,20 +163,21 @@ class VisitController extends Controller
 
     }
 
-    public function getVisit(int $visit_id, Request $request){
+    public function getVisit(int $visit_id, Request $request)
+    {
 
         $visit = Visit::findOrFail($visit_id);
         $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
         $admin = HaveRole::where('id_user', $user_id)->where('id_role', 1)->get()->first();
         $volunteer_id = HaveRole::where('id_user', $user_id)->where('id_role', 2)->get()->first();
 
-        if(($visit->archive && $admin == NULL)){
-                return response()->json([
-                    'message' => 'Ressource not found'
-                ], 404);
+        if (($visit->archive && $admin == NULL)) {
+            return response()->json([
+                'message' => 'Ressource not found'
+            ], 404);
         }
 
-        if($visit->id_beneficiary != $user_id && $volunteer_id == NULL && $admin == NULL){
+        if ($visit->id_beneficiary != $user_id && $volunteer_id == NULL && $admin == NULL) {
             return response()->json([
                 'message' => 'Ressource not found'
             ], 404);
@@ -185,11 +187,10 @@ class VisitController extends Controller
         $volunteer = User::where('id', $visit->id_volunteer)->get()->first();
 
         //If it's the administrator
-        if($admin != NULL){
+        if ($admin != NULL) {
             return response()->json([
                 "visit" => [
                     'id' => $visit->id,
-                    'checking' => $visit->checking,
                     'archive' => $visit->archive,
                     'created_at' => $visit->created_at,
                     'update_at' => $visit->updated_at,
@@ -205,10 +206,9 @@ class VisitController extends Controller
                     ]
                 ]
             ]);
-        }else
+        } else
             return response()->json([
                 "visit" => [
-                    'checking' => $visit->checking,
                     'created_at' => $visit->created_at,
                     'update_at' => $visit->updated_at,
                     'volunteer' => [
@@ -230,85 +230,68 @@ class VisitController extends Controller
 
         try {
             $fields = $request->validate([
-                'checking' => 'required|integer|max:1',
-                'volunteer.id' => 'required|integer',
-                'beneficiary.id' => 'required|integer',
-                'archive' => 'required||boolean'
+                'id_volunteer' => 'required|integer',
+                'id_beneficiary' => 'required|integer',
+                'archive' => 'boolean'
             ]);
+
+            User::findOrFail($fields['id_volunteer']);
+            User::findOrFail($fields['id_beneficiary']);
+
+            $volunteer = User::where('id', $fields['id_volunteer'])->get()->first();
+            $beneficiary = User::where('id', $fields['id_beneficiary'])->get()->first();
+
+            if (!HaveRole::where('id_user', $fields['id_beneficiary'])->where('id_role', 3)->get()->first()) {
+                $error['beneficiary']['id'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' isn\'t a beneficiary'];
+                throw ValidationException::withMessages($error);
+            }
+
+            if (!HaveRole::where('id_user', $fields['id_volunteer'])->where('id_role', 2)->get()->first()) {
+                $error['volunteer']['id'] = [$volunteer->forname . ' ' . $volunteer->name . ' isn\'t a volunteer'];
+                throw ValidationException::withMessages($error);
+            }
+
+            if (!$beneficiary->visited){
+                $error['id_beneficiary'] = [$beneficiary->forname . ' ' . $beneficiary->name . ' doesn\'t need to be visited'];
+                throw ValidationException::withMessages($error);
+            }
+
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        //if it's an administrator
+        isset($fields['id_volunteer']) ? $visit->id_volunteer = $fields['id_volunteer'] : null;
+        isset($fields['id_beneficiary']) ? $visit->id_beneficiary = $fields['id_beneficiary'] : null;
+        isset($fields['archive']) ? $visit->archive = $fields['archive'] : null;
 
-        if(HaveRole::where('id_user', TokenController::decodeToken($request->header('Authorization'))->id)->where('id_role', 1)->get()->first()){
-            if(isset($fields['volunteer']['id']))
-                $visit->id_volunteer = $fields['volunteer']['id'];
-            if(isset($fields['id_beneficiary']))
-                $visit->id_beneficiary = $fields['beneficiary']['id'];
-            if(isset($fields['checking']))
-                $visit->checking = $fields['checking'];
-            if(isset($fields['archive']))
-                $visit->checking = $fields['archive'];
+        $visit->save();
+        $visit->touch();
 
-            $visit->save();
-            $visit->touch();
+        $beneficiary = User::where('id', $visit->id_beneficiary)->get()->first();
+        $volunteer = User::where('id', $visit->id_volunteer)->get()->first();
 
-            $beneficiary = User::where('id', $visit->id_beneficiary)->get()->first();
-            $volunteer = User::where('id', $visit->id_volunteer)->get()->first();
-
-            return response()->json([
-                'visit' => [
-                    'id' => $visit->id,
-                    'checking' => $visit->checking,
-                    'archive' => $visit->archive,
-                    'updated_at' => $visit->updated_at,
-                    'volunteer' => [
-                        'forname' => $volunteer->forname,
-                        'name' => $volunteer->name
-                    ],
-                    'beneficiary' => [
-                        'forname' => $beneficiary->forname,
-                        'name' => $beneficiary->name
-                    ]
+        return response()->json([
+            'visit' => [
+                'id' => $visit->id,
+                'archive' => $visit->archive,
+                'updated_at' => $visit->updated_at,
+                'volunteer' => [
+                    'forname' => $volunteer->forname,
+                    'name' => $volunteer->name
+                ],
+                'beneficiary' => [
+                    'forname' => $beneficiary->forname,
+                    'name' => $beneficiary->name
                 ]
-            ]);
+            ]
+        ]);
 
-        }else{
-            $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
-            $visit->id_volunteer = $user_id;
-            if($visit->checking == 0)
-                $visit->checking = 1;
-            else
-                $visit->checking = 0;
-
-            $visit->save();
-            $visit->touch();
-            $beneficiary = User::where('id', $visit->id_beneficiary)->get()->first();
-            $volunteer = User::where('id', $visit->id_volunteer)->get()->first();
-
-            return response()->json([
-                'visit' => [
-                    'updated_at' => $visit->updated_at,
-                    'checking' => $visit->checking,
-                    'volunteer' => [
-                        'forname' => $volunteer->forname,
-                        'name' => $volunteer->name
-                    ],
-                    'beneficiary' => [
-                        'forname' => $beneficiary->forname,
-                        'name' => $beneficiary->name
-                    ]
-                ]
-            ]);
-
-        }
     }
 
     /**
      * @throws Exception
      */
-    public function deleteVisit(int $visit_id, Request $request): JsonResponse
+    public function deleteVisit(int $visit_id): JsonResponse
     {
         $visit = Visit::findOrFail($visit_id);
 

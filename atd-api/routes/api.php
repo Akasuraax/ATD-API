@@ -72,6 +72,7 @@ use App\Http\Controllers\StripeController;
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){
         Route::get('/', [UserController::class, 'getUsers']);
+        Route::get('/visit', [UserController::class, 'getUsersVisit']);
         Route::get('/{id}', [UserController::class, 'getUser'])->middleware('ValidateUserId');
         Route::patch('/{id}', [UserController::class, 'patchUser']);
         Route::patch('/admin/{id}', [UserController::class, 'patchUserAdmin'])->middleware('authorization:' . serialize([1]));

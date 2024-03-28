@@ -28,6 +28,7 @@ class Piece extends Model
         return $this->belongsTo(Warehouse::class, 'id_warehouse');
     }
 
+
     public function archive(){
         $this->archive = true;
         $this->save();

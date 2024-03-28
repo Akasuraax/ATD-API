@@ -16,7 +16,7 @@ class PieceController extends Controller
     {
         try{
             $validateData = $request->validate([
-                'expired_date' => 'required|date_format:Y-m-d H:i|after:today',
+                'expired_date' => 'required|date|after:today',
                 'count' => 'required|numeric',
                 'location' => 'nullable|int',
                 'warehouse.id' => 'required|int',
@@ -50,7 +50,7 @@ class PieceController extends Controller
     public function getPieces(Request $request)
     {
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 
@@ -60,9 +60,9 @@ class PieceController extends Controller
 
         $field = "pieces." . $field;
 
-        $pieces = Piece::select('pieces.id', 'pieces.expired_date', 'pieces.count', 'pieces.location', 'products.name as product_name', 'warehouses.name as warehouse_name', 'pieces.archive')
-            ->join('products','products.id', '=', 'pieces.id_product')
-            ->join('warehouses', 'warehouses.id', '=', 'pieces.id_warehouse')
+        $pieces = Piece::select('*')
+            ->with('product:id,name,measure')
+            ->with('warehouse:id,name')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -99,7 +99,7 @@ class PieceController extends Controller
 
     public function getPiece($id)
     {
-        return Piece::find($id) ? Piece::select('pieces.id', 'pieces.expired_date', 'pieces.count', 'pieces.location', 'products.name as product_name', 'warehouses.name as warehouse_name', 'pieces.archive')->join('products','products.id', '=', 'pieces.id_product')->join('warehouses', 'warehouses.id', '=', 'pieces.id_warehouse')->where('pieces.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Piece::find($id) ? Piece::select('*')->with('product:id,name,measure')->with('warehouse:id,name')->where('pieces.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function deletePiece($id)
@@ -110,8 +110,8 @@ class PieceController extends Controller
                 return response()->json(['message' => 'Element is already archived.'], 405);
 
             $piece->archive();
-            $piece = Piece::findOrFail($id);
-            return response()->json(['piece' => $piece,  'message' => "Deleted !"], 200);
+            $piece = Piece::select('*')->with('product:id,name,measure')->with('warehouse:id,name')->where('pieces.id', $id)->first();
+            return response()->json([$piece,  'message' => "Deleted !"], 200);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
@@ -123,7 +123,7 @@ class PieceController extends Controller
             $piece = Piece::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'expired_date' => 'required|date_format:Y-m-d H:i|date|after:today',
+                    'expired_date' => 'required|date|after:today',
                     'count' => 'required|numeric',
                     'location' => 'nullable|int',
                     'warehouse.id' => 'required|int',
@@ -141,7 +141,7 @@ class PieceController extends Controller
                 $piece->warehouse()->associate($warehouse->id);
                 $piece->product()->associate($product->id);
                 $piece->load('warehouse:id,name');
-                $piece->load('product:id,name');
+                $piece->load('product:id,name,measure');
                 $piece->save();
             }catch (ModelNotFoundException $e) {
                 return response()->json(['error' => 'The element you selected is not found'], 404);

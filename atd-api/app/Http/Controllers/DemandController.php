@@ -16,24 +16,24 @@ class DemandController extends Controller
     public function createDemand(Request $request){
         try{
             $validateData = $request->validate([
-                'description' => 'required|string',
-                'type.id' => 'required|int'
+                'demand.description' => 'required|string',
+                'demand.id_type' => 'required|int'
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
 
-        $type = Type::findOrFail($validateData['type']['id']);
+        $type = Type::findOrFail($validateData['demand']['id_type']);
         $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
 
         if($type->archive)
             return response()->json(['message' => 'The type of activity doesn\'t exist.'], 405);
 
         $demand = Demand::create([
-            'description' => $validateData['description'],
+            'description' => $validateData['demand']['description'],
             'id_user' => $user_id,
-            'id_type' => $validateData['type']['id']
+            'id_type' => $validateData['demand']['id_type']
         ]);
 
         $response = [

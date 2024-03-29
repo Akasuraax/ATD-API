@@ -86,7 +86,6 @@ use App\Http\Controllers\StripeController;
         Route::delete('/{id}', [RoleController::class, 'deleteRole'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [RoleController::class, 'updateRole'])->middleware('authorization:' . serialize([1]));
     });
-
     Route::prefix('/demand')->middleware('validity.token')->group(function(){
         Route::post('/', [DemandController::class, 'createDemand']);
         Route::get('/', [DemandController::class, 'getDemands']);

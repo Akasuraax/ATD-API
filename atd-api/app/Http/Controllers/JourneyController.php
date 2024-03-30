@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\Journey;
+use App\Models\Step;
 use App\Models\Vehicle;
 use App\Http\Services\DistanceMatrixService;
+use DateTime;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -20,37 +22,84 @@ class JourneyController extends Controller
     }
     public function createJourney(Request $request)
     {
-        try{
-            $validateData = $request->validate([
-                'name' => 'string|required|max:255',
-                'duration' => 'int|required',
-                'distance' => 'int|required',
-                'cost' => 'int|required',
-                'fuel_cost' => 'int|required',
-                'vehicle.id' => 'int|required',
-                'activity.id' => 'nullable|int'
-             ]);
-        }catch (ValidationException $e){
-            return response()->json(['errors' => $e->errors()], 422);
-        }
+        $array = json_decode($request->getContent(), true);
 
-        $vehicle = Vehicle::findOrFail($validateData['id_vehicle']);
-
+        //check if the vehicle exists
+        $vehicle = Vehicle::findOrFail($array['vehicle']['id']);
         if($vehicle->archive)
             return Response(['message'=>'The vehicle you selected is archived.'], 404);
 
+        $activity = Activity::findOrfail($array['activity']['id']);
+        if($activity->archive)
+            return Response(['message'=>'The activity you selected is archived.'], 404);
+
+        $result = $this->callGoogleApi($array["steps"]);
+        $json_string = trim($result->getOriginalContent()["output"], '"');
+        $json_string = str_replace("'", '"', $json_string);
+
+        $steps = json_decode($json_string);
+
+        $total_distance = 0;
+        $total_time = 0;
+
+        for ($i = 0; $i < count($steps) - 1; $i++) {
+            $node = $steps[$i];
+            $next_node = $steps[$i + 1];
+
+            $travel = $this->distanceMatrixService->getDistance($node, $next_node);
+            $time = $travel['rows'][0]['elements'][0]['duration_in_traffic']['value'];
+            $distance = $travel['rows'][0]['elements'][0]['distance']['value'];
+            $total_distance += $distance;
+            $total_time += $time;
+        }
+
         $journey = Journey::create([
-            'name' => $validateData['name'],
-            'duration' => $validateData['duration'],
-            'distance' => $validateData['distance'],
-            'cost' => $validateData['cost'],
-            'fuel_cost' => $validateData['fuel_cost'],
-            'id_activity' => $validateData['activity']['id'] ?? null
+            'name' => $array['journey']['name'],
+            'duration' => $total_time,
+            'distance' => $total_distance,
+            'id_activity' => $activity->id ?? null
         ]);
 
-        $journey->vehicles()->attach($validateData['vehicle']['id'], ['archive' => false]);
+        $stepsArray = [];
+        $dateTime = new DateTime($activity->start_date);
+        $date = $dateTime->format('Y-m-d');
 
-        return Response(['journey' => $journey], 201);
+        foreach ($steps as $node) {
+            foreach ($array["steps"] as $stepData) {
+                if ($node === $stepData['address'] . ' ' . $stepData['zipcode']) {
+                    $dateTimeString = $date . ' ' . $stepData['time'];
+
+                    $step = Step::create([
+                        'address' => $stepData['address'],
+                        'zipcode' =>  $stepData['zipcode'],
+                        'time' => $dateTimeString,
+                        'id_journey' =>  $journey->id
+                    ]);
+
+                    $stepsArray[] = $step;
+                    break;
+                }
+            }
+        }
+
+        $journey->vehicles()->attach($vehicle->id, ['archive' => false]);
+        $total_hours = floor($journey->duration / 3600);
+        $total_minutes = floor(($journey->duration % 3600) / 60);
+
+        $time = "06:05";
+        $currentDate = date('Y-m-d');
+
+// Concaténez la date avec l'heure récupérée
+        $dateTimeString = $currentDate . ' ' . $time;
+        return Response(['journey' => [
+            'id' => $journey->id,
+            'name' => $journey->name,
+            'distance' => $journey->distance/1000,
+            'duration' => $total_hours . "h " . $total_minutes ."min",
+            'activity' => $activity,
+            'vehicle' => $vehicle,
+            'steps' => $stepsArray
+        ]], 201);
     }
 
     public function getJourneys(Request $request){
@@ -158,11 +207,11 @@ class JourneyController extends Controller
         }
     }
 
-    public function callGoogleApi(Request $request){
+    public function callGoogleApi(array $steps){
+
 
         $nodes = [];
-        $steps = json_decode($request->getContent(), true);
-        foreach ($steps['steps'] as $step) {
+        foreach ($steps as $step) {
             $nodes[] = $step["address"] . " " . $step["zipcode"];
         }
 

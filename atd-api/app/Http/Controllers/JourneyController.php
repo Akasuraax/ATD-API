@@ -22,6 +22,19 @@ class JourneyController extends Controller
     }
     public function createJourney(Request $request)
     {
+        try{
+            $request->validate([
+                'journey.name' => 'required|string|max:255',
+                'activity.id' => 'required|int',
+                'vehicle.id' => 'required|int',
+                'steps.*.address' => 'required|string|max:255',
+                'steps.*.zipcode' => 'required|string|size:5',
+                'steps.*.time' => 'required|string|date_format:H:i'
+            ]);
+        }catch (ValidationException $e){
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
         $array = json_decode($request->getContent(), true);
 
         //check if the vehicle exists
@@ -81,7 +94,6 @@ class JourneyController extends Controller
                 }
             }
         }
-
         $journey->vehicles()->attach($vehicle->id, ['archive' => false]);
         $total_hours = floor($journey->duration / 3600);
         $total_minutes = floor(($journey->duration % 3600) / 60);
@@ -194,36 +206,38 @@ class JourneyController extends Controller
 
     public function updateJourney($id, Request $request){
         try{
-            $journey = Journey::findOrFail($id);
+            Journey::findOrFail($id);
             try{
-                $requestData = $request->validate([
-                    'name' => 'required|string|max:255',
-                    'duration' => 'required|int',
-                    'distance' => 'required|int',
-                    'cost' => 'required|int',
-                    'archive' => 'required|boolean',
-                    'fuel_cost' => 'required|int',
+                $request->validate([
+                    'journey.name' => 'required|string|max:255',
+                    'activity.id' => 'required|int',
                     'vehicle.id' => 'required|int',
-                    'activity.id' => 'required|int'
+                    'steps.*.address' => 'required|string|max:255',
+                    'steps.*.zipcode' => 'required|string|size:5',
+                    'steps.*.time' => 'required|string|date_format:H:i'
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            try{
-                $vehicle = Vehicle::where('id', $requestData['vehicle']['id'])->where('archive', false)->firstOrFail();
-                $activity = Activity::where('id', $requestData['activity']['id'])->where('archive', false)->firstOrFail();
-                $journey->update($requestData);
-                $journey->activity()->associate($activity->id);
-                $journey->vehicles()->sync($vehicle->id, ['archive' => false]);
-                $journey->save();
-                $journey->load('vehicles:id,name,license_plate');
-                $journey->load('activity:id,title');
-            }catch (ModelNotFoundException $e) {
-                return response()->json(['error' => 'The element you selected is not found'], 404);
-            }
+            Step::where('id_journey', $id)->delete();
+            Journey::where('id', $id)->delete();
 
-            return response()->json(['journey' => $journey], 200);
+            $create = new JourneyController();
+            $journey = $create->createJourney($request)->getOriginalContent()['journey'];
+
+            return response()->json([
+                'journey' => [
+                    'id' => $journey['id'],
+                    'name' => $journey['name'],
+                    'duration' => $journey['duration'],
+                    'activity' => $journey['activity'],
+                    'steps' => $journey['steps'],
+                    'vehicle' => $journey['vehicle'],
+                    'distance' => $journey['distance']
+                ],
+
+            ]);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }

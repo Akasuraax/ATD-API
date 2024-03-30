@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pieces', function (Blueprint $table) {
             $table->id()->autoIncrement();
-            $table->dateTime('expired_date');
+            $table->dateTime('expired_date')->nullable();
             $table->double('count');
             $table->integer('location')->nullable();
             $table->integer('id_warehouse');

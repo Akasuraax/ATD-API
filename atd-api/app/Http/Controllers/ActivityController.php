@@ -20,7 +20,7 @@ class ActivityController extends Controller
         try{
             $validateData = $request->validate([
                 'title' => 'required|string|max:255',
-                'description' => 'required|string|max:255',
+                'description' => 'required|string',
                 'address' => 'nullable|string',
                 'zipcode' => 'nullable|numeric:5',
                 'start_date' => 'required|date|after_or_equal:today|date_format:Y-m-d H:i',
@@ -238,7 +238,7 @@ class ActivityController extends Controller
             try{
                 $validateData = $request->validate([
                     'title' => 'string|max:255',
-                    'description' => 'string|max:255',
+                    'description' => 'string',
                     'address' => 'string',
                     'zipcode' => 'numeric:5',
                     'start_date' => 'date|after_or_equal:today',

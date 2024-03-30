@@ -86,11 +86,6 @@ class JourneyController extends Controller
         $total_hours = floor($journey->duration / 3600);
         $total_minutes = floor(($journey->duration % 3600) / 60);
 
-        $time = "06:05";
-        $currentDate = date('Y-m-d');
-
-// Concaténez la date avec l'heure récupérée
-        $dateTimeString = $currentDate . ' ' . $time;
         return Response(['journey' => [
             'id' => $journey->id,
             'name' => $journey->name,
@@ -153,7 +148,25 @@ class JourneyController extends Controller
 
     public function getJourney($id)
     {
-        return Journey::find($id) ?  Journey::select('journeys.id', 'journeys.name', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost', 'journeys.id_activity', 'vehicles.name as vehicle_name', 'vehicles.license_plate','journeys.archive')->join('drives', 'drives.id_journey', '=', 'journeys.id')->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')->where('journeys.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        $journey = Journey::findOrFail($id);
+        $steps = Step::where('id_journey', $id)->get()->toArray();
+        $activity = Activity::where('id', $journey->id_activity)->first();
+        $total_hours = floor($journey->duration / 3600);
+        $total_minutes = floor(($journey->duration % 3600) / 60);
+
+        return response()->json([
+           "journey" => [
+               'id' => $journey->id,
+               'name' => $journey->name,
+               'duration' => $total_hours . "h " . $total_minutes ."min",
+               'distance' => $journey->distance/1000,
+               'archive' => $journey->archive,
+               'created_at' => $journey->created_at,
+               'updated_at' => $journey->update_at,
+               'activity' => $activity,
+               'steps' => $steps,
+           ]
+        ]);
     }
 
     public function deleteJourney($id){

@@ -14,8 +14,6 @@ class Journey extends Model
         'date',
         'duration',
         'distance',
-        'cost',
-        'fuel_cost',
         'archive',
         'id_activity'
     ];

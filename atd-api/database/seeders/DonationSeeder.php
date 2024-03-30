@@ -18,16 +18,5 @@ class DonationSeeder extends Seeder
             'checkout_session' => 'cs_test_a1PvXi9cplVM20QSA1WNfj85lh3rUMRFO3W2ppxA3Z0JQKoDB7JnuKZXB7',
             'user_id' => 1
         ]);
-
-        Donation::create([
-            'amount' => 20,
-            'checkout_session' => 'cs_test_a1PvXi9cplVM20QSA1WNfj85lh3rUMRFO3W2ppxA3Z0JQKoDB7JnuKZXB7',
-            'user_id' => 23,
-        ]);
-
-        Donation::create([
-            'amount' => 50,
-            'user_id' => 22,
-        ]);
     }
 }

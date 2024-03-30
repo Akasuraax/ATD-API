@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('drives', function (Blueprint $table) {
             $table->integer('id_journey');
             $table->integer('id_vehicle');
-            $table->foreign('id_journey')->references('id')->on('journeys')->onDelete('restrict');
-            $table->foreign('id_vehicle')->references('id')->on('vehicles')->onDelete('restrict');
+            $table->foreign('id_journey')->references('id')->on('journeys')->onDelete('cascade');
+            $table->foreign('id_vehicle')->references('id')->on('vehicles')->onDelete('cascade');
             $table->primary(['id_journey', 'id_vehicle']);
             $table->boolean('archive')->default(false);
             $table->timestamps();

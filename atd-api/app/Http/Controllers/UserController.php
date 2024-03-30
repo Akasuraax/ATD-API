@@ -129,15 +129,15 @@ class UserController extends Controller
         return $users;
     }
 
-    public function getUsersVisit(Request $request): LengthAwarePaginator
+    public function getUsersVisit(Request $request)
     {
 
         $perPage = $request->input('pageSize', 10);
         $page = $request->input('page', 0);
 
+        $users = User::where('archive', false)
 
-        $users = User::select('*')
-            ->paginate($perPage, ['*'], 'page', $page + 1);
+            ->paginate($perPage, ['forname','name','address'], 'page', $page + 1);
 
         return $users;
     }

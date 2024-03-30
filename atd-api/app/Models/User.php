@@ -92,7 +92,7 @@ class User extends Authenticatable
     }
 
     public function visits(){
-        return $this->hasMany(Visit::class, 'id_volunteer');
+        return $this->hasMany(Visit::class, 'id_beneficiary');
     }
     public function messages(){
         return $this->hasMany(Message::class, 'id_user');

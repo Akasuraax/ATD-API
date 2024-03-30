@@ -146,6 +146,15 @@ class JourneyController extends Controller
         return response()->json($journey);
     }
 
+    public function getJourneysActivity($id)
+    {
+
+        Activity::findOrFail($id);
+        $journey = Journey::where('id_activity', $id)->get()->toArray();
+        return response()->json([
+            "journeys" => $journey,
+        ]);
+    }
     public function getJourney($id)
     {
         $journey = Journey::findOrFail($id);

@@ -24,7 +24,7 @@ use App\Http\Controllers\DemandController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ActivityController;
-use App\Http\Controllers\StripeController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Services\PdfService;
 use App\Models\Journey;
 use App\Models\Step;
 use App\Models\Vehicle;
@@ -15,10 +16,12 @@ use Illuminate\Validation\ValidationException;
 class JourneyController extends Controller
 {
     protected DistanceMatrixService $distanceMatrixService;
+    protected PdfService $pdfService;
 
     public function __construct()
     {
         $this->distanceMatrixService = new DistanceMatrixService();
+        $this->pdfService = new PdfService();
     }
     public function createJourney(Request $request)
     {
@@ -51,7 +54,6 @@ class JourneyController extends Controller
         $json_string = str_replace("'", '"', $json_string);
 
         $steps = json_decode($json_string);
-
         $total_distance = 0;
         $total_time = 0;
 
@@ -72,6 +74,8 @@ class JourneyController extends Controller
             'distance' => $total_distance,
             'id_activity' => $activity->id ?? null
         ]);
+
+        $this->pdfService->generatePdf($steps, $activity, $journey->id);
 
         $stepsArray = [];
         $dateTime = new DateTime($activity->start_date);

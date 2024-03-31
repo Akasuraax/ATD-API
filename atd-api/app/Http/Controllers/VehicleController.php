@@ -94,6 +94,12 @@ class VehicleController extends Controller
         return response()->json($vehicle);
     }
 
+    public function getAllVehicles() {
+        $vehicle = Vehicle::where('id', $id)
+            ->with('annexe')
+            ->first();
+    }
+
     public function getVehicle($id){
         $vehicle = Vehicle::where('id', $id)
             ->with('annexe')

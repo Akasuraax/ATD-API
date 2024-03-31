@@ -84,7 +84,7 @@ class AnnexesController extends Controller
 
     public function getAnnexesAll(Request $request){
 
-        $annexes = Annexe::select('id', 'name')->get();
+        $annexes = Annexe::select('id', 'name','address')->get();
 
         if($annexes) {
             return response()->json($annexes);

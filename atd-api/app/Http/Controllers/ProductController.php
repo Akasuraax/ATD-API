@@ -98,6 +98,17 @@ class ProductController extends Controller
         return Product::find($id) ? Product::select('id', 'name', 'measure', 'archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
+    public function getNbPiecesProduct($id)
+    {
+        $nb = Product::select('*')
+            ->with("pieces")
+            ->where('id',$id)
+            ->first();
+
+        return $nb;
+    }
+
+
     public function deleteProduct($id){
         try{
             $product = Product::findOrFail($id);

@@ -145,6 +145,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/product')->middleware('validity.token')->group(function (){
         Route::post('/', [ProductController::class, 'createProduct'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [ProductController::class, 'getProducts']);
+        Route::get('/max/{id}', [ProductController::class, 'getNbPiecesProduct']);
         Route::get('/filter', [ProductController::class, 'getProductsFilter']);
         Route::get('/{id}', [ProductController::class, 'getProduct']);
         Route::delete('/{id}', [ProductController::class, 'deleteProduct'])->middleware('authorization:' . serialize([1]));
@@ -153,7 +154,7 @@ use App\Http\Controllers\ActivityController;
 
     Route::prefix('/piece')->middleware('validity.token')->group(function (){
         Route::post('/', [PieceController::class, 'createPiece'])->middleware('authorization:' . serialize([1]));
-        Route::get('/', [PieceController::class, 'getPieces']);
+        Route::get('/', [PieceController::class, 'getMaxPiece']);
         Route::get('/{id}', [PieceController::class, 'getPiece']);
         Route::delete('/{id}', [PieceController::class, 'deletePiece'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [PieceController::class, 'updatePiece'])->middleware('authorization:' . serialize([1]));

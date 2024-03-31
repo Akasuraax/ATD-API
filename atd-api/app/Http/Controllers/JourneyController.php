@@ -8,8 +8,10 @@ use App\Models\Step;
 use App\Models\Vehicle;
 use App\Http\Services\DistanceMatrixService;
 use DateTime;
+use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class JourneyController extends Controller
@@ -27,9 +29,6 @@ class JourneyController extends Controller
                 'journey.name' => 'required|string|max:255',
                 'activity.id' => 'required|int',
                 'vehicle.id' => 'required|int',
-                'steps.*.address' => 'required|string|max:255',
-                'steps.*.zipcode' => 'required|string|size:5',
-                'steps.*.time' => 'required|string|date_format:H:i'
             ]);
         }catch (ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -42,19 +41,20 @@ class JourneyController extends Controller
         if($vehicle->archive)
             return Response(['message'=>'The vehicle you selected is archived.'], 404);
 
-        $activity = Activity::findOrfail($array['activity']['id']);
-        if($activity->archive)
-            return Response(['message'=>'The activity you selected is archived.'], 404);
+        if(isset($array['activity']['id'])){
+            $activity = Activity::findOrfail($array['activity']['id']);
+            if($activity->archive)
+                return Response(['message'=>'The activity you selected is archived.'], 404);
+        }else
+            $activity = null;
 
-        $result = $this->callGoogleApi($array["steps"]);
-        $json_string = trim($result->getOriginalContent()["output"], '"');
+        $json_string = trim($array["steps"], '"');
         $json_string = str_replace("'", '"', $json_string);
 
         $steps = json_decode($json_string);
 
         $total_distance = 0;
         $total_time = 0;
-
         for ($i = 0; $i < count($steps) - 1; $i++) {
             $node = $steps[$i];
             $next_node = $steps[$i + 1];
@@ -74,26 +74,19 @@ class JourneyController extends Controller
         ]);
 
         $stepsArray = [];
-        $dateTime = new DateTime($activity->start_date);
-        $date = $dateTime->format('Y-m-d');
+        for($i = 0; $i < count($steps); $i++) {
+            preg_match('/(.+)\s(\d{5})/', $steps[$i], $matches);
 
-        foreach ($steps as $node) {
-            foreach ($array["steps"] as $stepData) {
-                if ($node === $stepData['address'] . ' ' . $stepData['zipcode']) {
-                    $dateTimeString = $date . ' ' . $stepData['time'];
-
-                    $step = Step::create([
-                        'address' => $stepData['address'],
-                        'zipcode' =>  $stepData['zipcode'],
-                        'time' => $dateTimeString,
-                        'id_journey' =>  $journey->id
-                    ]);
-
-                    $stepsArray[] = $step;
-                    break;
-                }
-            }
+            $step = Step::create([
+                'address' => $matches[1],
+                'zipcode' =>$matches[2],
+                'time' => Carbon::now(),
+                'id_journey' => $journey->id
+            ]);
+            $stepsArray[] = $step;
         }
+
+
         $journey->vehicles()->attach($vehicle->id, ['archive' => false]);
         $total_hours = floor($journey->duration / 3600);
         $total_minutes = floor(($journey->duration % 3600) / 60);
@@ -211,14 +204,13 @@ class JourneyController extends Controller
                 $request->validate([
                     'journey.name' => 'required|string|max:255',
                     'activity.id' => 'required|int',
-                    'vehicle.id' => 'required|int',
-                    'steps.*.address' => 'required|string|max:255',
-                    'steps.*.zipcode' => 'required|string|size:5',
-                    'steps.*.time' => 'required|string|date_format:H:i'
+                    'vehicle.id' => 'required|int'
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
+
+            $result = $this->callGoogleApi($request);
 
             Step::where('id_journey', $id)->delete();
             Journey::where('id', $id)->delete();
@@ -236,16 +228,25 @@ class JourneyController extends Controller
                     'vehicle' => $journey['vehicle'],
                     'distance' => $journey['distance']
                 ],
-
             ]);
         }catch(ValidationException $e){
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
-    public function callGoogleApi(array $steps){
+    public function callGoogleApi(Request $request){
 
+        try{
+            $request->validate([
+                'steps.*.address' => 'required|string|max:255',
+                'steps.*.zipcode' => 'required|string|size:5',
+                'steps.*.time' => 'required|string|date_format:H:i'
+            ]);
+        }catch (ValidationException $e){
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
+        $steps = json_decode($request->getContent(), true)["steps"];
         $nodes = [];
         foreach ($steps as $step) {
             $nodes[] = $step["address"] . " " . $step["zipcode"];
@@ -291,7 +292,7 @@ class JourneyController extends Controller
             if ($return_value !== 0) {
                 return response()->json(['error' => 'Une erreur est survenue lors de l\'exécution du script.']);
             } else {
-                return response()->json(['output' => trim($output)]);
+                return response()->json(['steps' => trim($output)]);
             }
         } else {
             return response()->json(['error' => 'Impossible de démarrer le processus.']);

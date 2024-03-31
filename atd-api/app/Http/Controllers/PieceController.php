@@ -104,17 +104,17 @@ class PieceController extends Controller
 
     public function deletePiece($id)
     {
-        try{
-            $piece = Piece::findOrFail($id);
-            if($piece->archive)
-                return response()->json(['message' => 'Element is already archived.'], 405);
+            try {
+                $piece = Piece::findOrFail($id);
+                if ($piece->archive)
+                    return response()->json(['message' => 'Element is already archived.'], 405);
 
-            $piece->archive();
-            $piece = Piece::select('*')->with('product:id,name,measure')->with('warehouse:id,name')->where('pieces.id', $id)->first();
-            return response()->json([$piece,  'message' => "Deleted !"], 200);
-        }catch(ValidationException $e){
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
-        }
+                $piece->archive();
+                $piece = Piece::select('*')->with('product:id,name,measure')->with('warehouse:id,name')->where('pieces.id', $id)->first();
+                return response()->json([$piece, 'message' => "Deleted !"], 200);
+            } catch (ValidationException $e) {
+                return response()->json(['message' => $e->getMessage()], $e->getCode());
+            }
     }
 
     public function updatePiece($id, Request $request)

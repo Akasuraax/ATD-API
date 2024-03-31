@@ -3,6 +3,7 @@
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProblemController;
+use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TicketController;
@@ -151,12 +152,18 @@ use App\Http\Controllers\ActivityController;
         Route::patch('/{id}', [ProductController::class, 'updateProduct'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/piece')->middleware('validity.token')->group(function (){
+    //remettre ->middleware('validity.token') quand appli mobile
+    Route::prefix('/piece')->group(function (){
         Route::post('/', [PieceController::class, 'createPiece'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [PieceController::class, 'getPieces']);
-        Route::get('/{id}', [PieceController::class, 'getPiece']);
         Route::delete('/{id}', [PieceController::class, 'deletePiece'])->middleware('authorization:' . serialize([1]));
+        Route::get('/{id}', [PieceController::class, 'getPiece']);
         Route::patch('/{id}', [PieceController::class, 'updatePiece'])->middleware('authorization:' . serialize([1]));
+    });
+
+    Route::prefix('/qr')->group(function(){
+        Route::get('/{id}', [QrCodeController::class, 'generateQrCode']);
+        Route::get('/delete-piece/{pieceId}', [QrCodeController::class, 'deletePiece'])->name('deletePiece');
     });
 
     Route::prefix('/recipe')->middleware('validity.token')->group(function (){

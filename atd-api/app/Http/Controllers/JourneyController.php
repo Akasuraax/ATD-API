@@ -25,15 +25,16 @@ class JourneyController extends Controller
         $this->distanceMatrixService = new DistanceMatrixService();
         $this->pdfService = new PdfService();
     }
+
     public function createJourney(Request $request)
     {
-        try{
+        try {
             $request->validate([
                 'journey.name' => 'required|string|max:255',
                 'activity.id' => 'required|int',
                 'vehicle.id' => 'required|int',
             ]);
-        }catch (ValidationException $e){
+        } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
@@ -41,15 +42,12 @@ class JourneyController extends Controller
 
         //check if the vehicle exists
         $vehicle = Vehicle::findOrFail($array['vehicle']['id']);
-        if($vehicle->archive)
-            return Response(['message'=>'The vehicle you selected is archived.'], 404);
+        if ($vehicle->archive)
+            return Response(['message' => 'The vehicle you selected is archived.'], 404);
 
-        if(isset($array['activity']['id'])){
-            $activity = Activity::findOrfail($array['activity']['id']);
-            if($activity->archive)
-                return Response(['message'=>'The activity you selected is archived.'], 404);
-        }else
-            $activity = null;
+        $activity = Activity::findOrfail($array['activity']['id']);
+        if ($activity->archive)
+            return Response(['message' => 'The activity you selected is archived.'], 404);
 
         $json_string = trim($array["steps"], '"');
         $json_string = str_replace("'", '"', $json_string);
@@ -78,18 +76,17 @@ class JourneyController extends Controller
         $this->pdfService->generatePdf($steps, $activity, $journey->id);
 
         $stepsArray = [];
-        for($i = 0; $i < count($steps); $i++) {
+        for ($i = 0; $i < count($steps); $i++) {
             preg_match('/(.+)\s(\d{5})/', $steps[$i], $matches);
 
             $step = Step::create([
                 'address' => $matches[1],
-                'zipcode' =>$matches[2],
+                'zipcode' => $matches[2],
                 'time' => Carbon::now(),
                 'id_journey' => $journey->id
             ]);
             $stepsArray[] = $step;
         }
-
 
         $journey->vehicles()->attach($vehicle->id, ['archive' => false]);
         $total_hours = floor($journey->duration / 3600);
@@ -98,15 +95,16 @@ class JourneyController extends Controller
         return Response(['journey' => [
             'id' => $journey->id,
             'name' => $journey->name,
-            'distance' => $journey->distance/1000,
-            'duration' => $total_hours . "h " . $total_minutes ."min",
+            'distance' => $journey->distance / 1000,
+            'duration' => $total_hours . "h " . $total_minutes . "min",
             'activity' => $activity,
             'vehicle' => $vehicle,
             'steps' => $stepsArray
         ]], 201);
     }
 
-    public function getJourneys(Request $request){
+    public function getJourneys(Request $request)
+    {
         $perPage = $request->input('pageSize', 10);
         $page = $request->input('page', 1);
         $field = $request->input('field', "id");
@@ -118,7 +116,7 @@ class JourneyController extends Controller
 
         $field = "journeys." . $field;
 
-        $journey = Journey::select('journeys.id', 'journeys.name', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost', 'journeys.id_activity', 'vehicles.name as vehicle_name', 'vehicles.license_plate','journeys.archive', 'journeys.id_activity')
+        $journey = Journey::select('journeys.id', 'journeys.name', 'journeys.duration', 'journeys.distance', 'journeys.cost', 'journeys.fuel_cost', 'journeys.id_activity', 'vehicles.name as vehicle_name', 'vehicles.license_plate', 'journeys.archive', 'journeys.id_activity')
             ->join('drives', 'drives.id_journey', '=', 'journeys.id')
             ->join('vehicles', 'drives.id_vehicle', '=', 'vehicles.id')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
@@ -164,6 +162,7 @@ class JourneyController extends Controller
             "journeys" => $journey,
         ]);
     }
+
     public function getJourney($id)
     {
         $journey = Journey::findOrFail($id);
@@ -173,44 +172,46 @@ class JourneyController extends Controller
         $total_minutes = floor(($journey->duration % 3600) / 60);
 
         return response()->json([
-           "journey" => [
-               'id' => $journey->id,
-               'name' => $journey->name,
-               'duration' => $total_hours . "h " . $total_minutes ."min",
-               'distance' => $journey->distance/1000,
-               'archive' => $journey->archive,
-               'created_at' => $journey->created_at,
-               'updated_at' => $journey->update_at,
-               'activity' => $activity,
-               'steps' => $steps,
-           ]
+            "journey" => [
+                'id' => $journey->id,
+                'name' => $journey->name,
+                'duration' => $total_hours . "h " . $total_minutes . "min",
+                'distance' => $journey->distance / 1000,
+                'archive' => $journey->archive,
+                'created_at' => $journey->created_at,
+                'updated_at' => $journey->update_at,
+                'activity' => $activity,
+                'steps' => $steps,
+            ]
         ]);
     }
 
-    public function deleteJourney($id){
-        try{
+    public function deleteJourney($id)
+    {
+        try {
             $journey = Journey::findOrFail($id);
-            if($journey->archive)
+            if ($journey->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
 
             $journey->archive();
             $journey = Journey::findOrFail($id);
-            return response()->json(['journey' => $journey,  'message' => "Deleted !"], 200);
-        }catch(ValidationException $e){
+            return response()->json(['journey' => $journey, 'message' => "Deleted !"], 200);
+        } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
-    public function updateJourney($id, Request $request){
-        try{
+    public function updateJourney($id, Request $request)
+    {
+        try {
             Journey::findOrFail($id);
-            try{
+            try {
                 $request->validate([
                     'journey.name' => 'required|string|max:255',
                     'activity.id' => 'required|int',
                     'vehicle.id' => 'required|int'
                 ]);
-            }catch (ValidationException $e){
+            } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
@@ -233,20 +234,21 @@ class JourneyController extends Controller
                     'distance' => $journey['distance']
                 ],
             ]);
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
 
-    public function callGoogleApi(Request $request){
+    public function callGoogleApi(Request $request)
+    {
 
-        try{
+        try {
             $request->validate([
                 'steps.*.address' => 'required|string|max:255',
                 'steps.*.zipcode' => 'required|string|size:5',
                 'steps.*.time' => 'required|string|date_format:H:i'
             ]);
-        }catch (ValidationException $e){
+        } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
@@ -270,6 +272,7 @@ class JourneyController extends Controller
         return $this->executeScript($graph);
 
     }
+
     public function executeScript(array $graph)
     {
         $graph = json_encode($graph);

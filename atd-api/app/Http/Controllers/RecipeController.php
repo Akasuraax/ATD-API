@@ -112,7 +112,6 @@ class RecipeController extends Controller
 
         return response()->json($recipes);
     }
-
     public function getRecipesFilter(Request $request){
 
         $filter = $request->input('filter', '%');

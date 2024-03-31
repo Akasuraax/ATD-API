@@ -98,7 +98,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Global "From" Address
+    | Global "From" AddressController
     |--------------------------------------------------------------------------
     |
     | You may wish for all e-mails sent by your application to be sent from

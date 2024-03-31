@@ -11,7 +11,6 @@ class Step extends Model
 
     protected $fillable = [
         'address',
-        'zipcode',
         'time',
         'id_journey',
         'archive'

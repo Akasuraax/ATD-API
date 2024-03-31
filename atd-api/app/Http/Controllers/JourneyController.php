@@ -77,11 +77,9 @@ class JourneyController extends Controller
 
         $stepsArray = [];
         for ($i = 0; $i < count($steps); $i++) {
-            preg_match('/(.+)\s(\d{5})/', $steps[$i], $matches);
 
             $step = Step::create([
-                'address' => $matches[1],
-                'zipcode' => $matches[2],
+                'address' => $steps[$i],
                 'time' => Carbon::now(),
                 'id_journey' => $journey->id
             ]);
@@ -244,9 +242,7 @@ class JourneyController extends Controller
 
         try {
             $request->validate([
-                'steps.*.address' => 'required|string|max:255',
-                'steps.*.zipcode' => 'required|string|size:5',
-                'steps.*.time' => 'required|string|date_format:H:i'
+                'steps.*' => 'required|string'
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -254,10 +250,9 @@ class JourneyController extends Controller
 
         $steps = json_decode($request->getContent(), true)["steps"];
         $nodes = [];
-        foreach ($steps as $step) {
-            $nodes[] = $step["address"] . " " . $step["zipcode"];
+        for ($i = 0; $i < count($steps); $i++) {
+            $nodes[] = $steps[$i];
         }
-
         $graph = [];
         foreach ($nodes as $i => $node) {
             foreach ($nodes as $j => $otherNode) {

@@ -24,10 +24,10 @@ class AddressService
     public function address($value)
     {
 
-            $url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?' . http_build_query([
+        $url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?' . http_build_query([
                 'input' => $value,
                 'key' => $this->apiKey,
-                'types' => '(cities)',
+                'components' => 'country:fr',
             ]);
 
         $options = [

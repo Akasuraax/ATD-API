@@ -6,6 +6,7 @@ use App\Models\Demand;
 use App\Models\Type;
 use App\Services\DeleteService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 class TypeController extends Controller
@@ -15,6 +16,7 @@ class TypeController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
+                'color' => ['nullable', 'string', Rule::unique('types', 'color')],
                 'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'display' => 'required|boolean',
                 'access_to_warehouse' => 'required|boolean',
@@ -39,6 +41,7 @@ class TypeController extends Controller
             'name' => ucfirst(strtolower($validateData['name'])),
             'description' => $validateData['description'],
             'display' => $validateData['display'],
+            'color' => $validateData['color'] ?? null,
             'access_to_warehouse' => $validateData['access_to_warehouse'],
             'access_to_journey' => $validateData['access_to_journey'],
         ]);
@@ -150,6 +153,7 @@ class TypeController extends Controller
             $requestData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
+                'color' => ['nullable', 'string', Rule::unique('types', 'color')],
                 'display' => 'required|boolean',
                 'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'access_to_warehouse' => 'required|boolean',

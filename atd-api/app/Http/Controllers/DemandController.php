@@ -44,12 +44,12 @@ class DemandController extends Controller
     }
 
     public function getDemand($id){
-        return Demand::find($id) ? Demand::select('*')->with('type:name')->with('user:email')->where('demands.id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Demand::find($id) ? Demand::select('*')->with('type:id,name')->with('user:id,email')->where('id', $id)->get()  : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function getDemands(Request $request){
         $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
+        $page = $request->input('page', 0);
         $field = $request->input('field', "id");
         $sort = $request->input('sort', "asc");
 
@@ -59,7 +59,9 @@ class DemandController extends Controller
 
         $field = "demands." . $field;
 
-        $demand = Demand::select('*')->with('type:name')->with('user:email')
+        $demand =  Demand::select('*')
+            ->with('type:id,name')
+            ->with('user:id,email')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {

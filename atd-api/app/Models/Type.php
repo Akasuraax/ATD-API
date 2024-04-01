@@ -27,7 +27,7 @@ class Type extends Model
     }
 
     public function demands(){
-        return $this->hasMany(Demand::class,  'id_type', 'id');
+        return $this->hasMany(Demand::class,  'id_type');
     }
 
     public function archive(){

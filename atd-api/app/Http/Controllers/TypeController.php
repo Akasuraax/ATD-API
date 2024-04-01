@@ -116,7 +116,7 @@ class TypeController extends Controller
     }
 
     public function getType($id){
-        return Type::find($id) ? Type::select('id', 'name', 'description', 'image', 'access_to_warehouse', 'access_to_journey', 'display','archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Type::find($id) ? Type::select('id', 'name', 'description', 'color','image', 'access_to_warehouse', 'access_to_journey', 'display','archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
 
     }
 

@@ -108,7 +108,7 @@ class TypeController extends Controller
     }
 
     public function getTypesAll(){
-        $types = Type::get();
+        $types = Type::get()->where("archive", false);
 
         return response()->json([
             "types" => $types

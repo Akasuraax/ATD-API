@@ -63,14 +63,13 @@ use App\Http\Controllers\ActivityController;
 
     Route::prefix('/type')->middleware('validity.token')->group(function(){
         Route::post('/', [TypeController::class, 'createType'])->middleware('authorization:' . serialize([1]));
-        Route::get('/', [TypeController::class, 'getTypes']);
-        Route::get('/all', [TypeController::class, 'getTypesAll'])->middleware('authorization:' . serialize([1]));
+        Route::get('/', [TypeController::class, 'getTypes'])->middleware('authorization:' . serialize([1]));
+        Route::get('/all', [TypeController::class, 'getTypesAll']);
         Route::get('/{id}/file', [TypeController::class, 'downloadTypeFile']);
         Route::get('/{id}', [TypeController::class, 'getType']);
         Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
         Route::post('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
-    Route::get('/types', [TypeController::class, 'getTypeAll'])->middleware('validity.token');
 
     Route::prefix('/user')->middleware('validity.token')->group(function(){
         Route::get('/', [UserController::class, 'getUsers']);
@@ -90,7 +89,6 @@ use App\Http\Controllers\ActivityController;
         Route::delete('/{id}', [RoleController::class, 'deleteRole'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [RoleController::class, 'updateRole'])->middleware('authorization:' . serialize([1]));
     });
-
     Route::prefix('/demand')->middleware('validity.token')->group(function(){
         Route::post('/', [DemandController::class, 'createDemand']);
         Route::get('/', [DemandController::class, 'getDemands']);

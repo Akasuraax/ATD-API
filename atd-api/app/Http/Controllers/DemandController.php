@@ -16,26 +16,24 @@ class DemandController extends Controller
     public function createDemand(Request $request){
         try{
             $validateData = $request->validate([
-                'description' => 'required|string',
-                'user.id' => 'required|int',
-                'type.id' => 'required|int'
+                'demand.description' => 'required|string',
+                'demand.id_type' => 'required|int'
             ]);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $user = User::findOrFail($validateData['user']['id']);
-        $type = Type::findOrFail($validateData['type']['id']);
 
-        if($user->archive)
-            return response()->json(['message' => 'The user you put is archived.'], 405);
+        $type = Type::findOrFail($validateData['demand']['id_type']);
+        $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
+
         if($type->archive)
-            return response()->json(['message' => 'The type of activity you put is archived.'], 405);
+            return response()->json(['message' => 'The type of activity doesn\'t exist.'], 405);
 
         $demand = Demand::create([
-            'description' => $validateData['description'],
-            'id_user' => $validateData['user']['id'],
-            'id_type' => $validateData['type']['id']
+            'description' => $validateData['demand']['description'],
+            'id_user' => $user_id,
+            'id_type' => $validateData['demand']['id_type']
         ]);
 
         $response = [

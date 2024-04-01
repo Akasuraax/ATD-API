@@ -46,7 +46,7 @@ class DemandController extends Controller
     }
 
     public function getDemand($id){
-        return Demand::find($id) ? Demand::select('demands.id', 'demands.description', 'demands.status', 'users.name as user_name', 'users.forname as user_forname', 'users.email as user_email', 'types.name as type_name', 'demands.archive')->join('users', 'users.id', '=', 'demands.id_user')->join('types', 'types.id', '=', 'demands.id_type')->where('demands.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+        return Demand::find($id) ? Demand::select('*')->with('type:name')->with('user:email')->where('demands.id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
     public function getDemands(Request $request){
@@ -61,9 +61,7 @@ class DemandController extends Controller
 
         $field = "demands." . $field;
 
-        $demand = Demand::select('demands.id', 'demands.description', 'demands.status', 'users.name as user_name', 'users.forname as user_forname', 'users.email as user_email', 'types.name as type_name', 'demands.archive')
-            ->join('users', 'users.id', '=', 'demands.id_user')
-            ->join('types', 'types.id', '=', 'demands.id_type')
+        $demand = Demand::select('*')->with('type:name')->with('user:email')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {

@@ -152,6 +152,40 @@ class RecipeController extends Controller
 
         return response()->json($formattedRecipe);
     }
+
+    public function getNbPiecesRecipe($id)
+    {
+        $recipe = Recipe::with(["products", "products.pieces"])
+            ->where('id', $id)
+            ->where('archive', false)
+            ->first();
+
+        $nbRecipesPossible = PHP_INT_MAX;
+        if (!$recipe) {
+            return 0;
+        }
+
+        foreach ($recipe->products as $product) {
+            // Si le produit a des pièces associées
+            if ($product->pieces->isNotEmpty()) {
+                $totalPiecesCount = $product->pieces->sum('count');
+
+                if ($totalPiecesCount < $product->pivot->count) {
+                    // Il manque des pièces pour ce produit, donc le nombre maximal de recettes possibles est 0
+                    return 0;
+                }
+
+                $maxRecipesForProduct = floor($totalPiecesCount / $product->pivot->count);
+
+                $nbRecipesPossible = min($nbRecipesPossible, $maxRecipesForProduct);
+            } else {
+                // Si aucun lot n'est associé à ce produit, le nombre maximal de recettes possibles est 0
+                return 0;
+            }
+        }
+
+        return $nbRecipesPossible;
+    }
     public function deleteRecipe($id)
     {
         try{

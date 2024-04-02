@@ -145,7 +145,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/product')->middleware('validity.token')->group(function (){
         Route::post('/', [ProductController::class, 'createProduct'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [ProductController::class, 'getProducts']);
-        Route::get('/max/{id}', [ProductController::class, 'getNbPiecesProduct']);
+        Route::get('/max/{id}', [ProductController::class, 'getNbProductProduct']);
         Route::get('/filter', [ProductController::class, 'getProductsFilter']);
         Route::get('/{id}', [ProductController::class, 'getProduct']);
         Route::delete('/{id}', [ProductController::class, 'deleteProduct'])->middleware('authorization:' . serialize([1]));
@@ -163,6 +163,7 @@ use App\Http\Controllers\ActivityController;
     Route::prefix('/recipe')->middleware('validity.token')->group(function (){
         Route::post('/', [RecipeController::class, 'createRecipe'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [RecipeController::class, 'getRecipes']);
+        Route::get('/max/{id}', [RecipeController::class, 'getNbPiecesRecipe']);
         Route::get('/filter', [RecipeController::class, 'getRecipesFilter'])->middleware('authorization:' . serialize([1]));
         Route::get('/{id}', [RecipeController::class, 'getRecipe']);
         Route::delete('/{id}', [RecipeController::class, 'deleteRecipe'])->middleware('authorization:' . serialize([1]));

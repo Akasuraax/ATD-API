@@ -28,7 +28,7 @@ class ActivityController extends Controller
                 'donation' => 'nullable|int',
                 'type' => 'required|int',
                 'list_products' => 'nullable|array',
-                'list_recipes' => 'nullable|array',
+                'recipes' => 'nullable|array',
                 'roles' => 'required|array',
                 'activity_files' => 'nullable',
                 'activity_files.*' => 'mimes:pdf,jpg,png,jpeg|max:20000'
@@ -55,10 +55,9 @@ class ActivityController extends Controller
             if($validateProduct['status'] === 'error')
                 return response()->json(['message' => $validateProduct['message']], 422);
         }
-
         //recettes et vérification stock
-        if(isset($validateData['list_recipes'])) {
-            $validateRecipe = $this->validateRecipes($validateData['list_recipes']);
+        if(isset($validateData['recipes'])) {
+            $validateRecipe = $this->validateRecipes($validateData['recipes']);
 
             if ($validateRecipe['status'] === 'error')
                 return response()->json(['message' => $validateRecipe['message']], 422);
@@ -97,11 +96,10 @@ class ActivityController extends Controller
         }
 
         //enregistrement des recettes
-        if(isset($validateData['list_recipes'])) {
+        if(isset($validateData['recipes'])) {
             try {
-                foreach ($validateData['list_recipes'] as $recipe) {
-                    $recipe = json_decode($recipe, true);
-                    $activity->recipes()->attach($recipe['idRecipe'], ['archive' => false, 'count' => $recipe['count']]);
+                foreach ($validateData['recipes'] as $recipe) {
+                    $activity->recipes()->attach($recipe['id'], ['archive' => false, 'count' => $recipe['count']]);
                 }
             } catch (ValidationException $e) {
                 return response()->json(['message' => $e->getMessage()], $e->getCode());
@@ -182,6 +180,7 @@ class ActivityController extends Controller
 
         return response()->json($activities);
     }
+
     public function getActivitiesBetween(Request $request){
 
         $startDate = $request->input('startDate');
@@ -211,8 +210,47 @@ class ActivityController extends Controller
 
         return response()->json($renamedActivities);
     }
-    public function getActivity($id){
-        return Activity::find($id) ? Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')->join('types', 'types.id', '=', 'activities.id_type')->where('activities.id', $id)->get() : response()->json(['message' => 'Element doesn\'t exist'], 404);
+
+    public function getActivity($id) {
+        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
+            ->join('types', 'types.id', '=', 'activities.id_type')
+            ->with('files')
+            ->with('users')
+            ->with('roles')
+            ->with('products')
+            ->with('recipes')
+            ->with('journeys')
+            ->where('activities.id', $id)
+            ->first(); // Utiliser first() pour obtenir un seul résultat
+
+        if (!$activity) {
+            return response()->json(['message' => 'Element doesn\'t exist'], 404);
+        }
+
+        $renamedActivity = [
+            'id' => $activity->id,
+            'title' => $activity->title,
+            'description' => $activity->description,
+            'address' => $activity->address,
+            'zipcode' => $activity->zipcode,
+            'start' => $activity->start_date,
+            'end' => $activity->end_date,
+            'donation_amount' => $activity->donation,
+            'type_name' => $activity->type_name,
+            'roles' => $activity->roles->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'limits' => [
+                        'min' => $role->pivot->min,
+                        'max' => $role->pivot->max,
+                    ],
+                    'count' => $role->pivot->count,
+                ];
+            })
+        ];
+
+        return response()->json(['activity' => $renamedActivity]);
     }
 
     public function deleteActivity($id){
@@ -272,13 +310,13 @@ class ActivityController extends Controller
 
             try{
                 $validateData = $request->validate([
-                    'list_recipes' => 'required|array',
+                    'recipes' => 'required|array',
                 ]);
             }catch (ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            $validationResult = $this->validateRecipes($validateData['list_recipes']);
+            $validationResult = $this->validateRecipes($validateData['recipes']);
 
             if ($validationResult['status'] === 'error')
                 return response()->json(['message' => $validationResult['message']], 422);
@@ -286,7 +324,7 @@ class ActivityController extends Controller
             $activity->recipes()->detach();
 
             try{
-                foreach ($validateData['list_recipes'] as $recipe)
+                foreach ($validateData['recipes'] as $recipe)
                     $activity->recipes()->attach($recipe['idRecipe'], ['archive' => false, 'count' => $recipe['count']]);
 
             }catch(ValidationException $e){
@@ -368,20 +406,19 @@ class ActivityController extends Controller
     public function validateRecipes($recipes)
     {
         $attachedRecipeIds = [];
-
         foreach ($recipes as $recipe) {
             if (!is_array($recipe))
                 $recipe = json_decode($recipe, true);
 
-            if (!isset($recipe['idRecipe']) || !isset($recipe['count']))
+            if (!isset($recipe['id']) || !isset($recipe['count']))
                 return ['status' => 'error', 'message' => 'idRecipe or count is missing in one or more recipes.'];
 
-            if (in_array($recipe['idRecipe'], $attachedRecipeIds))
+            if (in_array($recipe['id'], $attachedRecipeIds))
                 return ['status' => 'error', 'message' => 'You can\'t put 2 same recipes.'];
 
-            $attachedRecipeIds[] = $recipe['idRecipe'];
+            $attachedRecipeIds[] = $recipe['id'];
 
-            $recipeModel = Recipe::findOrFail($recipe["idRecipe"]);
+            $recipeModel = Recipe::findOrFail($recipe["id"]);
 
             $makes = $recipeModel->makes()->get();
             foreach ($makes as $make) {

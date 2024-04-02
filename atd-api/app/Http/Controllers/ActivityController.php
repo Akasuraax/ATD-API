@@ -379,26 +379,6 @@ class ActivityController extends Controller
             if (in_array($recipe['idRecipe'], $attachedRecipeIds))
                 return ['status' => 'error', 'message' => 'You can\'t put 2 same recipes.'];
 
-            $attachedRecipeIds[] = $recipe['idRecipe'];
-
-            $recipeModel = Recipe::findOrFail($recipe["idRecipe"]);
-
-            $makes = $recipeModel->makes()->get();
-            foreach ($makes as $make) {
-                $product = Product::findOrFail($make->id_product);
-                $pieces = $product->pieces()->get();
-
-                if(!is_null($make->measure)&&!is_null($product->measure)) {
-                    $recipeCount = $this->makesToKgOrL($make, $recipe["count"]);
-                    $piecesCount = $this->calculateToKgOrL($pieces, $product->measure);
-                }else{
-                    $recipeCount = $recipe["count"] * $make["count"];
-                    $piecesCount = $this->calculateToUnit($pieces);
-                }
-
-                if ($recipeCount > $piecesCount)
-                    return ['status' => 'error', 'message' => 'The quantity of ' .  $product->name . ' you ask for the recipe : ' . $recipeModel->name . ', is higher than the stock !' ];
-            }
         }
 
         return ['status' => 'success'];

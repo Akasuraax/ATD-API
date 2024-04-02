@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -187,7 +188,6 @@ class UserController extends Controller
                 'status' => 'required|int'
             ]);
 
-
             $roles = $request['roles'];
             $rolesRequired = [1,2,3,4,5];
             $roleIds = array_column($roles, 'id');
@@ -205,10 +205,13 @@ class UserController extends Controller
 
            if(count(array_diff($roleIds, $validIds)) != 0){
                return response()->json(['errors' => "The list of roles is incorrect"], 400);
-
            }
 
             $user = User::findOrFail($userId);
+            if($user->status != $fields['status'] && $user->roles()->pluck('id')->toArray() != $request['roles'])
+                User::where('id', $userId)->update(['remember_token' => NULL]);
+
+            return response()->json(['test' => $user->roles()->pluck('id')->toArray()], 200);
             $user->update($fields);
             $user->roles()->sync($roleIds);
             $user->load('roles');

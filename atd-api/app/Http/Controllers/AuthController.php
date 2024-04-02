@@ -34,6 +34,8 @@ class AuthController extends Controller
 
             $user = Auth::user();
             $token = TokenController::encodeToken($user->id);
+            if($user->archive)
+                return response()->json(['message' => 'Your account has been archived.'], 403);
 
             User::where('id', $user->id)->update(['remember_token' => $token]);
             $userWithRoles = User::with('roles')->find($user->id);

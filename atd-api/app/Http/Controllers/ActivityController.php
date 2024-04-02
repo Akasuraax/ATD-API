@@ -444,81 +444,8 @@ class ActivityController extends Controller
             if (!$productModel)
                 return ['status' => 'error', 'message' => 'Product with ID ' . $product['idProduct'] . ' does not exist.'];
 
-            $pieces = $productModel->pieces()->get();
-
-            if ($this->productsToKgOrL($productModel, $product['count']) > $this->calculateToKgOrL($pieces, $productModel->measure))
-                return ['status' => 'error', 'message' => 'The quantity of ' .  $productModel->name . ' you ask is higher than the stock ! You are asking for ' . $this->productsToKgOrL($productModel, $product['count']) . 'kg or l and we have ' . $this->calculateToKgOrL($pieces, $productModel->measure) . ' kg or l in stock.' ];
         }
 
         return ['status' => 'success'];
-    }
-
-    public function productsToKgOrL($asset, $count){
-        $totalCount = 0;
-        switch ($asset->measure){
-            case 'kg' : case 'l':
-                $totalCount += $count;
-                break;
-            case 'g' : case 'ml':
-                $totalCount += $count /1000;
-                break;
-            case 'mg':
-                $totalCount += $count /(1000*1000);
-                break;
-            default:
-                $totalCount +=  0;
-                break;
-        }
-        return $totalCount;
-    }
-
-
-    public function calculateToKgOrL($assets, $measure){
-        $totalCount = 0;
-        foreach ($assets as $asset) {
-            switch ($measure) {
-                case 'kg':case 'l':
-                    $totalCount += $asset->count;
-                    break;
-                case 'g':case 'ml':
-                    $totalCount += $asset->count/1000;
-                    break;
-                case 'mg':
-                    $totalCount += $asset->count/(1000*1000);
-                    break;
-                default:
-                    $totalCount += $asset->count * 0;
-                    break;
-            }
-        }
-        return $totalCount;
-    }
-
-    public function calculateToUnit($assets){
-        $totalCount = 0;
-        foreach ($assets as $asset) {
-            $totalCount += $asset->count;
-        }
-
-        return $totalCount;
-    }
-
-    public function makesToKgOrL($asset, $count){
-        $totalCount = 0;
-        switch ($asset->measure){
-            case 'kg' : case 'l':
-                $totalCount += $asset->count * $count;
-                break;
-            case 'g' : case 'ml':
-                $totalCount += $asset->count * $count /1000;
-                break;
-            case 'mg':
-                $totalCount += $asset->count * $count /(1000*1000);
-                break;
-            default:
-                $totalCount += $asset->count * 0;
-                break;
-        }
-        return $totalCount;
     }
 }

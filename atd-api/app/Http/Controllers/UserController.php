@@ -208,10 +208,9 @@ class UserController extends Controller
            }
 
             $user = User::findOrFail($userId);
-            if($user->status != $fields['status'] && $user->roles()->pluck('id')->toArray() != $request['roles'])
+            if($user->status != $fields['status'] || count(array_diff($user->roles()->get()->pluck('id')->toArray(),$roleIds)) != 0)
                 User::where('id', $userId)->update(['remember_token' => NULL]);
 
-            return response()->json(['test' => $user->roles()->pluck('id')->toArray()], 200);
             $user->update($fields);
             $user->roles()->sync($roleIds);
             $user->load('roles');

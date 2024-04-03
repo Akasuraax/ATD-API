@@ -62,13 +62,18 @@ class ScheduleController extends Controller
                 break;
         }
 
-        $user = Schedule::with('user')->find($schedule->user_id);
+        $user = Schedule::with('user')->find($schedule->user_id)->getRelation('user');
         return response()->json([
             'schedule' => [
                 'day' => $fields['schedule']['day'],
                 'start_hour' => $fields['schedule']['start_hour'],
                 'end_hour' => $fields['schedule']['end_hour'],
-                'user' => $user
+                'user' => [
+                    'id' => $user->id,
+                    'forname' => $user->forname,
+                    'name' => $user->name,
+                    'company' => $user->compagny
+                ]
             ]
         ], 201);
     }

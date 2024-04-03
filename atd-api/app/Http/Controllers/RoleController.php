@@ -103,6 +103,9 @@ class RoleController extends Controller
             if($role->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
 
+            if(in_array($role->id, [1,2,3,4,5,6]))
+                return response()->json(['message' => 'You can\'t delete this role.'], 401);
+
             $role->archive();
             $role = Role::findOrFail($id);
 
@@ -123,6 +126,9 @@ class RoleController extends Controller
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
+
+            if(in_array($role->id, [1,2,3,4,5,6]))
+                return response()->json(['message' => 'You can\'t modify this role.'], 401);
 
             $exist = Role::where('name', strtolower($validateData['name']))->whereNotIn('id', [$id])->first();
             if($exist)

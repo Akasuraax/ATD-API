@@ -189,7 +189,7 @@ class UserController extends Controller
             ]);
 
             $roles = $request['roles'];
-            $rolesRequired = [1,2,3,4,5];
+            $rolesRequired = [1,2,3,4,5,6];
             $roleIds = array_column($roles, 'id');
             if(count(array_intersect($roleIds, $rolesRequired)) != 1){
                 return response()->json(['errors' => "The list of roles is incorrect"], 400);
@@ -227,6 +227,8 @@ class UserController extends Controller
     public function patchUser(int $userId, Request $request)
     {
         try {
+            if($userId == 1)
+                return response()->json(['message'=>'You can\'t modify this user !'], 401);
 
             $fields = $request->validate([
                 'name' => 'required|string|max:255',
@@ -267,6 +269,10 @@ class UserController extends Controller
         $user = User::where('id', $userId)
             ->with('roles')
             ->first();
+
+        if($userId == 1)
+            return response()->json(['message'=>'You can\'t delete this user !'], 401);
+
         if (!$user) {
             $response = [
                 'message' => 'Your element doesn\'t exists'

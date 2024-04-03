@@ -30,8 +30,8 @@ class ScheduleController extends Controller
             ], 404);
         }
 
-        if(!empty(Schedule::where('day', $fields['schedule']['day'])->where('user_id', $id)->first()))
-            return  response()->json(['message' => 'you already created a schedule for this day'], 409);
+        //if(!empty(Schedule::where('day', $fields['schedule']['day'])->where('user_id', $id)->first()))
+         //   return  response()->json(['message' => 'you already created a schedule for this day'], 409);
 
         $schedule = Schedule::create([
             'day' => $fields['schedule']['day'],
@@ -66,18 +66,12 @@ class ScheduleController extends Controller
                 break;
         }
 
-        $user = Schedule::with('user')->find($schedule->user_id)->getRelation('user');
         return response()->json([
             'schedule' => [
                 'day' => $fields['schedule']['day'],
                 'start_hour' => $fields['schedule']['start_hour'],
                 'end_hour' => $fields['schedule']['end_hour'],
-                'user' => [
-                    'id' => $user->id,
-                    'forname' => $user->forname,
-                    'name' => $user->name,
-                    'company' => $user->compagny
-                ]
+                'user' => $schedule->user
             ]
         ], 201);
     }
@@ -138,18 +132,12 @@ class ScheduleController extends Controller
                 break;
         }
 
-        $user = Schedule::with('user')->find($schedule->user_id)->getRelation('user');
         return response()->json([
             'schedule' => [
                 'day' =>  $scheduleDay,
                 'start_hour' => $fields['schedule']['start_hour'],
                 'end_hour' => $fields['schedule']['end_hour'],
-                'user' => [
-                    'id' => $user->id,
-                    'forname' => $user->forname,
-                    'name' => $user->name,
-                    'company' => $user->compagny
-                ]
+                'user' => $schedule->user
             ]], 200);
     }
 }

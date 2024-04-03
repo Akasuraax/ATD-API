@@ -221,7 +221,7 @@ class ActivityController extends Controller
             ->with('recipes')
             ->with('journeys')
             ->where('activities.id', $id)
-            ->first(); // Utiliser first() pour obtenir un seul résultat
+            ->first();
 
         if (!$activity) {
             return response()->json(['message' => 'Element doesn\'t exist'], 404);
@@ -237,6 +237,13 @@ class ActivityController extends Controller
             'end' => $activity->end_date,
             'donation_amount' => $activity->donation,
             'type_name' => $activity->type_name,
+            'files' => $activity->files->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'name' => $file->name,
+                    'link' => $file->link,
+                ];
+            }),
             'roles' => $activity->roles->map(function ($role) {
                 return [
                     'id' => $role->id,
@@ -528,7 +535,6 @@ class ActivityController extends Controller
         }
         return $totalCount;
     }
-
 
     public function calculateToKgOrL($assets, $measure){
         $totalCount = 0;

@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  pgsql:
+    container_name: db
+    restart: always
+    image: postgres:latest
+    environment:
+      POSTGRES_ROOT_PASSWORD: vj98bqEc745RZH
+      POSTGRES_USER: atd
+      POSTGRES_PASSWORD: i7}7U4(mB+=,7n/^Ch2G4qQYwsi-4E2]A8r7F.Zn
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

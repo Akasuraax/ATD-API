@@ -23,14 +23,14 @@ return new class extends Migration
         });
 
         DB::table('roles')->insert([
-            ['name' => 'admin', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //1
-            ['name' => 'volunteer', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //2
-            ['name' => 'beneficiary', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //3
-            ['name' => 'partner', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //4
-            ['name' => 'support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //5
-            ['name' => 'super_support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //6
-            ['name' => 'driver', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now(), 'role_id' => 2], //7
-            ['name' => 'teacher', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now(), 'role_id' => 2], //8
+            ['name' => 'admin', 'role_id' => null , 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //1
+            ['name' => 'volunteer', 'role_id' => null , 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //2
+            ['name' => 'beneficiary', 'role_id' => null , 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //3
+            ['name' => 'partner', 'role_id' => null , 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //4
+            ['name' => 'support', 'role_id' => null , 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //5
+            ['name' => 'super_support', 'role_id' => null, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //6
+            ['name' => 'driver', 'role_id' => 2, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //7
+            ['name' => 'teacher', 'role_id' => 2, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //8
         ]);
 
 

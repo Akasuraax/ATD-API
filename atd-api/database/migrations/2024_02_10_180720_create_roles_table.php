@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->string('name', 255);
             $table->boolean('archive')->default(false);
+            $table->integer('role_id')->nullable();
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -27,8 +29,8 @@ return new class extends Migration
             ['name' => 'partner', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //4
             ['name' => 'support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //5
             ['name' => 'super_support', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //6
-            ['name' => 'driver', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //7
-            ['name' => 'teacher', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()], //8
+            ['name' => 'driver', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now(), 'role_id' => 2], //7
+            ['name' => 'teacher', 'created_at' => Carbon::now(), 'updated_at' => Carbon::now(), 'role_id' => 2], //8
         ]);
 
 

@@ -23,7 +23,9 @@ class Activity extends Model
     ];
 
     public function files(){
-        return $this->belongsToMany(File::class, 'activity_files', 'id_activity', 'id_file')->withPivot('archive');
+        return $this->belongsToMany(File::class, 'activity_files', 'id_activity', 'id_file')
+            ->withPivot('archive')
+            ->wherePivot('archive', false);
     }
 
     public function users(){

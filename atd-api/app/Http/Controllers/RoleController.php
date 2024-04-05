@@ -16,10 +16,13 @@ use PhpParser\Node\Expr\List_;
 
 class RoleController extends Controller
 {
+    public $restrictedArray = [1,2,3,4,5,6];
+
     public function createRole(Request $request){
         try{
             $validateData = $request->validate([
-                'name' => 'string|required|max:255'
+                'name' => 'string|required|max:255',
+                'role_id' => 'nullable|int'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -29,8 +32,12 @@ class RoleController extends Controller
         if($exist)
             return response()->json(['message' => 'This role already exist !'], 409);
 
+        if($validateData['role_id'] && !in_array($validateData['role_id'], $this->restrictedArray) && Role::find($validateData['role_id']))
+            return response()->json(['message' => 'You didn\'t reference a valid role.'], 401);
+
         $role = Role::create([
-            'name' => strtolower($validateData['name'])
+            'name' => strtolower($validateData['name']),
+            'role_id' => $validateData['role_id'] ?? null
         ]);
 
         return Response(['role' => $role], 201);
@@ -49,7 +56,7 @@ class RoleController extends Controller
 
         $field = "roles." . $field;
 
-        $roles = Role::select('id', 'name', 'archive')
+        $roles = Role::select('id', 'name', 'role_id','archive')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -85,12 +92,12 @@ class RoleController extends Controller
     }
 
     public function getRole($id){
-        return Role::find($id) ? Role::select('id', 'name', 'archive')->where('id', $id)->first() : response(["Not found!"], 404);
+        return Role::find($id) ? Role::select('id', 'name', 'role_id', 'archive')->where('id', $id)->first() : response(["Not found!"], 404);
     }
 
     public function getAllRoles(Request $request): Collection
     {
-        $roles = Role::select('id','name')
+        $roles = Role::select('id','name', 'role_id')
             ->where('archive', false)
             ->get();
 
@@ -103,7 +110,7 @@ class RoleController extends Controller
             if($role->archive)
                 return response()->json(['message' => 'Element is already archived.'], 405);
 
-            if(in_array($role->id, [1,2,3,4,5,6]))
+            if(in_array($role->id, $this->restrictedArray))
                 return response()->json(['message' => 'You can\'t delete this role.'], 401);
 
             $role->archive();
@@ -121,14 +128,18 @@ class RoleController extends Controller
             try{
                 $validateData = $request->validate([
                     'name' => 'required|string|max:255',
+                    'role_id' => 'nullable|int',
                     'archive' => 'required|boolean'
                 ]);
             }catch(ValidationException $e){
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
-            if(in_array($role->id, [1,2,3,4,5,6]))
+            if(in_array($role->id, $this->restrictedArray))
                 return response()->json(['message' => 'You can\'t modify this role.'], 401);
+
+            if($validateData['role_id'] && !in_array($validateData['role_id'], $this->restrictedArray))
+                return response()->json(['message' => 'You didn\'t reference a valid role.'], 401);
 
             $exist = Role::where('name', strtolower($validateData['name']))->whereNotIn('id', [$id])->first();
             if($exist)

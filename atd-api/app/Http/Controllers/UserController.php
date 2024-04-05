@@ -65,7 +65,7 @@ class UserController extends Controller
                 'gender' => 2,
                 'birth_date' => Carbon::now(),
                 'address' => $fields['address'],
-                'zipcode' => $fields['zipcode'],
+                'zipcode' =>$fields['zipcode'],
                 'siret_number' => $fields['siret_number'],
                 'compagny' => $fields['compagny'],
             ]);
@@ -199,7 +199,7 @@ class UserController extends Controller
             $validRoles = $roleController->getAllRoles($request);
             $validIds = $validRoles->pluck('id')->all();
 
-            if(count(array_intersect($roleIds, $validIds)) != 1){
+            if(count(array_intersect($roleIds, $validIds)) < 1){
                 return response()->json(['errors' => "The list of roles is incorrect"], 400);
             }
 

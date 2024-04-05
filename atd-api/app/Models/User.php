@@ -63,6 +63,10 @@ class User extends Authenticatable
     {
     }
 
+    public function schedule(){
+        return $this->hasMany(Schedule::class, 'user_id');
+    }
+
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'have_roles', 'id_user', 'id_role')->withTimestamps();

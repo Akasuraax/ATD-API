@@ -25,6 +25,7 @@ use App\Http\Controllers\DemandController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ScheduleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,7 +72,9 @@ use App\Http\Controllers\ActivityController;
         Route::post('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
     });
 
-    Route::prefix('/user')->middleware('validity.token')->group(function(){
+   Route::prefix('/user')->middleware('validity.token')->group(function(){
+        Route::patch('/{id}/schedule/{scheduleDay}', [ScheduleController::class, 'updateSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
+        Route::post('/{id}/schedule', [ScheduleController::class, 'createSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
         Route::get('/', [UserController::class, 'getUsers']);
         Route::get('/visit', [UserController::class, 'getUsersVisit']);
         Route::get('/{id}', [UserController::class, 'getUser'])->middleware('ValidateUserId');

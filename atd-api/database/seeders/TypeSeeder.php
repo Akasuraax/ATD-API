@@ -82,5 +82,12 @@ class TypeSeeder extends Seeder
             'access_to_journey' => false,
             'display' => false
         ]);
+
+        Type::create([
+            'name' => 'Récolte des produits',
+            'access_to_warehouse' => true,
+            'access_to_journey' => true,
+            'display' => false
+        ]);
     }
 }

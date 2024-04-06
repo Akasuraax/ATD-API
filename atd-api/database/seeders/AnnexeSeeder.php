@@ -14,15 +14,16 @@ class AnnexeSeeder extends Seeder
     public function run(): void
     {
         Annexe::create([
-           'name' => "ESGI",
-           'address' => "242 Rue du Faubourg Saint-Antoine",
-           'zipcode' => "75012",
+            'name' => "Soissons",
+            'address' => "44 Avenue de Paris",
+            'zipcode' => "02200",
         ]);
 
         Annexe::create([
-            'name' => "Erard",
-            'address' => "21 rue Erard",
-            'zipcode' => "75012",
+           'name' => "Villers Cotteret",
+           'address' => "100 Rue Demoustier",
+           'zipcode' => "02600",
         ]);
+
     }
 }

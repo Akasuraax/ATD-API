@@ -73,7 +73,7 @@ class JourneyController extends Controller
             'id_activity' => $activity->id ?? null
         ]);
 
-        $this->pdfService->generatePdf($steps, $activity, $journey->id);
+        //$this->pdfService->generatePdf($steps, $activity, $journey->id);
 
         $stepsArray = [];
         for ($i = 0; $i < count($steps); $i++) {

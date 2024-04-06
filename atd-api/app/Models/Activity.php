@@ -40,6 +40,10 @@ class Activity extends Model
         return $this->belongsToMany(Product::class, 'gives', 'id_activity', 'id_product')->withPivot('count', 'archive');
     }
 
+    public function participates(){
+        return $this->belongsToMany(Product::class, 'participates', 'id_activity', 'id_user')->withPivot('count', 'archive');
+    }
+
     public function recipes(){
         return $this->belongsToMany(Recipe::class, 'contains', 'id_activity', 'id_recipe')->withPivot('count', 'archive');
     }

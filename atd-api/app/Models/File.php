@@ -28,7 +28,7 @@ class File extends Model
         $this->save();
         $activityIds = $this->activities->pluck('id')->toArray();
         $this->activities()->updateExistingPivot($activityIds, ['archive'=>true]);
-        unlink(public_path() . $name);
+        unlink(public_path() . '/' . $name);
     }
 
     public function archiveUser($name){

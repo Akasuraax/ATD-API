@@ -23,7 +23,9 @@ class Activity extends Model
     ];
 
     public function files(){
-        return $this->belongsToMany(File::class, 'activity_files', 'id_activity', 'id_file')->withPivot('archive');
+        return $this->belongsToMany(File::class, 'activity_files', 'id_activity', 'id_file')
+            ->withPivot('archive')
+            ->wherePivot('archive', false);
     }
 
     public function users(){
@@ -36,6 +38,10 @@ class Activity extends Model
 
     public function products(){
         return $this->belongsToMany(Product::class, 'gives', 'id_activity', 'id_product')->withPivot('count', 'archive');
+    }
+
+    public function participates(){
+        return $this->belongsToMany(Product::class, 'participates', 'id_activity', 'id_user')->withPivot('count', 'archive');
     }
 
     public function recipes(){

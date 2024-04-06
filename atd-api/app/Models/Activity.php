@@ -41,7 +41,7 @@ class Activity extends Model
     }
 
     public function participates(){
-        return $this->belongsToMany(Product::class, 'participates', 'id_activity', 'id_user')->withPivot('count', 'archive');
+        return $this->belongsToMany(Product::class, 'participates', 'id_activity', 'id_user')->withPivot('role', 'count', 'archive');
     }
 
     public function recipes(){

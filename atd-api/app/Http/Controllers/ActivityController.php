@@ -182,7 +182,7 @@ class ActivityController extends Controller
 
             $pivot->count += $request["count"];
             $pivot->save();
-            $activity->participates()->attach([$user->id => ['count' => $request["count"]]]);
+            $activity->participates()->attach([$user->id => ['count' => $request["count"], 'role' => $request['role.id']]]);
 
             return response()->json(['message' => "subscribe"]);
 
@@ -215,10 +215,11 @@ class ActivityController extends Controller
             return response()->json(['message' => 'User does not participate in this activity'], 400);
         }
 
-        $count = $activity->participates()->where('id_user', $user->id)->first()->pivot->count;
+        $pivot = $activity->participates()->where('id_user', $user->id)->first()->pivot;
+        $pivotRole = $activity->roles()->where('id_role', $pivot->role)->first()->pivot;
+        $pivotRole->count -= $pivot->count;
+        $pivotRole->save();
 
-        $pivot->count -= $request["count"];
-        $pivot->save();
         $activity->participates()->detach($user->id);
         return response()->json(['message' => "Unsubscribed successfully"]);
 

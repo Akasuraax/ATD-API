@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('participates', function (Blueprint $table) {
             $table->integer('count');
+            $table->integer('role');
             $table->integer('id_user');
             $table->integer('id_activity');
             $table->foreign('id_user')->references('id')->on('users')->onDelete('restrict');

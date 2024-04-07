@@ -270,7 +270,7 @@ class JourneyController extends Controller
 
     public function executeScript(array $graph)
     {
-        $graph = json_encode($graph);
+        $graph = json_encode($graph, JSON_UNESCAPED_UNICODE);
 
         $descriptorspec = [
             0 => ["pipe", "r"],
@@ -294,12 +294,11 @@ class JourneyController extends Controller
             if ($return_value !== 0) {
                 return response()->json(['error' => 'Une erreur est survenue lors de l\'exécution du script.']);
             } else {
-                return response()->json(['steps' => trim($output)]);
+                return response()->json(['steps' => $output]);
+
             }
         } else {
             return response()->json(['error' => 'Impossible de démarrer le processus.']);
         }
     }
-
-
 }

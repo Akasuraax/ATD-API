@@ -182,14 +182,48 @@ class ActivityController extends Controller
 
             $pivot->count += $request["count"];
             $pivot->save();
+
             $activity->participates()->attach([$user->id => ['count' => $request["count"], 'role' => $request['role.id']]]);
 
-            return response()->json(['message' => "subscribe"]);
+            $activity = Activity::find($id);
+
+            $participation = $activity->participates()->where('id_user', $user->id)->withPivot('role')->first();
+            $isSubscribe = $participation !== null;
+            $roleSubscribe = $isSubscribe ? $participation->pivot->role : null;
+
+
+            // Prepare the updated activity data to be returned
+            $renamedActivity = [
+                'id' => $activity->id,
+                'title' => $activity->title,
+                'description' => $activity->description,
+                'address' => $activity->address,
+                'zipcode' => $activity->zipcode,
+                'start_date' => $activity->start_date,
+                'end_date' => $activity->end_date,
+                'donation' => $activity->donation,
+                'type' => $activity->type,
+                'isSubscribe' => $isSubscribe,
+                'roleSubscribe' => $roleSubscribe,
+                'roles' => $activity->roles->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'limits' => [
+                            'min' => $role->pivot->min,
+                            'max' => $role->pivot->max,
+                        ],
+                        'count' => $role->pivot->count,
+                    ];
+                }),
+            ];
+
+            return response()->json(['message' => "subscribe", 'activity' => $renamedActivity]);
 
         } catch (ValidationException $e) {
-                return response()->json(['errors' => $e->errors()], 422);
-            }
+            return response()->json(['errors' => $e->errors()], 422);
         }
+    }
 
     public function deleteParticipate(Request $request, $id) {
         try {
@@ -221,8 +255,46 @@ class ActivityController extends Controller
         $pivotRole->save();
 
         $activity->participates()->detach($user->id);
-        return response()->json(['message' => "Unsubscribed successfully"]);
+        $activity->participates()->detach($user->id);
 
+        $updatedActivity = Activity::where("id",$id)
+            ->with('roles')
+            ->where('archive',false)
+            ->first();
+
+        $renamedActivity = [
+            'id' => $updatedActivity->id,
+            'title' => $updatedActivity->title,
+            'description' => $updatedActivity->description,
+            'address' => $updatedActivity->address,
+            'zipcode' => $updatedActivity->zipcode,
+            'start_date' => $updatedActivity->start_date,
+            'end_date' => $updatedActivity->end_date,
+            'donation' => $updatedActivity->donation,
+            'type' => $updatedActivity->type,
+            'isSubscribe' => false,
+            'roleSubscribe' => null,
+            'files' => $updatedActivity->files->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'name' => $file->name,
+                    'link' => $file->link,
+                ];
+            }),
+            'roles' => $updatedActivity->roles->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'limits' => [
+                        'min' => $role->pivot->min,
+                        'max' => $role->pivot->max,
+                    ],
+                    'count' => $role->pivot->count,
+                ];
+            }),
+        ];
+
+        return response()->json(['message' => "Unsubscribed successfully", 'activity' => $renamedActivity]);
     }
 
     public function isUserRegisteredToActivity(Request $request, $activityId)
@@ -234,10 +306,8 @@ class ActivityController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
-        // Trouver l'utilisateur par son ID
         $user = User::where('id', $request["user.id"])->first();
 
-        // Vérifier si l'utilisateur existe
         if (!$user) {
             return response()->json(['message' => 'Element doesn\'t exist'], 404);
         }
@@ -246,10 +316,14 @@ class ActivityController extends Controller
             ->where('archive',false)
             ->first();
 
-        // Vérifier si l'utilisateur est inscrit à l'activité
         $isRegistered = $activity->participates()->where('id_user', $user->id)->exists();
 
-        return response()->json(['message' => $isRegistered]);
+        if ($isRegistered) {
+            $role = $activity->participates()->where('id_user', $user->id)->withPivot('role')->first()->pivot->role;
+            return response()->json(['message' => 'User is registered', 'role' => $role]);
+        } else {
+            return response()->json(['message' => 'User is not registered']);
+        }
     }
 
     public function getActivities(Request $request)
@@ -306,6 +380,7 @@ class ActivityController extends Controller
 
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
+
 
         $activities = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'activities.id_type')
             ->with('type')
@@ -401,6 +476,76 @@ class ActivityController extends Controller
         return response()->json(['activity' => $renamedActivity]);
     }
 
+    public function getActivityForUser(Request $request, $id)
+    {
+        $validateData = $request->validate([
+            'user' => 'required',
+        ]);
+
+        // Retrieve the user from the request
+        $user = User::select("*")
+        ->where('id', $request['user'])
+        ->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User does not exist'], 404);
+        }
+
+        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type")
+            ->with('type')
+            ->with('files')
+            ->with('roles')
+            ->with('journeys')
+            ->where('activities.id', $id)
+            ->where('activities.archive', false)
+            ->first();
+
+        if (!$activity) {
+            return response()->json(['message' => 'Element doesn\'t exist'], 404);
+        }
+
+        $participation = $activity->participates()->where('id_user', $user->id)->withPivot('role')->first();
+        $isSubscribe = $participation !== null;
+        $roleSubscribe = $isSubscribe ? $participation->pivot->role : null;
+
+        $start = now()->greaterThanOrEqualTo($activity->start_date);
+
+
+        $renamedActivity = [
+            'id' => $activity->id,
+            'title' => $activity->title,
+            'description' => $activity->description,
+            'address' => $activity->address,
+            'zipcode' => $activity->zipcode,
+            'start_date' => $activity->start_date,
+            'end_date' => $activity->end_date,
+            'donation' => $activity->donation,
+            'start' => $start,
+            'type' => $activity->type,
+            'isSubscribe' => $isSubscribe,
+            'roleSubscribe' => $roleSubscribe,
+            'files' => $activity->files->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'name' => $file->name,
+                    'link' => $file->link,
+                ];
+            }),
+            'roles' => $activity->roles->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'limits' => [
+                        'min' => $role->pivot->min,
+                        'max' => $role->pivot->max,
+                    ],
+                    'count' => $role->pivot->count,
+                ];
+            }),
+        ];
+
+        return response()->json(['activity' => $renamedActivity]);
+    }
     public function deleteActivity($id)
     {
         try {

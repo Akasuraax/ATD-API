@@ -81,9 +81,11 @@ class TicketController extends Controller
     public function getTicket(int $id_ticket, Request $request)
     {
         $ticket = Ticket::findOrFail($id_ticket);
-        $admin = $request->attributes->parameters['admin'];
-        $support = $request->attributes->parameters['support'];
-        $demand_user = $request->attributes->parameters['demand_user'];
+
+        $data = \App::make('data');
+        $admin = $data->admin;
+        $support = $data->support;
+        $demand_user = $data->demand_user;
 
 
         $user = User::where('id', $demand_user)->first();

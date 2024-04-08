@@ -51,11 +51,12 @@ class TicketMiddleware
         if(isset($support))
             $support = $support->id_user;
 
-        $request->attributes->add([
-            'admin' => $admin,
-            'support' => $support,
-            'demand_user' => $user->id_user
-        ]);
+        $data = new \stdClass();
+        $data->admin = $admin;
+        $data->support = $support;
+        $data->demand_user = $user->id_user;
+
+        \App::instance('data', $data);
 
         return $next($request);
     }

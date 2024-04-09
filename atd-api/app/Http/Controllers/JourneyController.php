@@ -49,10 +49,13 @@ class JourneyController extends Controller
         if ($activity->archive)
             return Response(['message' => 'The activity you selected is archived.'], 404);
 
-        $json_string = trim($array["steps"], '"');
-        $json_string = str_replace("'", '"', $json_string);
+        $existingJourney = Journey::where('id_activity', $array['activity']['id'])->where('archive',false)->first();
 
-        $steps = json_decode($json_string);
+        if ($existingJourney) {
+            $existingJourney->archive();
+        }
+
+        $steps = $array["steps"];
         $total_distance = 0;
         $total_time = 0;
         for ($i = 0; $i < count($steps) - 1; $i++) {
@@ -270,7 +273,7 @@ class JourneyController extends Controller
 
     public function executeScript(array $graph)
     {
-        $graph = json_encode($graph);
+        $graph = json_encode($graph, JSON_UNESCAPED_UNICODE);
 
         $descriptorspec = [
             0 => ["pipe", "r"],
@@ -294,12 +297,11 @@ class JourneyController extends Controller
             if ($return_value !== 0) {
                 return response()->json(['error' => 'Une erreur est survenue lors de l\'exécution du script.']);
             } else {
-                return response()->json(['steps' => trim($output)]);
+                return response()->json(['steps' => $output]);
+
             }
         } else {
             return response()->json(['error' => 'Impossible de démarrer le processus.']);
         }
     }
-
-
 }

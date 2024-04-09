@@ -122,13 +122,14 @@ use App\Http\Controllers\ScheduleController;
     Route::prefix('/vehicle')->middleware('validity.token')->group(function(){
         Route::post('/', [VehicleController::class, 'createVehicle'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [VehicleController::class, 'getVehicles']);
+        Route::get('/all', [VehicleController::class, 'getAllVehicles']);
         Route::get('/{id}', [VehicleController::class, 'getVehicle']);
         Route::delete('/{id}', [VehicleController::class, 'deleteVehicle'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [VehicleController::class, 'updateVehicle'])->middleware('authorization:' . serialize([1]));
     });
 
     Route::prefix('/journey')->middleware('validity.token')->group(function(){
-        Route::get('/best_path', [JourneyController::class, 'callGoogleApi'])->middleware('authorization:' . serialize([1]));
+        Route::post('/best_path', [JourneyController::class, 'callGoogleApi'])->middleware('authorization:' . serialize([1]));
         Route::post('/', [JourneyController::class, 'createJourney'])->middleware('authorization:' . serialize([1]));
         Route::post('/{journey_id}', [StepController::class, 'calculusJourney'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [JourneyController::class, 'getJourneys']);

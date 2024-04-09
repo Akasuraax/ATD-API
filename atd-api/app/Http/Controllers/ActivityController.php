@@ -396,7 +396,9 @@ class ActivityController extends Controller
             ->with('roles')
             ->with('products')
             ->with('recipes')
-            ->with('journeys')
+            ->with(['journeys' => function ($query) {
+                $query->with('steps');
+            }])
             ->where('activities.id', $id)
             ->where('activities.archive', false)
             ->first();
@@ -415,6 +417,20 @@ class ActivityController extends Controller
             'end_date' => $activity->end_date,
             'donation' => $activity->donation,
             'type' => $activity->type,
+            'journeys' => $activity->journeys->map(function ($journey) {
+                return [
+                    'id' => $journey->id,
+                    'name' => $journey->name,
+                    'duration' => $journey->duration,
+                    'distance' => $journey->distance,
+                    'steps' => $journey->steps->map(function ($step) {
+                        return [
+                            'id' => $step->id,
+                            'address' => $step->address,
+                        ];
+                    }),
+                ];
+            }),
             'files' => $activity->files->map(function ($file) {
                 return [
                     'id' => $file->id,

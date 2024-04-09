@@ -1,0 +1,6 @@
+*
+!languages
+!/languages/*
+!/languages/*/*
+!.gitignore
+.DS_Store

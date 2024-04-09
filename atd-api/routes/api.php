@@ -159,7 +159,6 @@ use App\Http\Controllers\ScheduleController;
         Route::post('/', [PieceController::class, 'createPiece'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [PieceController::class, 'getPieces']);
         Route::delete('/{id}', [PieceController::class, 'deletePiece'])->middleware('authorization:' . serialize([1]));
-        Route::get('/', [PieceController::class, 'getMaxPiece']);
         Route::get('/{id}', [PieceController::class, 'getPiece']);
         Route::patch('/{id}', [PieceController::class, 'updatePiece'])->middleware('authorization:' . serialize([1]));
     });

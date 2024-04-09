@@ -199,13 +199,12 @@ class UserController extends Controller
             $validRoles = $roleController->getAllRoles($request);
             $validIds = $validRoles->pluck('id')->all();
 
-            if(count(array_intersect($roleIds, $validIds)) < 1){
+            if(count(array_intersect($roleIds, $validIds)) < 1)
                 return response()->json(['errors' => "The list of roles is incorrect"], 400);
-            }
 
-           if(count(array_diff($roleIds, $validIds)) != 0){
+
+           if(count(array_diff($roleIds, $validIds)) != 0)
                return response()->json(['errors' => "The list of roles is incorrect"], 400);
-           }
 
             $user = User::findOrFail($userId);
             if($user->status != $fields['status'] || count(array_diff($user->roles()->get()->pluck('id')->toArray(),$roleIds)) != 0)
@@ -280,6 +279,8 @@ class UserController extends Controller
             $status = 404;
             return Response($response, $status);
         }
+
+        User::where('id', $userId)->update(['remember_token' => NULL]);
 
         if($ban == "true") {
             $user->update(['ban' => true]);

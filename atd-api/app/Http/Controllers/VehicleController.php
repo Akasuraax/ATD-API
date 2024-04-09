@@ -17,7 +17,7 @@ class VehicleController extends Controller
         try {
             $validateData = $request->validate([
                 'name' => 'string|required|max:255',
-                'license_plate' => 'string|required|max:9',
+                'license_plate' => 'string|required|min:9|max:9',
                 'average_consumption' => 'required|numeric',
                 'fuel_type' => 'string|required',
                 'id_annexe' => 'required|int'
@@ -133,7 +133,7 @@ class VehicleController extends Controller
             try{
                 $requestData = $request->validate([
                     'name' => 'required','string|max:255',
-                    'license_plate' => 'required',
+                    'license_plate' => 'required|min:9|max:9',
                     'string',
                     'email',
                     'max:9',

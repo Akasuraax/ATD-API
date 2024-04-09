@@ -16,7 +16,7 @@ class PieceController extends Controller
     {
         try{
             $validateData = $request->validate([
-                'expired_date' => 'required|date|after:today',
+                'expired_date' => 'nullable|date|after:today',
                 'count' => 'required|numeric',
                 'location' => 'nullable|int',
                 'warehouse.id' => 'required|int',
@@ -30,6 +30,9 @@ class PieceController extends Controller
         $warehouse = Warehouse::findOrFail($validateData['warehouse']['id']);
         $product = Product::findOrFail($validateData['product']['id']);
 
+        if($validateData['count'] < 1)
+            return response()->json(['message' => 'Count must be greater than 0'], 422);
+
         if($warehouse->archive)
             return response()->json(['message' => 'The warehouse you selected is archived.'], 404);
 
@@ -37,7 +40,7 @@ class PieceController extends Controller
             return response()->json(['message' => 'The product you selected is archived.'], 404);
 
         $piece = Piece::create([
-            'expired_date' => $validateData['expired_date'],
+            'expired_date' => $validateData['expired_date'] ?? null,
             'count' => $validateData['count'],
             'location' => $validateData['location'] ?? null,
             'id_warehouse' => $validateData['warehouse']['id'],
@@ -123,7 +126,7 @@ class PieceController extends Controller
             $piece = Piece::findOrFail($id);
             try{
                 $requestData = $request->validate([
-                    'expired_date' => 'required|date|after:today',
+                    'expired_date' => 'nullable|date|after:today',
                     'count' => 'required|numeric',
                     'location' => 'nullable|int',
                     'warehouse.id' => 'required|int',

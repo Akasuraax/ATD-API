@@ -31,7 +31,7 @@ class TypeSeeder extends Seeder
         ]);
 
         Type::create([
-            'name' => 'Navettes/délplacements',
+            'name' => 'Navettes/déplacements',
             'access_to_warehouse' => false,
             'access_to_journey' => true,
             'color' => '#7cf694',

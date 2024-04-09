@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\DeleteService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\Type;
@@ -308,49 +309,14 @@ class ActivityController extends Controller
 
     public function getActivities(Request $request)
     {
-        $perPage = $request->input('pageSize', 10);
-        $page = $request->input('page', 1);
-        $field = $request->input('field', "id");
-        $sort = $request->input('sort', "asc");
-
-        $fieldFilter = $request->input('fieldFilter', '');
-        $operator = $request->input('operator', '');
-        $value = $request->input('value', '%');
-
-        $field = "activities." . $field;
+        // Obtenir la date et l'heure actuelles
+        $now = Carbon::now();
 
         $activities = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
             ->join('types', 'types.id', '=', 'activities.id_type')
-            ->where(function ($query) use ($fieldFilter, $operator, $value) {
-                if ($fieldFilter && $operator && $value !== '*') {
-                    switch ($operator) {
-                        case 'contains':
-                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
-                            break;
-                        case 'equals':
-                            $query->where($fieldFilter, '=', $value);
-                            break;
-                        case 'startsWith':
-                            $query->where($fieldFilter, 'LIKE', $value . '%');
-                            break;
-                        case 'endsWith':
-                            $query->where($fieldFilter, 'LIKE', '%' . $value);
-                            break;
-                        case 'isEmpty':
-                            $query->whereNull($fieldFilter);
-                            break;
-                        case 'isNotEmpty':
-                            $query->whereNotNull($fieldFilter);
-                            break;
-                        case 'isAnyOf':
-                            $values = explode(',', $value);
-                            $query->whereIn($fieldFilter, $values);
-                            break;
-                    }
-                }
-            })
-            ->orderBy($field, $sort)
-            ->paginate($perPage, ['*'], 'page', $page + 1);
+            ->where('activities.start_date', '>', $now)
+            ->limit(3)
+            ->get();
 
         return response()->json($activities);
     }
@@ -591,7 +557,7 @@ class ActivityController extends Controller
 
             try {
                 $validateData = $request->validate([
-                    'recipes' => 'required|array',
+                    'recipes' => 'array',
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
@@ -620,7 +586,7 @@ class ActivityController extends Controller
 
             try {
                 $validateData = $request->validate([
-                    'list_products' => 'required|array',
+                    'list_products' => 'array',
                 ]);
             } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
@@ -664,14 +630,39 @@ class ActivityController extends Controller
             if ($validationResult['status'] === 'error')
                 return response()->json(['message' => $validationResult['message']], 422);
 
-            $activity->roles()->detach();
+            // Obtenir les ID des rôles déjà attachés
+            $existingRoleIds = $activity->roles()->pluck('roles.id')->toArray();
 
-            try {
-                foreach ($validateData['role_limits'] as $limits) {
-                    $activity->roles()->attach($limits['id'], ['archive' => false, 'min' => $limits["limits"]["min"], 'max' => $limits["limits"]["max"], 'count' => 0]);
+            // Préparation des données pour l'attachement
+            $newRoles = [];
+            $updateRoles = [];
+            foreach ($validateData['role_limits'] as $limits) {
+                if (!in_array($limits['id'], $existingRoleIds)) {
+                    // Nouveau rôle, attacher avec count à 0
+                    $newRoles[$limits['id']] = [
+                        'archive' => false,
+                        'min' => $limits["limits"]["min"],
+                        'max' => $limits["limits"]["max"],
+                        'count' => 0,
+                    ];
+                } else {
+                    // Rôle existant, mettre à jour sans affecter count
+                    $updateRoles[$limits['id']] = [
+                        'archive' => false,
+                        'min' => $limits["limits"]["min"],
+                        'max' => $limits["limits"]["max"],
+                    ];
                 }
-            } catch (ValidationException $e) {
-                return response()->json(['message' => $e->getMessage()], $e->getCode());
+            }
+
+            // Attacher les nouveaux rôles
+            if (!empty($newRoles)) {
+                $activity->roles()->attach($newRoles);
+            }
+
+            // Mettre à jour les rôles existants
+            if (!empty($updateRoles)) {
+                $activity->roles()->syncWithoutDetaching($updateRoles);
             }
 
             return response()->json(['activity' => $activity], 200);

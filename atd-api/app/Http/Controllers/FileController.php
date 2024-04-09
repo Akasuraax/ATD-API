@@ -72,11 +72,14 @@ class FileController extends Controller
             if ($request->activity_files) {
                 foreach ($request->activity_files as $file) {
                     $newFile = $file->getClientOriginalName();
-                    $name = $id . '-' .  time() . '-' . strtolower(str_replace(' ', '-', $newFile));
+                    $count = File::where('name', 'LIKE', '%'. pathinfo($id . '-' . $newFile, PATHINFO_FILENAME) . '%')->where('archive',false)->count();
+                    if($count>0)
+                        $name = pathinfo($id . '-' . $newFile, PATHINFO_FILENAME) . $count+1 . '.' . $file->getClientOriginalExtension();
+                    else
+                        $name = $id . '-' . strtolower(str_replace(' ', '-', $newFile));
                     $file->move(public_path() . '/storage/activities/' . $id . '/', $name);
-
                     $newFile = File::create([
-                        'name' => pathinfo($newFile, PATHINFO_FILENAME),
+                        'name' => $id . '-' . ($count > 0 ? pathinfo($newFile, PATHINFO_FILENAME) . ($count + 1) : pathinfo($newFile, PATHINFO_FILENAME)),
                         'link' => 'storage/activities/' . $id . '/' . $name,
                     ]);
 
@@ -166,7 +169,7 @@ class FileController extends Controller
         $activities = File::select('files.id', 'files.name', 'files.link', 'files.archive')
             ->join('activity_files', 'activity_files.id_file', '=', 'files.id')
             ->where('activity_files.id_activity', '=', $id)
-            ->where('archive', false)
+            ->where('files.archive', false)
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {

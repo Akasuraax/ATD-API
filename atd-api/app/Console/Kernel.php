@@ -10,9 +10,13 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
+    protected $commands = [
+        Commands\PlanJourneyFromScheduleCommand::class,
+    ];
+
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('app:plan-journey-from-schedule-command')->timezone('Europe/Paris')->dailyAt('16:20');
     }
 
     /**

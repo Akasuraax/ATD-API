@@ -15,6 +15,7 @@ class Vehicle extends Model
         'license_plate',
         'average_consumption',
         'fuel_type',
+        'partner',
         'id_annexe',
         'vehicle',
         'archive'

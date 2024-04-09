@@ -28,6 +28,8 @@ class AuthController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
+        $request['email'] = strtolower($request->email);
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {

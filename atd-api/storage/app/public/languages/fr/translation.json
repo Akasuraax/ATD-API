@@ -258,8 +258,9 @@
         "vehicleDetails": "Détails du véhicule",
         "fuel_type": "Type d'essence",
         "license_plate": "Plaque d'immatriculation",
-        "isArchived": "vehicule archiver",
-        "annexe": "Annexe"
+        "isArchived": "Véhicule archivé",
+        "annexe": "Annexe",
+        "partner": "Véhicule de collecte partenaire"
     },
     "warehouse": {
         "title": "Liste des entrepôts",

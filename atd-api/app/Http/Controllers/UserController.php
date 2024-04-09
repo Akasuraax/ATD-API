@@ -47,7 +47,7 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $fields['name'],
                 'forname' => $fields['forname'],
-                'email' => $fields['email'],
+                'email' => strtolower($fields['email']),
                 'password' => $fields['password'],
                 'phone_number' => $fields['phone_number'],
                 'gender' => $fields['gender'],
@@ -59,7 +59,7 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $fields['name'],
                 'forname' => $fields['forname'],
-                'email' => $fields['email'],
+                'email' => strtolower($fields['email']),
                 'password' => $fields['password'],
                 'phone_number' => $fields['phone_number'],
                 'gender' => 2,

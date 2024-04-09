@@ -16,17 +16,32 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
+        $addresses = [
+            '85 Rue du Faubourg du Temple, 75010',
+            '8 Pass. de Dantzig, 75015',
+            '36 Rue Bobillot, 75013',
+            '9bis Rue Albert Guilpin, 94250',
+            '13 Rue Victor Marquigny, 94250',
+            '60 Rue de Rosny, 93100',
+            'Rue Paul Doumer, 78420'
+        ];
+
         //Create partner
         for ($i = 0; $i < 10; $i++) {
+            $randomAddress = $addresses[array_rand($addresses)];
+            $addressParts = explode(',', $randomAddress);
+            $address = trim($addressParts[0]);
+            $zipcode = trim($addressParts[1]);
+
             $user = User::create([
                 'name' => 'John' . $i,
                 'forname' => 'Doe' . $i,
                 'email' => 'user' . $i . '@example.com',
-                'password' => 'password123', // Utilisation de Hash::make pour hasher le mot de passe
+                'password' => 'password123',
                 'phone_country' => '+33',
                 'phone_number' => '123456789',
-                'address' => '123 Street',
-                'zipcode' => '12345',
+                'address' => $address,
+                'zipcode' => $zipcode,
                 'visited' => 'false',
                 'siret_number' => '12345678901234',
                 'compagny' => 'Company' . $i,

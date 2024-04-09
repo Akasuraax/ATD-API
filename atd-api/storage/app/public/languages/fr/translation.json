@@ -291,6 +291,9 @@
         "title": "Liste des produits",
         "titled": "Intitulé",
         "details": "Détails",
+        "name": "Nom",
+        "count": "Quantité",
+        "productDetails": "Détail du produit",
         "add": "Ajouter un produit",
         "measure" : "Unité de mesure",
         "conflictMessage":"Le nom du produit existe déjà"

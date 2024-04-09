@@ -72,7 +72,7 @@ class FileController extends Controller
             if ($request->activity_files) {
                 foreach ($request->activity_files as $file) {
                     $newFile = $file->getClientOriginalName();
-                    $name = $id . '-' . strtolower(str_replace(' ', '-', $newFile));
+                    $name = $id . '-' .  time() . '-' . strtolower(str_replace(' ', '-', $newFile));
                     $file->move(public_path() . '/storage/activities/' . $id . '/', $name);
 
                     $newFile = File::create([

@@ -105,26 +105,6 @@ class ActivityController extends Controller
             }
         }
 
-        //enregistrement des fichiers
-        try {
-            if ($request->activity_files) {
-
-                foreach ($request->activity_files as $file) {
-                    $name = $activity->id . '-' . time() . rand(1, 99) . '.' . $file->extension();
-                    $file->move(public_path() . '/storage/activities/' . $activity->id . '/', $name);
-
-                    $newFile = File::create([
-                        'name' => $name,
-                        'link' => '/storage/activities/' . $activity->id . '/' . $name,
-                    ]);
-
-                    $newFile->activities()->attach($activity->id, ['archive' => false]);
-                }
-            }
-        } catch (ValidationException $e) {
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
-        }
-
         return response()->json(["activity" => $activity]);
     }
 

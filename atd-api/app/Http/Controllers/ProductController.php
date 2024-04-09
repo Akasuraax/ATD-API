@@ -47,7 +47,7 @@ class ProductController extends Controller
 
         $field = "products." . $field;
 
-        $product = Product::select('id','name', 'measure', 'archive')
+        $product = Product::select('id','name', 'measure','archive')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -104,7 +104,7 @@ class ProductController extends Controller
             ->with('pieces')
             ->where('archive', false)
             ->first();
-        
+
         if (!$product) {
             return 0;
         }

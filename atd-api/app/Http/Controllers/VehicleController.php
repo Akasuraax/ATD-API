@@ -95,9 +95,15 @@ class VehicleController extends Controller
     }
 
     public function getAllVehicles() {
-        $vehicle = Vehicle::where('id', $id)
+        $vehicle = Vehicle::where('archive', false)
             ->with('annexe')
-            ->first();
+            ->get();
+
+        if ($vehicle) {
+            return $vehicle;
+        } else {
+            return response()->json(['message' => 'Element doesn\'t exist'], 404);
+        }
     }
 
     public function getVehicle($id){

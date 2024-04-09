@@ -49,10 +49,13 @@ class JourneyController extends Controller
         if ($activity->archive)
             return Response(['message' => 'The activity you selected is archived.'], 404);
 
-        $json_string = trim($array["steps"], '"');
-        $json_string = str_replace("'", '"', $json_string);
+        $existingJourney = Journey::where('id_activity', $array['activity']['id'])->where('archive',false)->first();
 
-        $steps = json_decode($json_string);
+        if ($existingJourney) {
+            $existingJourney->archive();
+        }
+
+        $steps = $array["steps"];
         $total_distance = 0;
         $total_time = 0;
         for ($i = 0; $i < count($steps) - 1; $i++) {

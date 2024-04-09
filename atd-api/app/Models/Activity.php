@@ -54,7 +54,7 @@ class Activity extends Model
 
     public function journeys()
     {
-        return $this->hasMany(Journey::class, 'id_activity');
+        return $this->hasMany(Journey::class, 'id_activity')->where('archive', false);
     }
 
     public function archive($id)

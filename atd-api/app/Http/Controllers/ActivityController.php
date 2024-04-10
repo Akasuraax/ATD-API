@@ -114,6 +114,7 @@ class ActivityController extends Controller
         try {
             $activity = Activity::where("id",$id)
                 ->with('roles')
+                ->with('files')
                 ->where('archive',false)
                 ->first();
 
@@ -186,6 +187,13 @@ class ActivityController extends Controller
                 'type' => $activity->type,
                 'isSubscribe' => $isSubscribe,
                 'roleSubscribe' => $roleSubscribe,
+                'files' => $activity->files->map(function ($file) {
+                    return [
+                        'id' => $file->id,
+                        'name' => $file->name,
+                        'link' => $file->link,
+                    ];
+                }),
                 'roles' => $activity->roles->map(function ($role) {
                     return [
                         'id' => $role->id,
@@ -255,13 +263,7 @@ class ActivityController extends Controller
             'type' => $updatedActivity->type,
             'isSubscribe' => false,
             'roleSubscribe' => null,
-            'files' => $updatedActivity->files->map(function ($file) {
-                return [
-                    'id' => $file->id,
-                    'name' => $file->name,
-                    'link' => $file->link,
-                ];
-            }),
+            'files' => [],
             'roles' => $updatedActivity->roles->map(function ($role) {
                 return [
                     'id' => $role->id,
@@ -486,13 +488,7 @@ class ActivityController extends Controller
             'type' => $activity->type,
             'isSubscribe' => $isSubscribe,
             'roleSubscribe' => $roleSubscribe,
-            'files' => $activity->files->map(function ($file) {
-                return [
-                    'id' => $file->id,
-                    'name' => $file->name,
-                    'link' => $file->link,
-                ];
-            }),
+            'files' => [],
             'roles' => $activity->roles->map(function ($role) {
                 return [
                     'id' => $role->id,
@@ -505,6 +501,16 @@ class ActivityController extends Controller
                 ];
             }),
         ];
+
+        if ($isSubscribe) {
+            $renamedActivity['files'] = $activity->files->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'name' => $file->name,
+                    'link' => $file->link,
+                ];
+            });
+        }
 
         return response()->json(['activity' => $renamedActivity]);
     }

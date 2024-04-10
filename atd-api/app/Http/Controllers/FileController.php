@@ -79,7 +79,7 @@ class FileController extends Controller
                         $name = $id . '-' . strtolower(str_replace(' ', '-', $newFile));
                     $file->move(public_path() . '/storage/activities/' . $id . '/', $name);
                     $newFile = File::create([
-                        'name' => $id . '-' . ($count > 0 ? pathinfo($newFile, PATHINFO_FILENAME) . ($count + 1) : pathinfo($newFile, PATHINFO_FILENAME)),
+                        'name' => $id . '-' . ($count > 0 ? pathinfo($newFile, PATHINFO_FILENAME) . ($count + 1) . '.' . $file->getClientOriginalExtension() : pathinfo($newFile, PATHINFO_FILENAME) . '.' . $file->getClientOriginalExtension()),
                         'link' => 'storage/activities/' . $id . '/' . $name,
                     ]);
 

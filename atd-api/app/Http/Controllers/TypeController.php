@@ -153,7 +153,7 @@ class TypeController extends Controller
             $requestData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
-                'color' => ['nullable', 'string', 'min:7', 'max:7', Rule::unique('types', 'color')],
+                'color' => ['nullable', 'string', 'max:7', Rule::unique('types', 'color')],
                 'display' => 'required|boolean',
                 'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'access_to_warehouse' => 'required|boolean',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Models\File;
 use App\Services\PdfService;
 use App\Models\Journey;
 use App\Models\Step;
@@ -76,7 +77,13 @@ class JourneyController extends Controller
             'id_activity' => $activity->id ?? null
         ]);
 
-        //$this->pdfService->generatePdf($steps, $activity, $journey->id);
+        $file = $this->pdfService->generatePdf($steps, $activity, $journey->id);
+        $newFile = File::create([
+            'name' => $activity->id . '-' .'journey' . '.pdf',
+            'link' => $file,
+        ]);
+
+        $newFile->activities()->attach($array['activity']['id'], ['archive' => false]);
 
         $stepsArray = [];
         for ($i = 0; $i < count($steps); $i++) {

@@ -20,10 +20,18 @@ class PdfService
 
         $pdf->writeHTML($html);
 
-        $pdfFileName = $activity->id . '-' . $id_journey . '.pdf';
+        $pdfFileName = $activity->id . '-' .'journey' . '.pdf';
 
-        $pdf->Output(public_path('./storage/pdf/' . $pdfFileName), 'F');
+        $activityFolderPath = public_path('./storage/activities/' . $activity->id);
 
-        return public_path('./storage/pdf/' . $pdfFileName);
+        if (!is_dir($activityFolderPath)) {
+            mkdir($activityFolderPath, 0777, true);
+        }
+
+        $pdfFilePath = $activityFolderPath . '/' . $pdfFileName;
+
+        $pdf->Output($pdfFilePath, 'F');
+
+        return "/storage/activities/" . $pdfFileName;
     }
 }

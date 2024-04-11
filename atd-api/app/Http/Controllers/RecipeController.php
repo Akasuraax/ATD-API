@@ -143,7 +143,7 @@ class RecipeController extends Controller
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
-                    'measure' => $product->measure,
+                    'measure' => $product->pivot->measure,
                     'archive' => $product->archive,
                     'count' => $product->pivot->count,
                 ];

@@ -78,7 +78,6 @@ class RecipeController extends Controller
 
         $recipes = Recipe::select('recipes.id', 'recipes.name', 'recipes.description', 'recipes.archive')
             ->with('products')
-            ->where('recipes.archive', false)
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
                     switch ($operator) {
@@ -127,10 +126,6 @@ class RecipeController extends Controller
     public function getRecipe($id)
     {
         $recipe = Recipe::with('products')->findOrFail($id);
-
-        if ($recipe->archive) {
-            return response()->json(['message' => 'Element is already archived.'], 405);
-        }
 
         $formattedRecipe = [
             'id' => $recipe->id,

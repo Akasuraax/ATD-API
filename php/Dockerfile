@@ -1,6 +1,4 @@
 FROM php:8.2-fpm
-EXPOSE 8000
-
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -27,4 +25,9 @@ RUN chmod 0644 /etc/crontab
 #Create the cron log file
 RUN touch /var/log/cron.log
 
-ENTRYPOINT ["sh", "-c", "composer install && php artisan migrate && php artisan db:seed && php artisan serve --host=0.0.0.0 --port=8000"]
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Définir le script d'initialisation comme point d'entrée
+ENTRYPOINT ["entrypoint.sh"]

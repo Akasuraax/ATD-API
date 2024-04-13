@@ -17,7 +17,8 @@ if [ ! -f /var/www/html/.initialized ]; then
     php artisan db:seed --class=ScheduleSeeder 
     php artisan db:seed --class=VehicleSeeder 
     php artisan db:seed --class=ActivitySeeder  
-
+    php artisan storage:link
+    
     touch /var/www/html/.initialized
 fi
 

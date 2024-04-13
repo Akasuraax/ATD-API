@@ -60,6 +60,7 @@ class DatabaseSeeder extends Seeder
                 'password' => 'motdepasse123', // Utilisation de Hash::make pour hasher le mot de passe
                 'phone_country' => '+33',
                 'phone_number' => '123456789',
+                'status' => 1,
                 'gender' => '0',
                 'visited' => 'false',
                 'birth_date' => '1990-01-01',

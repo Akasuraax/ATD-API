@@ -25,9 +25,6 @@ RUN chmod 0644 /etc/crontab
 #Create the cron log file
 RUN touch /var/log/cron.log
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# Définir le script d'initialisation comme point d'entrée
-ENTRYPOINT ["entrypoint.sh"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

@@ -16,13 +16,12 @@ if [ ! -f /var/www/html/.initialized ]; then
     php artisan db:seed --class=DonationSeeder 
     php artisan db:seed --class=ScheduleSeeder 
     php artisan db:seed --class=VehicleSeeder 
-    php artisan db:seed --class=ActivitySeeder  
-    php artisan storage:link
+    php artisan db:seed --class=ActivitySeeder
     
+    php artisan storage:link
+    php artisan schedule:run 
     touch /var/www/html/.initialized
 fi
 
 composer update --working-dir=/var/www/html
-
-# Démarrer le serveur PHP intégré
-php artisan serve --host=0.0.0.0 --port=8000 
+php artisan serve --host=0.0.0.0 --port=8000

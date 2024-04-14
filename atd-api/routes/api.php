@@ -73,7 +73,7 @@ use App\Http\Controllers\ScheduleController;
     });
 
    Route::prefix('/user')->middleware('validity.token')->group(function(){
-        Route::patch('/{id}/schedule/{scheduleDay}', [ScheduleController::class, 'updateSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
+        Route::patch('/{id}/schedule', [ScheduleController::class, 'updateSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
         Route::post('/{id}/schedule', [ScheduleController::class, 'createSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
         Route::get('/', [UserController::class, 'getUsers']);
         Route::get('/visit', [UserController::class, 'getUsersVisit']);

@@ -103,7 +103,7 @@ class DemandController extends Controller
                 return response()->json(['message' => 'Element is already archived.'], 405);
 
             $demand->archive();
-            $demand = Demand::findOrFail($id);
+            $demand = Demand::select('*')->with('type:id,name')->with('user:id,email')->where('id', $id)->first();
 
             return response()->json(['demand' => $demand], 200);
         }catch(ValidationException $e){

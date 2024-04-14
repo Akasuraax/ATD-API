@@ -283,6 +283,7 @@
         "addRecipe": "Ajouter une recette",
         "description" : "Description",
         "products" : "Produits",
+        "archive": "Archivé",
         "conflictMessage":"Le nom de la recette existe déjà",
         "recipeDetails":  "Création d'une recette",
         "ingrédients" : "ingrédients"
@@ -414,6 +415,7 @@
         "timetable": "Horaire de passage",
         "cancel": "Annuler",
         "register": "Enregistrer",
+        "unregister": "Me désincrire",
         "fillMessage": "Vous devez remplir tous les champs nécéssaires"
     },
     "week": {
@@ -424,6 +426,10 @@
         "friday": "Vendredi",
         "saturday": "Samedi",
         "sunday": "Dimanche"
+    },
+    "file" : {
+        "addFile": "Ajouter un fichier",
+        "successAddFiles": "Fichier ajouté"
     },
     "demand": {
         "signal": "Rédigez votre demande",

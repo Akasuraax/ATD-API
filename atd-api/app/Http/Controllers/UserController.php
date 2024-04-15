@@ -145,13 +145,18 @@ class UserController extends Controller
 
     public function getUser(int $userId)
     {
-
         $user = User::where('id', $userId)
             ->with('roles')
+            ->with('schedules')
             ->first();
 
         if ($user) {
-            $response = $user;
+            foreach ($user->schedules as $schedule) {
+                $schedule->start_hour = substr($schedule->start_hour, 0, 5); // Formater "HH:MM"
+                $schedule->end_hour = substr($schedule->end_hour, 0, 5); // Formater "HH:MM"
+            }
+
+            $response = $user->toArray();
             $status = 200;
         } else {
             $response = [
@@ -160,7 +165,7 @@ class UserController extends Controller
             $status = 404;
         }
 
-        return Response($response, $status);
+        return response($response, $status);
     }
 
     public function patchUserAdmin(int $userId, Request $request)

@@ -108,7 +108,8 @@ class TypeController extends Controller
     }
 
     public function getTypesAll(){
-        $types = Type::get()->where("archive", false);
+        //ne pas inverser get et where
+        $types = Type::where("archive", false)->get();
 
         return response()->json([
             "types" => $types
@@ -153,7 +154,7 @@ class TypeController extends Controller
             $requestData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
-                'color' => ['nullable', 'string', 'max:7', Rule::unique('types', 'color')],
+                'color' => ['nullable', 'string', 'max:7'],
                 'display' => 'required|boolean',
                 'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'access_to_warehouse' => 'required|boolean',
@@ -162,9 +163,12 @@ class TypeController extends Controller
             ]);
 
             $path = public_path() . '/storage/types/' . $type->id ;
-            $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->whereNotIn('id', [$id])->first();
+            $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->where('archive',false)->whereNotIn('id', [$id])->first();
+            $color = Type::where('color', $requestData['color'])->where('archive', false)->whereNotIn('id', [$id])->first();
             if ($exist)
                 return response()->json(['message' => 'This type already exists!'], 409);
+            if ($color)
+                return response()->json(['message' => 'This color is already used'], 409);
             if($requestData['display'] == 1 && !is_dir($path) && !$request->type_image)
                 return response()->json(['message' => 'You have to put an image if you want to display the type'], 422);
             if($requestData['display'] == 0){
@@ -204,6 +208,10 @@ class TypeController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+    }
+
+    public function getDispayableTypes(){
+        return Type::where('display', true)->get();
     }
 
 

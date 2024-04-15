@@ -159,6 +159,7 @@ use App\Http\Controllers\ScheduleController;
     Route::prefix('/piece')->group(function (){
         Route::post('/', [PieceController::class, 'createPiece'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [PieceController::class, 'getPieces']);
+        Route::get('/stock/{id}', [PieceController::class, 'getPieceStockCount']);
         Route::delete('/{id}', [PieceController::class, 'deletePiece'])->middleware('authorization:' . serialize([1]));
         Route::get('/{id}', [PieceController::class, 'getPiece']);
         Route::patch('/{id}', [PieceController::class, 'updatePiece'])->middleware('authorization:' . serialize([1]));

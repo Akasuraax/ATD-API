@@ -65,6 +65,7 @@ use App\Http\Controllers\ScheduleController;
     Route::prefix('/type')->middleware('validity.token')->group(function(){
         Route::post('/', [TypeController::class, 'createType'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [TypeController::class, 'getTypes'])->middleware('authorization:' . serialize([1]));
+        Route::get('/display', [TypeController::class, 'getDispayableTypes']);
         Route::get('/all', [TypeController::class, 'getTypesAll']);
         Route::get('/{id}/file', [TypeController::class, 'downloadTypeFile']);
         Route::get('/{id}', [TypeController::class, 'getType']);

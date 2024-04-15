@@ -211,7 +211,7 @@ class TypeController extends Controller
     }
 
     public function getDispayableTypes(){
-        return Type::where('display', true)->get();
+        return Type::where('display', true)->where('archive', false)->get();
     }
 
 

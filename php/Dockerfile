@@ -28,11 +28,3 @@ RUN touch /var/log/cron.log
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-
-FROM php:8.2-fpm as production
-
-WORKDIR /var/www/html
-
-COPY . /var/www/html
-#RUN composer install --no-dev --optimize-autoloader
-ENTRYPOINT ["php", "artisan", "serv", "--host=0.0.0.0", "--port=8000"]

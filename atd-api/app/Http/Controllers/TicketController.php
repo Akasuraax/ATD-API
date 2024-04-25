@@ -77,7 +77,6 @@ class TicketController extends Controller
         ]);
     }
 
-
     public function getTicket(int $id_ticket, Request $request)
     {
         $ticket = Ticket::findOrFail($id_ticket);
@@ -86,7 +85,6 @@ class TicketController extends Controller
         $admin = $data->admin;
         $support = $data->support;
         $demand_user = $data->demand_user;
-
 
         $user = User::where('id', $demand_user)->first();
         $messages = Message::with('userWhoSendTheMessage')
@@ -150,50 +148,9 @@ class TicketController extends Controller
     }
 
     public function getTickets(Request $request){
-        $perPage = $request->input('pageSize', 10);
-        if($perPage > 50){
-            $perPage = 50;
-        }
-        $page = $request->input('page', 1);
-        $field = $request->input('field', "id");
-        $sort = $request->input('sort', "asc");
 
-        $fieldFilter = $request->input('fieldFilter', '');
-        $operator = $request->input('operator', '');
-        $value = $request->input('value', '%');
-
-        $tickets = Ticket::select('tickets.*', 'problems.name as problem_name')
-            ->leftJoin('problems', 'tickets.problem_id', '=', 'problems.id')
-            ->where(function ($query) use ($fieldFilter, $operator, $value) {
-                if ($fieldFilter && $operator && $value !== '*') {
-                    switch ($operator) {
-                        case 'contains':
-                            $query->where($fieldFilter, 'LIKE', '%' . $value . '%');
-                            break;
-                        case 'equals':
-                            $query->where($fieldFilter, '=', $value);
-                            break;
-                        case 'startsWith':
-                            $query->where($fieldFilter, 'LIKE', $value . '%');
-                            break;
-                        case 'endsWith':
-                            $query->where($fieldFilter, 'LIKE', '%' . $value);
-                            break;
-                        case 'isEmpty':
-                            $query->whereNull($fieldFilter);
-                            break;
-                        case 'isNotEmpty':
-                            $query->whereNotNull($fieldFilter);
-                            break;
-                        case 'isAnyOf':
-                            $values = explode(',', $value);
-                            $query->whereIn($fieldFilter, $values);
-                            break;
-                    }
-                }
-            })
-            ->orderBy($field, $sort)
-            ->paginate($perPage, ['*'], 'page', $page + 1);
+        $tickets = Ticket::where('archive', false)
+            ->get();
 
         return response()->json([
             'tickets' => $tickets
@@ -237,6 +194,51 @@ class TicketController extends Controller
                 $message->archive = true;
             }
 
+            try{
+                $ticket->update($validatedData);
+                $ticket->save();
+                $messages = $ticket->messages()->get();
+            }catch (ModelNotFoundException $e) {
+                return response()->json(['error' => 'The element you selected is not found'], 404);
+            }
+        }
+
+        $ticket->save();
+        $ticket->touch();
+
+        $messages = Message::where('id_ticket', $id_ticket)->get();
+
+        return response()->json([
+            'ticket' => [
+                'id' => $ticket->id,
+                'title' => $ticket->title,
+                'description' => $ticket->description,
+                'severity' => $ticket->severity,
+                'status' => $ticket->status,
+                'problem' => $problem->name,
+                'archive' => $ticket->archive,
+                'created_at' => $ticket->created_at,
+                'updated_at' => $ticket->updated_at
+            ],
+            'messages' => $messages
+        ]);
+    }
+
+    public function assignedTicket(int $id_ticket, Request $request){
+        try{
+            $validatedData = $request->validate([
+                'support.id' => 'int',
+            ]);
+        }catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $ticket = Ticket::findOrFail($id_ticket);
+        $support = User::findOrFail($validatedData['support']['id']);
+
+        if(!$ticket->archive){
+
+            $ticket->user()->attach($validatedData['support']['id']);
             try{
                 $ticket->update($validatedData);
                 $ticket->save();

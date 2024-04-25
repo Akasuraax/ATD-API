@@ -76,6 +76,7 @@ use App\Http\Controllers\ScheduleController;
         Route::patch('/{id}/schedule', [ScheduleController::class, 'updateSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
         Route::post('/{id}/schedule', [ScheduleController::class, 'createSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
         Route::get('/', [UserController::class, 'getUsers']);
+        Route::get('/support', [UserController::class, 'getSupport']);
         Route::get('/visit', [UserController::class, 'getUsersVisit']);
         Route::get('/{id}', [UserController::class, 'getUser'])->middleware('ValidateUserId');
         Route::patch('/{id}', [UserController::class, 'patchUser']);
@@ -166,7 +167,7 @@ use App\Http\Controllers\ScheduleController;
 
     Route::prefix('/qr')->group(function(){
         Route::get('/{id}', [QrCodeController::class, 'generateQrCode']);
-        Route::get('/delete-piece/{pieceId}', [QrCodeController::class, 'deletePiece'])->name('deletePiece');
+        Route::delete('/delete-piece/{pieceId}', [QrCodeController::class, 'deletePiece'])->name('deletePiece');
     });
 
     Route::prefix('/recipe')->middleware('validity.token')->group(function (){

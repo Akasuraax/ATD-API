@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Berkayk\OneSignal;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -149,6 +150,7 @@ class UserController extends Controller
             ->with('roles')
             ->with('schedules')
             ->first();
+
 
         if ($user) {
             foreach ($user->schedules as $schedule) {
@@ -299,6 +301,20 @@ class UserController extends Controller
             ];
             $status = 200;
         return Response($response, $status);
+    }
+
+    public function getSupport(Request $request)
+    {
+        $users = User::where('archive', false)
+            ->whereHas('roles', function ($query) {
+                $query->where('id', 5);
+            })
+            ->select('id', 'name', 'forname')
+            ->get();
+
+        return response()->json([
+            'supports' => $users
+        ]);
     }
 }
 

@@ -35,7 +35,15 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
 
             $user = Auth::user();
-            $token = TokenController::encodeToken($user->id);
+
+            $existingToken = $user->remember_token;
+            if ($existingToken) {
+                $token = $existingToken;
+            } else {
+                $token = TokenController::encodeToken($user->id);
+                User::where('id', $user->id)->update(['remember_token' => $token]);
+            }
+
             if($user->archive)
                 return response()->json(['message' => 'Your account has been archived.'], 403);
 

@@ -149,45 +149,78 @@ class TicketController extends Controller
 
     public function getTickets(Request $request){
 
+// Récupérez tous les tickets avec leurs supports
         $tickets = Ticket::where('archive', false)
+            ->with('problem')
+            ->with('support')
             ->get();
 
-        return response()->json([
-            'tickets' => $tickets
-        ]);
+        $transformedTickets = $tickets->map(function ($ticket) {
+            // Identifiez l'utilisateur qui a créé le ticket
+            $creatorId = $ticket->support->sortBy('created_at')->first()->id;
+
+            // Filtrez les supports pour exclure l'utilisateur qui a créé le ticket
+            $filteredSupports = $ticket->support->reject(function ($support) use ($creatorId) {
+                return $support->id == $creatorId;
+            });
+
+            return [
+                'id' => $ticket->id,
+                'title' => $ticket->title,
+                'description' => $ticket->description,
+                'status' => $ticket->status,
+                'severity' => $ticket->severity,
+                'archive' => $ticket->archive,
+                'created_at' => $ticket->created_at,
+                'updated_at' => $ticket->updated_at,
+                'problem_id' => $ticket->problem_id,
+                'problem' => $ticket->problem->name,
+                'support' => $ticket->support->whereNull('created_at')->first() ? [
+                    'id' => $ticket->support->whereNull('created_at')->first()->id,
+                    'name' => $ticket->support->whereNull('created_at')->first()->name,
+                    'forname' => $ticket->support->whereNull('created_at')->first()->forname,
+                ] : null
+            ];
+
+
+
+        });
+
+        // Renvoyer la collection transformée
+        return response()->json(['tickets' => $transformedTickets]);
     }
 
     public function patchTicket(int $id_ticket, Request $request){
+        //return $request;
         try{
             $validatedData = $request->validate([
-                'ticket.title' => 'string',
-                'ticket.description' => 'string',
-                'ticket.type' => 'integer',
-                'ticket.status' => 'integer',
-                'ticket.severity' => 'integer',
-                'ticket.archive' => 'boolean'
+                'title' => 'required:string',
+                'description' => 'required:string',
+                'status' => 'required:integer',
+                'severity' => 'required:integer',
+                'archive' => 'required:boolean',
+                'problem' => 'required:string'
             ]);
         }catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
         $ticket = Ticket::findOrFail($id_ticket);
-        $problem = Problem::findOrFail($validatedData['ticket']['type']);
+        //$problem = Problem::findOrFail($validatedData['ticket']['type']);
 
-        if(isset($validatedData['ticket']['title']))
-            $ticket->title = $validatedData['ticket']['title'];
-        if(isset($validatedData['ticket']['description']))
-            $ticket->description = $validatedData['ticket']['description'];
-        if(isset($validatedData['ticket']['type']))
-            $ticket->problem_id = $validatedData['ticket']['type'];
-        if(isset($validatedData['ticket']['status']))
-            $ticket->status = $validatedData['ticket']['status'];
-        if(isset($validatedData['ticket']['severity']))
-            $ticket->severity = $validatedData['ticket']['severity'];
-        if(isset($validatedData['ticket']['archive']))
-            $ticket->archive = $validatedData['ticket']['archive'];
+        if(isset($validatedData['title']))
+            $ticket->title = $validatedData['title'];
+        if(isset($validatedData['description']))
+            $ticket->description = $validatedData['description'];
 
-        if(!$ticket->archive){
+        if(isset($validatedData['status']))
+            $ticket->status = $validatedData['status'];
+        if(isset($validatedData['severity']))
+            $ticket->severity = $validatedData['severity'];
+        if(isset($validatedData['archive']))
+            $ticket->archive = $validatedData['archive'];
+
+        if($ticket->archive){
             $messages = Message::where('id_ticket', $id_ticket)->get();
 
             foreach($messages as $message){
@@ -215,7 +248,7 @@ class TicketController extends Controller
                 'description' => $ticket->description,
                 'severity' => $ticket->severity,
                 'status' => $ticket->status,
-                'problem' => $problem->name,
+                'problem' => $validatedData['problem'],
                 'archive' => $ticket->archive,
                 'created_at' => $ticket->created_at,
                 'updated_at' => $ticket->updated_at
@@ -227,46 +260,28 @@ class TicketController extends Controller
     public function assignedTicket(int $id_ticket, Request $request){
         try{
             $validatedData = $request->validate([
-                'support.id' => 'int',
+                'id' => 'int',
             ]);
         }catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
         $ticket = Ticket::findOrFail($id_ticket);
-        $support = User::findOrFail($validatedData['support']['id']);
+        $newSupport = User::findOrFail($validatedData['id']);
 
-        if(!$ticket->archive){
+        // Trouver le support actuellement assigné au ticket
+        // Supposons que la relation entre Ticket et User est nommée 'sends'
+        $currentSupport = $ticket->support()->whereNull('sends.created_at')->orWhere('sends.created_at', '<>', null)->first();
 
-            $ticket->user()->attach($validatedData['support']['id']);
-            try{
-                $ticket->update($validatedData);
-                $ticket->save();
-                $messages = $ticket->messages()->get();
-            }catch (ModelNotFoundException $e) {
-                return response()->json(['error' => 'The element you selected is not found'], 404);
+        // Vérifier si le ticket a plus de 2 utilisateurs attachés
+        if ($ticket->support()->count() > 1) {
+            if ($currentSupport) {
+                $ticket->support()->detach($currentSupport->id);
             }
         }
+        $ticket->support()->attach($newSupport->id);
 
-        $ticket->save();
-        $ticket->touch();
-
-        $messages = Message::where('id_ticket', $id_ticket)->get();
-
-        return response()->json([
-            'ticket' => [
-                'id' => $ticket->id,
-                'title' => $ticket->title,
-                'description' => $ticket->description,
-                'severity' => $ticket->severity,
-                'status' => $ticket->status,
-                'problem' => $problem->name,
-                'archive' => $ticket->archive,
-                'created_at' => $ticket->created_at,
-                'updated_at' => $ticket->updated_at
-            ],
-            'messages' => $messages
-        ]);
+        return response()->json(['message' => 'Support assigned successfully']);
     }
 
     public function deleteTicket(int $id){

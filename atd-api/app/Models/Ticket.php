@@ -25,7 +25,7 @@ class Ticket extends Model
 
     public function support()
     {
-        return $this->belongsToMany(User::class, 'help', 'id_ticket', 'id_user')->withTimestamps();
+        return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user');
     }
 
     public function messages(){

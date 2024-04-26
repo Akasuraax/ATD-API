@@ -59,6 +59,7 @@ use App\Http\Controllers\ScheduleController;
         Route::post('/{id_ticket}', [MessageController::class, 'createMessage'])->middleware('ticket');
         Route::post('/', [TicketController::class, 'createTicket']);
         Route::patch('/{id_ticket}', [TicketController::class, 'patchTicket'])->middleware('authorization:' . serialize([1, 5]));
+        Route::patch('/assign/{id_ticket}', [TicketController::class, 'assignedTicket'])->middleware('authorization:' . serialize([1, 5]));
         Route::delete('/{id_ticket}', [TicketController::class, 'deleteTicket'])->middleware('authorization:' . serialize([1, 5]));
     });
 

@@ -25,7 +25,8 @@ class Ticket extends Model
 
     public function support()
     {
-        return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user');
+        return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user')
+            ->withPivot('created_at');
     }
 
     public function messages(){

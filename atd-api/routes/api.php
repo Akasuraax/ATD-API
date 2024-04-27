@@ -55,6 +55,8 @@ use App\Http\Controllers\ScheduleController;
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
         Route::get('/', [TicketController::class, 'getTickets'])->middleware('authorization:' . serialize([1, 5]));
+        Route::get('/assigned', [TicketController::class, 'getTicketsWithSupport'])->middleware('authorization:' . serialize([1, 5]));
+        Route::get('/notassigned', [TicketController::class, 'getTicketsWithoutSupport'])->middleware('authorization:' . serialize([1, 5]));
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket'])->middleware('ticket');
         Route::post('/{id_ticket}', [MessageController::class, 'createMessage'])->middleware('ticket');
         Route::post('/', [TicketController::class, 'createTicket']);

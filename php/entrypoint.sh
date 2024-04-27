@@ -19,7 +19,6 @@ if [ ! -f /var/www/html/.initialized ]; then
     php artisan db:seed --class=ActivitySeeder
     
     php artisan storage:link
-    php artisan schedule:run 
     touch /var/www/html/.initialized
 fi
 

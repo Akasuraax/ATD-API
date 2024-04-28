@@ -50,4 +50,13 @@ class MessageController extends Controller
             ]
         ], 201);
     }
+
+    public function getMessage(int $ticketId, Request $request) {
+
+        $message = Message::where('id_ticket', $ticketId)
+            ->with('userWhoSendTheMessage')
+            ->get();
+
+        return response()->json(['messages' => $message]);
+    }
 }

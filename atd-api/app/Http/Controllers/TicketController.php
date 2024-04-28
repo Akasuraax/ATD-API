@@ -61,7 +61,7 @@ class TicketController extends Controller
 
         $ticketIds = $tickets_id->pluck('id_ticket');
 
-        $tickets = Ticket::select('tickets.id', 'tickets.title', 'tickets.description', 'tickets.created_at', 'problems.name')
+        $tickets = Ticket::select('tickets.id', 'tickets.title', 'tickets.description', 'tickets.created_at', 'problems.name', 'tickets.status', 'tickets.severity')
             ->join('problems', 'tickets.problem_id', '=', 'problems.id')
             ->whereIn('tickets.id', $ticketIds)
             ->get();

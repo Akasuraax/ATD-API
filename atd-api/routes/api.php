@@ -87,7 +87,8 @@ use App\Http\Controllers\ScheduleController;
         Route::patch('/admin/{id}', [UserController::class, 'patchUserAdmin'])->middleware('authorization:' . serialize([1]));
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
         Route::get('/{id}/tickets', [TicketController::class, 'getMyTickets'])->middleware('ValidateUserId');
-    });
+       Route::get('/{id}/tickets/support', [TicketController::class, 'getMySupportTickets'])->middleware('ValidateUserId');
+   });
 
     Route::prefix('/role')->group(function(){
         Route::post('/', [RoleController::class, 'createRole'])->middleware('authorization:' . serialize([1]));

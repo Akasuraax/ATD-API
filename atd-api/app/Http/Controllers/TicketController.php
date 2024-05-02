@@ -57,6 +57,32 @@ class TicketController extends Controller
     public function getMyTickets(Request $request){
         $id_user = $request->route('id');
 
+        $tickets_id = Send::select('id_ticket')
+            ->where('id_user', $id_user)
+            ->where('archive',false)
+             ->get();
+
+        $ticketIds = $tickets_id->pluck('id_ticket');
+
+        $tickets = Ticket::select('tickets.id', 'tickets.title', 'tickets.description', 'tickets.created_at', 'problems.name', 'tickets.status', 'tickets.severity')
+            ->join('problems', 'tickets.problem_id', '=', 'problems.id')
+            ->whereIn('tickets.id', $ticketIds)
+            ->get();
+
+        $tickets = $tickets->map(function ($ticket) {
+            $ticket['problem'] = $ticket['name'];
+            unset($ticket['name']);
+            return $ticket;
+        });
+
+        return response()->json([
+            'tickets' => $tickets,
+        ]);
+    }
+
+    public function getMySupportTickets(Request $request){
+        $id_user = $request->route('id');
+
         $tickets_id = Send::select('id_ticket')->where('id_user', $id_user)->get();
 
         $ticketIds = $tickets_id->pluck('id_ticket');
@@ -64,6 +90,7 @@ class TicketController extends Controller
         $tickets = Ticket::select('tickets.id', 'tickets.title', 'tickets.description', 'tickets.created_at', 'problems.name', 'tickets.status', 'tickets.severity')
             ->join('problems', 'tickets.problem_id', '=', 'problems.id')
             ->whereIn('tickets.id', $ticketIds)
+            ->where('status', 1)
             ->get();
 
         $tickets = $tickets->map(function ($ticket) {
@@ -361,8 +388,7 @@ class TicketController extends Controller
         $ticket = Ticket::findOrFail($id_ticket);
         $newSupport = User::findOrFail($validatedData['id']);
 
-        // Trouver le support actuellement assigné au ticket
-        // Supposons que la relation entre Ticket et User est nommée 'sends'
+
         $currentSupport = $ticket->support()->whereNull('sends.created_at')->orWhere('sends.created_at', '<>', null)->first();
 
         // Vérifier si le ticket a plus de 2 utilisateurs attachés
@@ -372,6 +398,8 @@ class TicketController extends Controller
             }
         }
         $ticket->support()->attach($newSupport->id, ['created_at' => null]);
+        $ticket->status = 1;
+        $ticket->save();
 
         return response()->json(['message' => 'Support assigned successfully']);
     }

@@ -140,7 +140,7 @@ class PlanJourneyFromScheduleCommand extends Command
     }
 
     public function getAllUsersAddressFromDayId($dayId){
-        $schedules = Schedule::where('day', $dayId)->with('user:id,email,address,zipcode')->get();
+        $schedules = Schedule::where('day', $dayId)->where('checking', true)->with('user:id,email,address,zipcode')->get();
 
         $addrressesArray = [];
 

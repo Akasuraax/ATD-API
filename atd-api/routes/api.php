@@ -73,6 +73,7 @@ use App\Http\Controllers\ScheduleController;
     Route::prefix('/type')->middleware('validity.token')->group(function(){
         Route::post('/', [TypeController::class, 'createType'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [TypeController::class, 'getTypes'])->middleware('authorization:' . serialize([1]));
+        Route::get('/display', [TypeController::class, 'getDispayableTypes']);
         Route::get('/all', [TypeController::class, 'getTypesAll']);
         Route::get('/{id}/file', [TypeController::class, 'downloadTypeFile']);
         Route::get('/{id}', [TypeController::class, 'getType']);
@@ -169,6 +170,7 @@ use App\Http\Controllers\ScheduleController;
     Route::prefix('/piece')->group(function (){
         Route::post('/', [PieceController::class, 'createPiece'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [PieceController::class, 'getPieces']);
+        Route::get('/stock/{id}', [PieceController::class, 'getPieceStockCount']);
         Route::delete('/{id}', [PieceController::class, 'deletePiece'])->middleware('authorization:' . serialize([1]));
         Route::get('/{id}', [PieceController::class, 'getPiece']);
         Route::patch('/{id}', [PieceController::class, 'updatePiece'])->middleware('authorization:' . serialize([1]));

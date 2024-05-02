@@ -30,7 +30,7 @@ class PieceController extends Controller
         $warehouse = Warehouse::findOrFail($validateData['warehouse']['id']);
         $product = Product::findOrFail($validateData['product']['id']);
 
-        if($validateData['count'] < 0)
+        if($validateData['count'] < "1")
             return response()->json(['message' => 'Count must be greater than 0'], 422);
 
         if($warehouse->archive)
@@ -38,6 +38,10 @@ class PieceController extends Controller
 
         if($product->archive)
             return response()->json(['message' => 'The product you selected is archived.'], 404);
+
+        $warehousePiecesCount = $this->getPieceStockCount($warehouse->id);
+        if($warehousePiecesCount + $validateData['count'] > $warehouse->capacity)
+            return response()->json(['message' => 'You reached the warehouse maximum capacity'], 401);
 
         $piece = Piece::create([
             'expired_date' => $validateData['expired_date'] ?? null,
@@ -156,5 +160,8 @@ class PieceController extends Controller
         }
     }
 
+    public function getPieceStockCount($warehouseId){
+        return Piece::where('id_warehouse', $warehouseId)->where('archive', false)->sum('count');
+    }
 
 }

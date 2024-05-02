@@ -271,8 +271,9 @@
         "delete": "Supprimer",
         "isArchived": "Entrepôt archivé",
         "details": "Détails",
+        "usedCapacity": "Capacité restante",
         "warehouseDetails" : "Détails de l'entrepot",
-        "zipcode" : "code postal"
+        "zipcode" : "Code postal"
     },
     "recipe": {
         "title": "Liste des recettes",
@@ -384,7 +385,8 @@
         "measure": "Unité de mesure",
         "isArchived": "Archivé",
         "qrCode": "Générer le QRCode",
-        "addPiece": "Ajouter une pièce"
+        "addPiece": "Ajouter une pièce",
+        "notSpace": "Capacité maximale de l'entrepôt atteinte"
     },
     "demands": {
         "title": "Demandes des utilisateurs",

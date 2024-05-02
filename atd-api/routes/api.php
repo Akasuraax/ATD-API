@@ -11,6 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VisitController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\ProductController;
@@ -50,6 +51,9 @@ use App\Http\Controllers\ScheduleController;
         });
     });
 
+    Route::get('/ping', function () {
+        return response();
+    });
     Route::post('/logIn', [AuthController::class, 'logIn']);
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 

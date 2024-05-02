@@ -70,15 +70,15 @@ use App\Http\Controllers\ScheduleController;
         Route::delete('/{id_ticket}', [TicketController::class, 'deleteTicket'])->middleware('authorization:' . serialize([1, 5, 6]));
     });
 
-    Route::prefix('/type')->middleware('validity.token')->group(function(){
-        Route::post('/', [TypeController::class, 'createType'])->middleware('authorization:' . serialize([1]));
-        Route::get('/', [TypeController::class, 'getTypes'])->middleware('authorization:' . serialize([1]));
+    Route::prefix('/type')->group(function(){
+        Route::post('/', [TypeController::class, 'createType'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
+        Route::get('/', [TypeController::class, 'getTypes'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
         Route::get('/display', [TypeController::class, 'getDispayableTypes']);
-        Route::get('/all', [TypeController::class, 'getTypesAll']);
-        Route::get('/{id}/file', [TypeController::class, 'downloadTypeFile']);
-        Route::get('/{id}', [TypeController::class, 'getType']);
-        Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('authorization:' . serialize([1]));
-        Route::post('/{id}', [TypeController::class, 'updateType'])->middleware('authorization:' . serialize([1]));
+        Route::get('/all', [TypeController::class, 'getTypesAll'])->middleware('validity.token');
+        Route::get('/{id}/file', [TypeController::class, 'downloadTypeFile'])->middleware('validity.token');
+        Route::get('/{id}', [TypeController::class, 'getType'])->middleware('validity.token');
+        Route::delete('/{id}', [TypeController::class, 'deleteType'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
+        Route::post('/{id}', [TypeController::class, 'updateType'])->middleware('validity.token')->middleware('authorization:' . serialize([1]));
     });
 
    Route::prefix('/user')->middleware('validity.token')->group(function(){

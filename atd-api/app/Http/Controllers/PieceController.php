@@ -30,7 +30,7 @@ class PieceController extends Controller
         $warehouse = Warehouse::findOrFail($validateData['warehouse']['id']);
         $product = Product::findOrFail($validateData['product']['id']);
 
-        if($validateData['count'] < 1)
+        if($validateData['count'] < 0)
             return response()->json(['message' => 'Count must be greater than 0'], 422);
 
         if($warehouse->archive)

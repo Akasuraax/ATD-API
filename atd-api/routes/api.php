@@ -58,12 +58,16 @@ use App\Http\Controllers\ScheduleController;
     Route::get('/logOut', [AuthController::class, 'logOut'])->middleware('validity.token');
 
     Route::prefix('/ticket')->middleware('validity.token')->group(function () {
-        Route::get('/', [TicketController::class, 'getTickets'])->middleware('authorization:' . serialize([1, 5]));
+        Route::get('/', [TicketController::class, 'getTickets'])->middleware('authorization:' . serialize([1, 5, 6]));
+        Route::get('/assigned', [TicketController::class, 'getTicketsWithSupport'])->middleware('authorization:' . serialize([1, 5, 6]));
+        Route::get('/notassigned', [TicketController::class, 'getTicketsWithoutSupport'])->middleware('authorization:' . serialize([1, 5, 6]));
+        Route::get('/{id_ticket}/messages', [MessageController::class, 'getMessage']);
         Route::get('/{id_ticket}', [TicketController::class, 'getTicket'])->middleware('ticket');
         Route::post('/{id_ticket}', [MessageController::class, 'createMessage'])->middleware('ticket');
         Route::post('/', [TicketController::class, 'createTicket']);
-        Route::patch('/{id_ticket}', [TicketController::class, 'patchTicket'])->middleware('authorization:' . serialize([1, 5]));
-        Route::delete('/{id_ticket}', [TicketController::class, 'deleteTicket'])->middleware('authorization:' . serialize([1, 5]));
+        Route::patch('/{id_ticket}', [TicketController::class, 'patchTicket'])->middleware('authorization:' . serialize([1, 5, 6]));
+        Route::patch('/assign/{id_ticket}', [TicketController::class, 'assignedTicket'])->middleware('authorization:' . serialize([1, 5, 6]));
+        Route::delete('/{id_ticket}', [TicketController::class, 'deleteTicket'])->middleware('authorization:' . serialize([1, 5, 6]));
     });
 
     Route::prefix('/type')->middleware('validity.token')->group(function(){
@@ -80,13 +84,15 @@ use App\Http\Controllers\ScheduleController;
         Route::patch('/{id}/schedule', [ScheduleController::class, 'updateSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
         Route::post('/{id}/schedule', [ScheduleController::class, 'createSchedule'])->middleware(['ValidateUserId', 'authorization:' . serialize([1, 4])]);
         Route::get('/', [UserController::class, 'getUsers']);
+        Route::get('/support', [UserController::class, 'getSupport']);
         Route::get('/visit', [UserController::class, 'getUsersVisit']);
         Route::get('/{id}', [UserController::class, 'getUser'])->middleware('ValidateUserId');
         Route::patch('/{id}', [UserController::class, 'patchUser']);
         Route::patch('/admin/{id}', [UserController::class, 'patchUserAdmin'])->middleware('authorization:' . serialize([1]));
         Route::delete('/{id}', [UserController::class, 'deleteUser']);
         Route::get('/{id}/tickets', [TicketController::class, 'getMyTickets'])->middleware('ValidateUserId');
-    });
+       Route::get('/{id}/tickets/support', [TicketController::class, 'getMySupportTickets'])->middleware('ValidateUserId');
+   });
 
     Route::prefix('/role')->group(function(){
         Route::post('/', [RoleController::class, 'createRole'])->middleware('authorization:' . serialize([1]));
@@ -170,7 +176,7 @@ use App\Http\Controllers\ScheduleController;
 
     Route::prefix('/qr')->group(function(){
         Route::get('/{id}', [QrCodeController::class, 'generateQrCode']);
-        Route::get('/delete-piece/{pieceId}', [QrCodeController::class, 'deletePiece'])->name('deletePiece');
+        Route::delete('/delete-piece/{pieceId}', [QrCodeController::class, 'deletePiece'])->name('deletePiece');
     });
 
     Route::prefix('/recipe')->middleware('validity.token')->group(function (){

@@ -23,6 +23,12 @@ class Ticket extends Model
         return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user')->withTimestamps();
     }
 
+    public function support()
+    {
+        return $this->belongsToMany(User::class, 'sends', 'id_ticket', 'id_user')
+            ->withPivot('created_at');
+    }
+
     public function messages(){
         return $this->hasMany(Message::class, 'id_ticket');
     }

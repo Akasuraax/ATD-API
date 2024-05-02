@@ -63,7 +63,7 @@ class VisitController extends Controller
                     'name' => $volunteer->name,
                     'forname' => $volunteer->forname
                 ],
-                'id_beneficiary' => [
+                'beneficiary' => [
                     'name' => $beneficiary->name,
                     'forname' => $beneficiary->forname
                 ],

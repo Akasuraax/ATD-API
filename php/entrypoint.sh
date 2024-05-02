@@ -23,4 +23,4 @@ if [ ! -f /var/www/html/.initialized ]; then
 fi
 
 composer update --working-dir=/var/www/html
-php artisan serve --host=0.0.0.0 --port=8000
+php artisan serve --host=77.237.241.171 --port=8000

@@ -143,6 +143,40 @@ class UserController extends Controller
         return $users;
     }
 
+    public function getUsersVisitAll(Request $request)
+    {
+
+
+
+        $users = User::where('archive', false)
+            ->where("visited", true)
+            ->with("visits")
+            ->get(); // Récupérer tous les utilisateurs
+
+        $transformedUser = $users->map(function ($user) {
+
+            $visitToday = false;
+            foreach ($user->visits as $visit) {
+                $visitDate = $visit->created_at->startOfDay(); // Met à minuit la date de visite
+                if ($visitDate->equalTo(today())) { // Vérifie si les deux dates sont égales
+                    $visitToday = true;
+                    break;
+                }
+            }
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'forname' => $user->forname,
+                'address' => $user->address,
+                'visit' => $visitToday
+            ];
+        });
+
+        return $transformedUser;
+    }
+
+
     public function getUser(int $userId)
     {
         $user = User::where('id', $userId)

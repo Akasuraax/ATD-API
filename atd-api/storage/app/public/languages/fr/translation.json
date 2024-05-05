@@ -140,6 +140,7 @@
         "files": "Fichiers",
         "journey": "Trajet",
         "addJourney": "Ajouter l'activité",
+        "journeyTitle": "Titre du trajet",
         "back": {
             "title": "Liste des types activités",
             "name": "Nom",

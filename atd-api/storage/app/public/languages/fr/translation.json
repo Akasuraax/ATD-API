@@ -333,7 +333,7 @@
         "signUp": "Inscription",
         "logOut": "Déconnexion",
         "donation": "Dons",
-        "pieces": "Pièces",
+        "pieces": "Lots",
         "demands": "Demandes",
         "volunteer": "Volontaire",
         "personVisit": "Personne a visité"
@@ -380,12 +380,12 @@
         "location": "Localisation",
         "product_name": "Nom du produit",
         "warehouse_name": "Nom de l'entrepôt",
-        "title": "Pièces",
-        "pieceDetails": "Détails de la pièce",
+        "title": "Lots",
+        "pieceDetails": "Détails du lot",
         "measure": "Unité de mesure",
         "isArchived": "Archivé",
         "qrCode": "Générer le QRCode",
-        "addPiece": "Ajouter une pièce",
+        "addPiece": "Ajouter un lot",
         "notSpace": "Capacité maximale de l'entrepôt atteinte"
     },
     "demands": {

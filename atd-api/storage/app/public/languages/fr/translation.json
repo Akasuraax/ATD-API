@@ -137,6 +137,9 @@
         "tutoring": "Soutien scolaire pour enfant",
         "event": "Organisation d’évènements de récoltes de fonds",
         "seniors": "Visites et activités pour personnes âgées.",
+        "files": "Fichiers",
+        "journey": "Trajet",
+        "addJourney": "Ajouter l'activité",
         "back": {
             "title": "Liste des types activités",
             "name": "Nom",

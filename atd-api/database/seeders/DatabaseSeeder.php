@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
                 'address' => $address,
                 'zipcode' => $zipcode,
                 'visited' => 'false',
+                'status' => 1,
                 'siret_number' => '12345678901234',
                 'compagny' => 'Company' . $i,
             ]);
@@ -83,6 +84,7 @@ class DatabaseSeeder extends Seeder
                 'phone_number' => '123456789',
                 'gender' => '0',
                 'visited' => 'false',
+                'status' => 1,
                 'birth_date' => '1990-01-01',
                 'address' => '123 Street',
                 'zipcode' => '12345',
@@ -102,6 +104,7 @@ class DatabaseSeeder extends Seeder
                 'phone_country' => '+33',
                 'phone_number' => '123456789',
                 'gender' => '0',
+                'status' => 1,
                 'birth_date' => '1990-01-01',
                 'visited' => 'false',
                 'address' => '123 Street',
@@ -123,6 +126,7 @@ class DatabaseSeeder extends Seeder
                 'phone_number' => '123456789',
                 'gender' => '1',
                 'visited' => 'false',
+                'status' => 1,
                 'birth_date' => '1990-01-01',
                 'address' => '123 Street',
                 'zipcode' => '12345',
@@ -133,7 +137,7 @@ class DatabaseSeeder extends Seeder
 
         for ($i = 0; $i < 5; $i++) {
             $user = User::create([
-                'name' => 'Ribat' . $i,
+                'name' => 'Riba' . $i,
                 'forname' => 'Jacques' . $i,
                 'email' => 'ribat' . $i . '@example.com',
                 'password' => 'motdepasse123', // Utilisation de Hash::make pour hasher le mot de passe
@@ -141,12 +145,32 @@ class DatabaseSeeder extends Seeder
                 'phone_number' => '123456789',
                 'gender' => '1',
                 'visited' => 'true',
+                'status' => 1,
                 'birth_date' => '1990-01-01',
                 'address' => '123 Street',
                 'zipcode' => '12345',
             ]);
 
             $user->roles()->attach(3);
+        }
+
+        for ($i = 0; $i < 5; $i++) {
+            $user = User::create([
+                'name' => 'Arthur' . $i,
+                'forname' => 'Morelon' . $i,
+                'email' => 'morelon' . $i . '@example.com',
+                'password' => 'motdepasse123', // Utilisation de Hash::make pour hasher le mot de passe
+                'phone_country' => '+33',
+                'phone_number' => '123456789',
+                'gender' => '1',
+                'visited' => 'false',
+                'status' => 1,
+                'birth_date' => '1990-01-01',
+                'address' => '123 Street',
+                'zipcode' => '12345',
+            ]);
+
+            $user->roles()->attach(6);
         }
     }
 }

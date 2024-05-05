@@ -280,7 +280,7 @@ class UserController extends Controller
                     Rule::unique('users')->ignore($userId),
                 ],
                 'phone_number' => 'nullable|string|max:15',
-                'gender' => 'nullable|int|max:1',
+                'gender' => 'nullable|int|max:2',
                 'birth_date' => 'nullable|date',
                 'address' => 'required|string',
                 'zipcode' => 'required|string|max:5',

@@ -243,7 +243,10 @@
         "validated": "validé",
         "refused": "refusé",
         "zipcode": "code postal",
-        "donations": "Dons"
+        "donations": "Dons",
+        "male": "Homme",
+        "female": "Femme",
+        "ratherNot": "Non précisé"
     },
     "vehicle": {
         "title": "Liste des véhicules",

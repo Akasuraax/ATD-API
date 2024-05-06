@@ -18,7 +18,7 @@ class WarehouseController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:255',
                 'address' => 'required|string',
-                'zipcode' => 'required|digits:5|integer',
+                'zipcode' => 'required',
                 'capacity' => 'required|integer'
             ]);
         }catch (ValidationException $e) {
@@ -32,10 +32,9 @@ class WarehouseController extends Controller
         $warehouse = Warehouse::create([
             'name' => $validateData['name'],
             'address' => $validateData['address'],
-            'zipcode' => $validateData['zipcode'],
+            'zipcode' => intval($validateData['zipcode']),
             'capacity' => $validateData['capacity'],
         ]);
-
         return Response(['warehouse' => $warehouse], 201);
     }
 

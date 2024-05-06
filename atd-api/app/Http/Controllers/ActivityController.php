@@ -317,6 +317,7 @@ class ActivityController extends Controller
         $activities = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'types.name as type_name')
             ->join('types', 'types.id', '=', 'activities.id_type')
             ->where('activities.start_date', '>', $now)
+            ->where('activities.archive', false)
             ->limit(3)
             ->get();
 

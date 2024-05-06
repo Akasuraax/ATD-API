@@ -355,6 +355,40 @@ class ActivityController extends Controller
         return response()->json($renamedActivities);
     }
 
+    public function getFuturUserActivities(Request $request)
+    {
+        $userId = $request->input('userId');
+
+        $activities = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'activities.id_type')
+            ->with('type')
+            ->with('roles')
+            ->with('users')
+            ->where('activities.archive', false)
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('id_user', $userId);
+            })
+            ->where('activities.end_date', '>', now()) // This line filters activities where end_date is in the future
+            ->get();
+
+        $renamedActivities = $activities->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'title' => $activity->title,
+                'description' => $activity->description,
+                'address' => $activity->address,
+                'start' => $activity->start_date,
+                'end' => $activity->end_date,
+                'type_name' => $activity->type->name,
+                'roles' => $activity->roles,
+                'color' => $activity->type->color
+            ];
+        });
+
+        return response()->json($renamedActivities);
+    }
+
+
+
     public function getActivity($id)
     {
         $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type")
@@ -489,6 +523,20 @@ class ActivityController extends Controller
             'isSubscribe' => $isSubscribe,
             'roleSubscribe' => $roleSubscribe,
             'files' => [],
+            'journeys' => $activity->journeys->map(function ($journey) {
+                return [
+                    'id' => $journey->id,
+                    'name' => $journey->name,
+                    'duration' => $journey->duration,
+                    'distance' => $journey->distance,
+                    'steps' => $journey->steps->map(function ($step) {
+                        return [
+                            'id' => $step->id,
+                            'address' => $step->address,
+                        ];
+                    }),
+                ];
+            }),
             'roles' => $activity->roles->map(function ($role) {
                 return [
                     'id' => $role->id,
@@ -514,6 +562,7 @@ class ActivityController extends Controller
 
         return response()->json(['activity' => $renamedActivity]);
     }
+
     public function deleteActivity($id)
     {
         try {

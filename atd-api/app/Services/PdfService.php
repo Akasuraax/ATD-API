@@ -32,6 +32,6 @@ class PdfService
 
         $pdf->Output($pdfFilePath, 'F');
 
-        return "/storage/activities/" . $pdfFileName;
+        return "storage/activities/" . $activity->id  . '/' . $pdfFileName;
     }
 }

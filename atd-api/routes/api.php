@@ -204,6 +204,7 @@ use App\Http\Controllers\ScheduleController;
     Route::prefix('/activity')->middleware('validity.token')->group(function (){
         Route::post('/', [ActivityController::class, 'createActivity']);
         Route::get('/', [ActivityController::class, 'getActivities']);
+        Route::get('/withParticipate', [ActivityController::class, 'getFuturUserActivities']);
         Route::get('/publicActivity/{id}', [ActivityController::class, 'getActivityForUser']);
         Route::get('/{id}', [ActivityController::class, 'getActivity']);
         Route::get('/participate/{id}', [ActivityController::class, 'isUserRegisteredToActivity']);

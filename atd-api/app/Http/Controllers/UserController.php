@@ -3,18 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use GuzzleHttp\Psr7\Response;
-use Illuminate\Database\Eloquent\Collection;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Pagination\LengthAwarePaginator;
-use App\Http\Controllers\RoleController;
-use function Webmozart\Assert\Tests\StaticAnalysis\length;
 
 class UserController extends Controller
 {
@@ -220,7 +215,6 @@ class UserController extends Controller
 
         return response($response, $status);
     }
-
     public function patchUserAdmin(int $userId, Request $request)
     {
         try {

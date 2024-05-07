@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\DeleteService;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -21,12 +22,15 @@ class ActivityController extends Controller
 
     protected RecipeController $recipeController;
     protected ProductController $productController;
+    protected $notificationService;
 
 
-    public function __construct(RecipeController $recipeController, ProductController $productController)
+    public function __construct(RecipeController $recipeController, ProductController $productController, NotificationService $notificationService)
     {
         $this->recipeController = $recipeController;
         $this->productController = $productController;
+        $this->notificationService = $notificationService;
+
     }
 
 
@@ -105,6 +109,8 @@ class ActivityController extends Controller
                 return response()->json(['message' => $e->getMessage()], $e->getCode());
             }
         }
+
+        $response = $this->notificationService->sendNotification('Bonjour, ceci est une notification de test.');
 
         return response()->json(["activity" => $activity]);
     }

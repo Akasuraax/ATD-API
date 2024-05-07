@@ -20,5 +20,9 @@ class ProblemSeeder extends Seeder
         Problem::create([
             'name' => 'Problème avec une activité',
         ]);
+
+        Problem::create([
+            'name' => 'Autre'
+        ]);
     }
 }

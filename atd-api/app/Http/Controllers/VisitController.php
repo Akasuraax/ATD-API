@@ -15,9 +15,6 @@ use function PHPUnit\Framework\isEmpty;
 class VisitController extends Controller
 {
 
-    public function test(int $ticket_id){
-
-    }
     public function createVisit(Request $request): JsonResponse
     {
         try {

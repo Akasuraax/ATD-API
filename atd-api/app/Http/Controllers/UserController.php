@@ -137,16 +137,35 @@ class UserController extends Controller
         $page = $request->input('page', 0);
 
         $users = User::where('archive', false)
+            ->where('visited',true)
+            ->with("visits")
+            ->paginate($perPage, ['id','forname','name','address'], 'page', $page + 1);
 
-            ->paginate($perPage, ['forname','name','address'], 'page', $page + 1);
+        $transformedUser = $users->map(function ($user) {
 
-        return $users;
+            $visitToday = false;
+            foreach ($user->visits as $visit) {
+                $visitDate = $visit->created_at->startOfDay(); // Met à minuit la date de visite
+                if ($visitDate->equalTo(today())) { // Vérifie si les deux dates sont égales
+                    $visitToday = true;
+                    break;
+                }
+            }
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'forname' => $user->forname,
+                'address' => $user->address,
+                'visit' => $visitToday
+            ];
+        });
+
+        return $transformedUser;
     }
 
     public function getUsersVisitAll(Request $request)
     {
-
-
 
         $users = User::where('archive', false)
             ->where("visited", true)
@@ -175,7 +194,6 @@ class UserController extends Controller
 
         return $transformedUser;
     }
-
 
     public function getUser(int $userId)
     {

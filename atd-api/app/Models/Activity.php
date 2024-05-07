@@ -29,7 +29,7 @@ class Activity extends Model
     }
 
     public function users(){
-        return $this->belongsToMany(User::class, 'participates', 'id_activity', 'id_user')->withPivot('count', 'archive');
+        return $this->belongsToMany(User::class, 'participates', 'id_activity', 'id_user')->withPivot('count', 'archive', 'role');
     }
 
     public function roles(){
@@ -41,7 +41,7 @@ class Activity extends Model
     }
 
     public function participates(){
-        return $this->belongsToMany(Product::class, 'participates', 'id_activity', 'id_user')->withPivot('role', 'count', 'archive');
+        return $this->belongsToMany(Participate::class, 'participates', 'id_activity', 'id_user')->withPivot('role', 'count', 'archive');
     }
 
     public function recipes(){

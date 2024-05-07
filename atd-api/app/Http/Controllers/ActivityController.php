@@ -110,7 +110,7 @@ class ActivityController extends Controller
             }
         }
 
-        $response = $this->notificationService->sendNotification('Bonjour, ceci est une notification de test.');
+        $this->notificationService->sendNotification('Bonjour, ceci est une notification de test.');
 
         return response()->json(["activity" => $activity]);
     }

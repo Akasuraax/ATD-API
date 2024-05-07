@@ -503,7 +503,7 @@ class ActivityController extends Controller
             return response()->json(['message' => 'Element doesn\'t exist'], 404);
         }
 
-        $participation = $activity->participates()->where('id_user', $user->id)->withPivot('role')->first();
+        $participation = $activity->users()->where('id_user', $user->id)->withPivot('role')->first();
         $isSubscribe = $participation !== null;
         $roleSubscribe = $isSubscribe ? $participation->pivot->role : null;
 

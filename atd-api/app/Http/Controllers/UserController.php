@@ -195,7 +195,6 @@ class UserController extends Controller
         return $transformedUser;
     }
 
-
     public function getUser(int $userId)
     {
         $user = User::where('id', $userId)

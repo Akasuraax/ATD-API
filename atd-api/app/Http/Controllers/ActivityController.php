@@ -138,7 +138,7 @@ class ActivityController extends Controller
                 return response()->json(['message' => $e->getMessage()], $e->getCode());
             }
 
-            $alreadyParticipates = $activity->participates()->where('id_user', $user->id)->exists();
+            $alreadyParticipates = $activity->users()->where('id_user', $user->id)->exists();
 
             if ($alreadyParticipates) {
                 return response()->json(['message' => 'User already participates in this activity'], 400);
@@ -169,7 +169,7 @@ class ActivityController extends Controller
 
             $activity = Activity::find($id);
 
-            $participation = $activity->participates()->where('id_user', $user->id)->withPivot('role')->first();
+            $participation = $activity->users()->where('id_user', $user->id)->withPivot('role')->first();
             $isSubscribe = $participation !== null;
             $roleSubscribe = $isSubscribe ? $participation->pivot->role : null;
 
@@ -232,19 +232,19 @@ class ActivityController extends Controller
             return response()->json(['message' => 'Element doesn\'t exist'], 404);
         }
 
-        $alreadyParticipates = $activity->participates()->where('id_user', $user->id)->exists();
+        $alreadyParticipates = $activity->users()->where('id_user', $user->id)->exists();
 
         if (!$alreadyParticipates) {
             return response()->json(['message' => 'User does not participate in this activity'], 400);
         }
 
-        $pivot = $activity->participates()->where('id_user', $user->id)->first()->pivot;
+        $pivot = $activity->users()->where('id_user', $user->id)->first()->pivot;
         $pivotRole = $activity->roles()->where('id_role', $pivot->role)->first()->pivot;
         $pivotRole->count -= $pivot->count;
         $pivotRole->save();
 
-        $activity->participates()->detach($user->id);
-        $activity->participates()->detach($user->id);
+        $activity->users()->detach($user->id);
+        $activity->users()->detach($user->id);
 
         $updatedActivity = Activity::where("id",$id)
             ->with('roles')
@@ -299,7 +299,7 @@ class ActivityController extends Controller
             ->where('archive',false)
             ->first();
 
-        $isRegistered = $activity->participates()->where('id_user', $user->id)->exists();
+        $isRegistered = $activity->users()->where('id_user', $user->id)->exists();
 
         if ($isRegistered) {
             $role = $activity->participates()->where('id_user', $user->id)->withPivot('role')->first()->pivot->role;
@@ -387,8 +387,6 @@ class ActivityController extends Controller
 
         return response()->json($renamedActivities);
     }
-
-
 
     public function getActivity($id)
     {

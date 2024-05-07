@@ -141,6 +141,7 @@
         "journey": "Trajet",
         "addJourney": "Ajouter l'activité",
         "journeyTitle": "Titre du trajet",
+        "waitValid": "Vous ne pouvez pas vous inscrire, votre compte est en attente de validation.",
         "back": {
             "title": "Liste des types activités",
             "name": "Nom",
@@ -250,7 +251,9 @@
         "donations": "Dons",
         "male": "Homme",
         "female": "Femme",
-        "ratherNot": "Non précisé"
+        "ratherNot": "Non précisé",
+        "yourActivities": "Activités auxquelles vous êtes inscrit",
+        "comingActivities": "Activités à venir"
     },
     "vehicle": {
         "title": "Liste des véhicules",
@@ -323,7 +326,7 @@
         "activities": "Activités",
         "local": "Locaux",
         "about": "À propos",
-        "profile": "Profile",
+        "profile": "Profil",
         "activityRequest": "Demande d'activité",
         "admin": "Administration",
         "users": "Utilisateurs",
@@ -343,7 +346,7 @@
         "pieces": "Lots",
         "demands": "Demandes",
         "volunteer": "Volontaire",
-        "personVisit": "Personne a visité"
+        "personVisit": "Personnes à visiter"
     },
     "roles": {
         "title": "Roles",

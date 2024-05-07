@@ -138,6 +138,9 @@ class ActivityController extends Controller
                 return response()->json(['message' => $e->getMessage()], $e->getCode());
             }
 
+            if($user["status"] == 0)
+                return response()->json(['message' => 'You can\'t perform this action yet.'], 401);
+
             $alreadyParticipates = $activity->users()->where('id_user', $user->id)->exists();
 
             if ($alreadyParticipates) {

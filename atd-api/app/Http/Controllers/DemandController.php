@@ -27,6 +27,11 @@ class DemandController extends Controller
         $type = Type::findOrFail($validateData['demand']['id_type']);
         $user_id = TokenController::decodeToken($request->header('Authorization'))->id;
 
+        $user_status = User::select('status')->where('id', $user_id)->first();
+
+        if($user_status['status'] == 0)
+            return response()->json(['message' => 'You can\'t perform this action yet.'], 401);
+
         if($type->archive)
             return response()->json(['message' => 'The type of activity doesn\'t exist.'], 405);
 

@@ -270,6 +270,7 @@ class UserController extends Controller
 
             $user->update($fields);
             $user->roles()->sync($roleIds);
+            $user->activities()->detach();
             $user->load('roles');
 
             return response()->json([

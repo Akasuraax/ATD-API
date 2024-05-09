@@ -477,6 +477,10 @@ class ActivityController extends Controller
         }
         $isArchived = $activity->archive || (now() > $activity->end_date);
 
+        $requestWithWarehouseAddress = new Request([
+            'warehouseAddress' => $activity->address,
+        ]);
+
         $renamedActivity = [
             'id' => $activity->id,
             'title' => $activity->title,
@@ -529,13 +533,13 @@ class ActivityController extends Controller
                     'max' => $this->recipeController->getNbPiecesRecipe($recipe->id),
                 ];
             }),
-            'products' => $activity->products->map(function ($product) {
+            'products' => $activity->products->map(function ($product) use ($requestWithWarehouseAddress) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'measure' => $product->measure,
                     'count' => $product->pivot->count,
-                    'max' => $this->productController->getNbProductProduct($product->id),
+                    'max' => $this->productController->getNbProductProduct($requestWithWarehouseAddress, $product->id),
                 ];
             }),
         ];

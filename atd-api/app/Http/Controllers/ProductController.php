@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Make;
 use App\Models\Piece;
 use App\Models\Product;
+use App\Models\Warehouse;
 use App\Services\DeleteService;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -93,15 +94,14 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    public function getProduct($id)
+    public function getProduct( $id)
     {
         return Product::find($id) ? Product::select('id', 'name', 'measure', 'archive')->where('id', $id)->first() : response()->json(['message' => 'Element doesn\'t exist'], 404);
     }
 
-    public function getNbProductProduct($id)
+    public function getNbProductProduct(Request $request, $id)
     {
         $product = Product::where('id', $id)
-            ->with('pieces')
             ->where('archive', false)
             ->first();
 
@@ -109,15 +109,29 @@ class ProductController extends Controller
             return 0;
         }
 
-        if ($product->pieces->isNotEmpty()) {
-            $totalPiecesCount = $product->pieces->sum('count');
+        // Vérifier si l'adresse de la warehouse est liée à une warehouse enregistrée dans la base de données
+        $warehouseAddress = $request->input('warehouseAddress');
+        $warehouse = Warehouse::where('address', $warehouseAddress)->first();
+        if ($warehouse) {
+            // Si l'adresse de la warehouse est liée à une warehouse enregistrée, filtrer les pièces par warehouse_id
+            $pieces = $product->pieces()
+                ->where('id_warehouse', $warehouse->id)
+                ->where('archive',false)
+                ->get();
+        } else {
+            // Si l'adresse de la warehouse n'est pas liée à une warehouse enregistrée, récupérer toutes les pièces
+            $pieces = $product->pieces;
+        }
+
+        if ($pieces->isNotEmpty()) {
+            $totalPiecesCount = $pieces->sum('count');
         } else {
             return 0;
         }
 
-
         return $totalPiecesCount;
     }
+
     public function deleteProduct($id){
         try{
             $product = Product::findOrFail($id);

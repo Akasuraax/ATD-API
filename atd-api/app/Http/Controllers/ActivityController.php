@@ -106,7 +106,8 @@ class ActivityController extends Controller
             }
         }
 
-        $this->notificationService->sendNotification('Bonjour, ceci est une notification de test.');
+        $formattedDate = date('d/m/Y à H:i', strtotime($activity->title));
+        $this->notificationService->sendNotification('Une nouvelle activité est disponible : ' . $activity->title . ' le ' . $formattedDate);
 
         return response()->json(["activity" => $activity]);
     }
@@ -454,8 +455,6 @@ class ActivityController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
     }
-
-
 
     public function getActivity($id)
     {

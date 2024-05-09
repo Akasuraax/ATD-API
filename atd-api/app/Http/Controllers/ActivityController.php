@@ -424,7 +424,7 @@ class ActivityController extends Controller
 
     public function getActivity($id)
     {
-        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type")
+        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type","activities.archive")
             ->with('type')
             ->with('files')
             ->with('users')
@@ -440,6 +440,7 @@ class ActivityController extends Controller
         if (!$activity) {
             return response()->json(['message' => 'Element doesn\'t exist'], 404);
         }
+        $isArchived = $activity->archive || (now() > $activity->end_date);
 
         $renamedActivity = [
             'id' => $activity->id,
@@ -451,7 +452,7 @@ class ActivityController extends Controller
             'end_date' => $activity->end_date,
             'donation' => $activity->donation,
             'type' => $activity->type,
-            'archive' => $activity->archive,
+            'archive' => $isArchived,
             'journeys' => $activity->journeys->map(function ($journey) {
                 return [
                     'id' => $journey->id,

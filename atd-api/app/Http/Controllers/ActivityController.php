@@ -106,7 +106,7 @@ class ActivityController extends Controller
             }
         }
 
-        $formattedDate = date('d/m/Y à H:i', strtotime($activity->title));
+        $formattedDate = date('d/m/Y à H:i', strtotime($activity->start_date));
         $this->notificationService->sendNotification('Une nouvelle activité est disponible : ' . $activity->title . ' le ' . $formattedDate);
 
         return response()->json(["activity" => $activity]);

@@ -422,6 +422,41 @@ class ActivityController extends Controller
         return response()->json($renamedActivities);
     }
 
+    public function isFree(Request $request)
+    {
+        try {
+            $validateData = $request->validate([
+                'address' => 'nullable|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date',
+            ]);
+
+            $requestStartDate = $request->input('start_date');
+            $requestEndDate = $request->input('end_date');
+            $requestAddress = $request->input('address');
+
+            $activityCount = Activity::select('activities.id','activities.id_type')
+                ->where('archive', false)
+                ->whereHas('type', function ($query) {
+                    $query->where('access_to_journey', false);
+                })
+                ->where('activities.address', $requestAddress)
+                ->where(function ($query) use ($requestStartDate, $requestEndDate) {
+                    $query->whereBetween('activities.start_date', [$requestStartDate, $requestEndDate])
+                        ->whereNot('activities.start_date', $requestEndDate)
+                        ->orWhereBetween('activities.end_date', [$requestStartDate, $requestEndDate])
+                        ->whereNot('activities.end_date', $requestStartDate);
+                })
+                ->count();
+
+            return response()->json(['count' => $activityCount]);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+    }
+
+
+
     public function getActivity($id)
     {
         $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type","activities.archive")

@@ -13,25 +13,32 @@ class ScheduleSeeder extends Seeder
      */
     public function run(): void
     {
-        Schedule::create([
-            'day' => 1,
-            'start_hour' => '11:00:00',
-            'end_hour' => '12:00:00',
-            'user_id' => 6
-        ]);
+        for($i = 0; $i<8; $i++){
+            Schedule::create([
+                'day' => $i,
+                'start_hour' => '11:00:00',
+                'end_hour' => '12:00:00',
+                'user_id' => 6
+            ]);
+        }
 
-        Schedule::create([
-            'day' => 4,
-            'start_hour' => '16:00:00',
-            'end_hour' => '18:30:00',
-            'user_id' => 6
-        ]);
+        for($i = 0; $i<8; $i++){
+            Schedule::create([
+                'day' => $i,
+                'start_hour' => '11:00:00',
+                'end_hour' => '12:00:00',
+                'user_id' => 7
+            ]);
+        }
 
-        Schedule::create([
-            'day' => 2,
-            'start_hour' => '14:45:00',
-            'end_hour' => '16:30:00',
-            'user_id' => 7
-        ]);
+        for($i = 0; $i<8; $i++){
+            Schedule::create([
+                'day' => $i,
+                'start_hour' => '11:00:00',
+                'end_hour' => '12:00:00',
+                'user_id' => 8
+            ]);
+        }
+
     }
 }

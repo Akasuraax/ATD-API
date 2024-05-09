@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
-use App\Models\File;
-use App\Models\Journey;
-use App\Models\Recipe;
 use App\Models\Role;
 use App\Models\Product;
 use App\Models\User;
@@ -15,7 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\Type;
-use function PHPUnit\Framework\isEmpty;
 
 class ActivityController extends Controller
 {
@@ -397,6 +393,35 @@ class ActivityController extends Controller
         return response()->json($renamedActivities);
     }
 
+    public function getUserActivities(Request $request, $userId)
+    {
+        $activities = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'activities.id_type')
+            ->with('type')
+            ->with('roles')
+            ->with('users')
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('id_user', $userId);
+            })
+            ->where('activities.end_date', '<', now())
+            ->get();
+
+        $renamedActivities = $activities->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'title' => $activity->title,
+                'description' => $activity->description,
+                'address' => $activity->address,
+                'start' => $activity->start_date,
+                'end' => $activity->end_date,
+                'type_name' => $activity->type->name,
+                'roles' => $activity->roles,
+                'color' => $activity->type->color
+            ];
+        });
+
+        return response()->json($renamedActivities);
+    }
+
     public function getActivity($id)
     {
         $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type")
@@ -410,7 +435,6 @@ class ActivityController extends Controller
                 $query->with('steps');
             }])
             ->where('activities.id', $id)
-            ->where('activities.archive', false)
             ->first();
 
         if (!$activity) {
@@ -427,6 +451,7 @@ class ActivityController extends Controller
             'end_date' => $activity->end_date,
             'donation' => $activity->donation,
             'type' => $activity->type,
+            'archive' => $activity->archive,
             'journeys' => $activity->journeys->map(function ($journey) {
                 return [
                     'id' => $journey->id,
@@ -497,25 +522,20 @@ class ActivityController extends Controller
             return response()->json(['message' => 'User does not exist'], 404);
         }
 
-        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type")
+        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type", 'activities.archive')
             ->with('type')
             ->with('files')
             ->with('roles')
             ->with('journeys')
             ->where('activities.id', $id)
-            ->where('activities.archive', false)
             ->first();
-
-        if (!$activity) {
-            return response()->json(['message' => 'Element doesn\'t exist'], 404);
-        }
 
         $participation = $activity->users()->where('id_user', $user->id)->withPivot('role')->first();
         $isSubscribe = $participation !== null;
         $roleSubscribe = $isSubscribe ? $participation->pivot->role : null;
 
         $start = now()->greaterThanOrEqualTo($activity->start_date);
-
+        $isArchived = $activity->archive || (now() > $activity->end_date);
 
         $renamedActivity = [
             'id' => $activity->id,
@@ -530,6 +550,7 @@ class ActivityController extends Controller
             'type' => $activity->type,
             'isSubscribe' => $isSubscribe,
             'roleSubscribe' => $roleSubscribe,
+            'archive' => $isArchived,
             'files' => [],
             'journeys' => $activity->journeys->map(function ($journey) {
                 return [

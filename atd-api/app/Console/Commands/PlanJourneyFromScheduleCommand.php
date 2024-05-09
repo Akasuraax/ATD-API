@@ -96,9 +96,10 @@ class PlanJourneyFromScheduleCommand extends Command
         ];
 
         $requestJourney = Request::create('/journey', 'POST', $journeyArray);
-        $requestJourney->content = json_encode($journeyArray);
+        $requestJourney= json_encode($journeyArray);
+        $requestApi = new Request($journeyArray, $journeyArray, [], [], [], [], $requestJourney);
 
-        $newJourney = app(JourneyController::class)->createJourney($requestJourney);
+        $newJourney = app(JourneyController::class)->createJourney($requestApi);
     }
 
     public function getDayId($day){

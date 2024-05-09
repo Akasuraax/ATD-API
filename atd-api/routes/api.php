@@ -264,6 +264,6 @@ use App\Http\Controllers\ScheduleController;
         Route::post('/', [AddressController::class, 'address']);
     });
 
-    /*Route::prefix('schedule')->group(function(){
+    Route::prefix('schedule')->group(function(){
         Route::post('/', [ScheduleController::class, 'planJourneyFromSchedule']);
-    });*/
+    });

@@ -19,7 +19,7 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => true,
             'access_to_journey' => true,
             'color' => '#c09eea',
-            'display' => true
+            'display' => false
         ]);
 
         Type::create([
@@ -27,7 +27,7 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => false,
             'access_to_journey' => false,
             'color' => '#f67c7c',
-            'display' => true
+            'display' => false
         ]);
 
         Type::create([
@@ -35,7 +35,7 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => false,
             'access_to_journey' => true,
             'color' => '#7cf694',
-            'display' => true
+            'display' => false
         ]);
 
         Type::create([
@@ -43,7 +43,7 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => false,
             'access_to_journey' => true,
             'color' => '#7cf6ec',
-            'display' => true
+            'display' => false
         ]);
 
         Type::create([
@@ -51,7 +51,7 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => false,
             'access_to_journey' => false,
             'color' => '#7cc5f6',
-            'display' => true
+            'display' => false
         ]);
 
         Type::create([
@@ -59,14 +59,14 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => false,
             'access_to_journey' => true,
             'color' => '#f6ec7c',
-            'display' => true
+            'display' => false
         ]);
 
         Type::create([
             'name' => 'Visite',
             'access_to_warehouse' => false,
             'access_to_journey' => false,
-            'display' => true
+            'display' => false
         ]);
 
         Type::create([

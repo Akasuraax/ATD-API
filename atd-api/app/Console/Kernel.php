@@ -17,8 +17,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('app:plan-journey-from-schedule-command')->timezone('Europe/Paris')->dailyAt('18:00');
-
     }
+
 
     /**
      * Register the commands for the application.

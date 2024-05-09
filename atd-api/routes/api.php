@@ -205,6 +205,8 @@ use App\Http\Controllers\ScheduleController;
         Route::post('/', [ActivityController::class, 'createActivity']);
         Route::get('/', [ActivityController::class, 'getActivities']);
         Route::get('/withParticipate', [ActivityController::class, 'getFuturUserActivities']);
+        Route::get('/user/{id}', [ActivityController::class, 'getUserActivities']);
+        Route::get('/isFree', [ActivityController::class, 'isFree']);
         Route::get('/publicActivity/{id}', [ActivityController::class, 'getActivityForUser']);
         Route::get('/{id}', [ActivityController::class, 'getActivity']);
         Route::get('/participate/{id}', [ActivityController::class, 'isUserRegisteredToActivity']);

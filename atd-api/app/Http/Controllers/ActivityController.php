@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
-use App\Models\File;
-use App\Models\Journey;
-use App\Models\Recipe;
 use App\Models\Role;
 use App\Models\Product;
 use App\Models\User;
@@ -15,7 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\Type;
-use function PHPUnit\Framework\isEmpty;
 
 class ActivityController extends Controller
 {
@@ -110,7 +106,8 @@ class ActivityController extends Controller
             }
         }
 
-        $this->notificationService->sendNotification('Bonjour, ceci est une notification de test.');
+        $formattedDate = date('d/m/Y à H:i', strtotime($activity->title));
+        $this->notificationService->sendNotification('Une nouvelle activité est disponible : ' . $activity->title . ' le ' . $formattedDate);
 
         return response()->json(["activity" => $activity]);
     }
@@ -397,9 +394,71 @@ class ActivityController extends Controller
         return response()->json($renamedActivities);
     }
 
+    public function getUserActivities(Request $request, $userId)
+    {
+        $activities = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', 'activities.id_type')
+            ->with('type')
+            ->with('roles')
+            ->with('users')
+            ->whereHas('users', function ($query) use ($userId) {
+                $query->where('id_user', $userId);
+            })
+            ->where('activities.end_date', '<', now())
+            ->get();
+
+        $renamedActivities = $activities->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'title' => $activity->title,
+                'description' => $activity->description,
+                'address' => $activity->address,
+                'start' => $activity->start_date,
+                'end' => $activity->end_date,
+                'type_name' => $activity->type->name,
+                'roles' => $activity->roles,
+                'color' => $activity->type->color
+            ];
+        });
+
+        return response()->json($renamedActivities);
+    }
+
+    public function isFree(Request $request)
+    {
+        try {
+            $validateData = $request->validate([
+                'address' => 'nullable|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date',
+            ]);
+
+            $requestStartDate = $request->input('start_date');
+            $requestEndDate = $request->input('end_date');
+            $requestAddress = $request->input('address');
+
+            $activityCount = Activity::select('activities.id','activities.id_type')
+                ->where('archive', false)
+                ->whereHas('type', function ($query) {
+                    $query->where('access_to_journey', false);
+                })
+                ->where('activities.address', $requestAddress)
+                ->where(function ($query) use ($requestStartDate, $requestEndDate) {
+                    $query->whereBetween('activities.start_date', [$requestStartDate, $requestEndDate])
+                        ->whereNot('activities.start_date', $requestEndDate)
+                        ->orWhereBetween('activities.end_date', [$requestStartDate, $requestEndDate])
+                        ->whereNot('activities.end_date', $requestStartDate);
+                })
+                ->count();
+
+            return response()->json(['count' => $activityCount]);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+    }
+
     public function getActivity($id)
     {
-        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type")
+        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type","activities.archive")
             ->with('type')
             ->with('files')
             ->with('users')
@@ -410,12 +469,16 @@ class ActivityController extends Controller
                 $query->with('steps');
             }])
             ->where('activities.id', $id)
-            ->where('activities.archive', false)
             ->first();
 
         if (!$activity) {
             return response()->json(['message' => 'Element doesn\'t exist'], 404);
         }
+        $isArchived = $activity->archive || (now() > $activity->end_date);
+
+        $requestWithWarehouseAddress = new Request([
+            'warehouseAddress' => $activity->address,
+        ]);
 
         $renamedActivity = [
             'id' => $activity->id,
@@ -427,6 +490,7 @@ class ActivityController extends Controller
             'end_date' => $activity->end_date,
             'donation' => $activity->donation,
             'type' => $activity->type,
+            'archive' => $isArchived,
             'journeys' => $activity->journeys->map(function ($journey) {
                 return [
                     'id' => $journey->id,
@@ -468,13 +532,13 @@ class ActivityController extends Controller
                     'max' => $this->recipeController->getNbPiecesRecipe($recipe->id),
                 ];
             }),
-            'products' => $activity->products->map(function ($product) {
+            'products' => $activity->products->map(function ($product) use ($requestWithWarehouseAddress) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'measure' => $product->measure,
                     'count' => $product->pivot->count,
-                    'max' => $this->productController->getNbProductProduct($product->id),
+                    'max' => $this->productController->getNbProductProduct($requestWithWarehouseAddress, $product->id),
                 ];
             }),
         ];
@@ -497,25 +561,20 @@ class ActivityController extends Controller
             return response()->json(['message' => 'User does not exist'], 404);
         }
 
-        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type")
+        $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type", 'activities.archive')
             ->with('type')
             ->with('files')
             ->with('roles')
             ->with('journeys')
             ->where('activities.id', $id)
-            ->where('activities.archive', false)
             ->first();
-
-        if (!$activity) {
-            return response()->json(['message' => 'Element doesn\'t exist'], 404);
-        }
 
         $participation = $activity->users()->where('id_user', $user->id)->withPivot('role')->first();
         $isSubscribe = $participation !== null;
         $roleSubscribe = $isSubscribe ? $participation->pivot->role : null;
 
         $start = now()->greaterThanOrEqualTo($activity->start_date);
-
+        $isArchived = $activity->archive || (now() > $activity->end_date);
 
         $renamedActivity = [
             'id' => $activity->id,
@@ -530,6 +589,7 @@ class ActivityController extends Controller
             'type' => $activity->type,
             'isSubscribe' => $isSubscribe,
             'roleSubscribe' => $roleSubscribe,
+            'archive' => $isArchived,
             'files' => [],
             'journeys' => $activity->journeys->map(function ($journey) {
                 return [

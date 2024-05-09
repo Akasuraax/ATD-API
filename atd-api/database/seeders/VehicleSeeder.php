@@ -17,6 +17,7 @@ class VehicleSeeder extends Seeder
            'name' => "Martine",
             'license_plate' => "AA-229-AA",
             'average_consumption' => 10.6,
+            'partner' => false,
             'fuel_type' => "diesel",
             'id_annexe' => 1
         ]);
@@ -25,6 +26,7 @@ class VehicleSeeder extends Seeder
             'name' => "Ginette",
             'license_plate' => "BA-223-HG",
             'average_consumption' => 9.3,
+            'partner' => true,
             'fuel_type' => "E75",
             'id_annexe' => 1
         ]);

@@ -40,7 +40,6 @@ class JourneyController extends Controller
         }
 
         $array = json_decode($request->getContent(), true);
-
         //check if the vehicle exists
         $vehicle = Vehicle::findOrFail($array['vehicle']['id']);
         if ($vehicle->archive)
@@ -57,6 +56,13 @@ class JourneyController extends Controller
         }
 
         $steps = $array["steps"];
+
+        //cas ou c'est un journey crée par le planJourneyFromSchedule
+        if(is_string($steps)){
+            $json_string = str_replace("'", '"', $array["steps"]);
+            $steps = json_decode($json_string);
+        }
+
         $total_distance = 0;
         $total_time = 0;
         for ($i = 0; $i < count($steps) - 1; $i++) {
@@ -80,7 +86,7 @@ class JourneyController extends Controller
         $file = $this->pdfService->generatePdf($steps, $activity, $journey->id);
         $newFile = File::create([
             'name' => $activity->id . '-' .'journey' . '.pdf',
-            'link' => $file,
+            'link' => '/' . $file,
         ]);
 
         $newFile->activities()->attach($array['activity']['id'], ['archive' => false]);

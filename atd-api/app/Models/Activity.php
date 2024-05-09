@@ -76,7 +76,7 @@ class Activity extends Model
         $this->users()->updateExistingPivot($userIds, ['archive' => true]);
 
         File::whereIn('id', $fileIds)->get()->each(function($file) use ($id) {
-            $file->archiveActivity($id, $file->name);
+            $file->archiveActivity($file->link);
         });
     }
 

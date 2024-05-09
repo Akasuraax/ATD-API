@@ -40,10 +40,12 @@ class PlanJourneyFromScheduleCommand extends Command
     {
         //1 - création de l'activité
         $vehicle = Vehicle::where('partner', true)->first();
-        if(!$vehicle)
+        if(!$vehicle) {
             Log::error('Aucun véhicule sélectionné.');
+            return response()->json(['message' => 'Aucun véhicule séléctionné'], 404);
+        }
 
-        $annexe = Annexe::findOrFail($vehicle->id_annexe);
+        $annexe = Annexe::findOrFail($vehicle["id_annexe"]);
 
         $tomorrowsId = $this->getDayId(Carbon::now()->addDay()->format('l'));
 
@@ -58,12 +60,19 @@ class PlanJourneyFromScheduleCommand extends Command
             'id_type' => 10
         ]);
 
+        $activity->roles()->attach(7, ['archive' => false, 'min' => 1, 'max' => 1, 'count' => 0]);
+
         //2 - création du trajet
         $steps = [$annexe['address'] . ', ' . $annexe['zipcode']];
 
         $warehouseAdress = $this->getMostAvailableWarehouse();
         $usersAddress = $this->getAllUsersAddressFromDayId($tomorrowsId);
         $steps = array_merge($steps, $usersAddress);
+
+        if(empty($steps)){
+            Log::error('Aucun horaire disponible.');
+            return response()->json(['message' => 'Aucun horaire disponible'], 404);
+        }
 
         //envoie des données à l'api google
         $jsonSteps = json_encode(['steps' => $steps]);

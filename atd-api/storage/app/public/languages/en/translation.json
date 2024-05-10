@@ -243,7 +243,8 @@
         "validated": "validated",
         "refused": "refused",
         "zipcode": "postal code",
-        "donations": "Donations"
+        "donations": "Donations",
+        "totaldonations": "The total"
     },
     "vehicle": {
         "title": "Vehicle List",
@@ -259,7 +260,8 @@
         "fuel_type": "Fuel Type",
         "license_plate": "License Plate",
         "isArchived": "Archived Vehicle",
-        "annexe": "Annex"
+        "annexe": "Annex",
+        "partner": "Partner collection vehicle"
     },
     "warehouse": {
         "title": "Warehouse List",
@@ -284,7 +286,8 @@
         "products": "Products",
         "conflictMessage": "Recipe name already exists",
         "recipeDetails": "Create a Recipe",
-        "ingredients": "Ingredients"
+        "ingredients": "Ingredients",
+        "archive": "Archived"
     },
     "product": {
         "title": "Product List",

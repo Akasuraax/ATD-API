@@ -7,6 +7,27 @@
         "placeHolderMsg": "Formulieren Sie Ihre Anfrage...",
         "submitBtn": "Nachricht senden"
     },
+    "generic": {
+        "success": "Das Element wurde erfolgreich gesendet!",
+        "failure": "Ein Fehler ist aufgetreten!",
+        "deleteMessage": "Möchten Sie dieses Element wirklich löschen?",
+        "acceptDelete": "Ja, ich bin sicher",
+        "refuseDelete": "Nein, abbrechen",
+        "deleteButton": "Löschen",
+        "banButton": "Verbannen",
+        "editButton": "Bearbeiten",
+        "saveButton": "Speichern",
+        "signOut": "Abmelden",
+        "yes": "Ja",
+        "no": "Nein",
+        "unit": "Einheit",
+        "next": "Weiter",
+        "previous": "Zurück",
+        "timetable": "Fahrplan",
+        "cancel": "Abbrechen",
+        "register": "Registrieren",
+        "fillMessage": "Sie müssen alle erforderlichen Felder ausfüllen"
+    },
     "createActivity": {
         "create": "Aktivität erstellen",
         "general": "Allgemein",
@@ -243,7 +264,8 @@
         "validated": "validiert",
         "refused": "abgelehnt",
         "zipcode": "Postleitzahl",
-        "donations": "Spenden"
+        "donations": "Spenden",
+        "totaldonations": "Gesamt"
     },
     "vehicle": {
         "title": "Fahrzeugliste",
@@ -259,7 +281,8 @@
         "fuel_type": "Kraftstoffart",
         "license_plate": "Kennzeichen",
         "isArchived": "Fahrzeug archiviert",
-        "annexe": "Anhang"
+        "annexe": "Anhang",
+        "partner": "Partnerfahrzeug für die Abholung"
     },
     "warehouse": {
         "title": "Lagerliste",
@@ -296,23 +319,20 @@
         "lactoseFree": "Laktosefrei",
         "noRestriction": "Keine Einschränkung",
         "addProduct": "Produkt hinzufügen",
-        "addIngredient": "Zutat hinzufügen"
+        "addIngredient": "Zutat hinzufügen",
+        "ingredients" : "Zutaten",
+        "archive": "Archiv"
     },
     "product": {
         "title": "Produktliste",
-        "name": "Name",
-        "quantity": "Menge",
-        "unit": "Einheit",
-        "addProduct": "Produkt hinzufügen",
-        "delete": "Löschen",
+        "titled": "Titel",
         "details": "Details",
+        "name": "Name",
+        "count": "Menge",
         "productDetails": "Produktdetails",
-        "cost": "Kosten",
-        "supplier": "Lieferant",
-        "expirationDate": "Verfallsdatum",
-        "warehouse": "Lager",
-        "type": "Typ",
-        "addSupplier": "Lieferant hinzufügen"
+        "add": "Produkt hinzufügen",
+        "measure" : "Maßeinheit",
+        "conflictMessage":"Der Produktname existiert bereits"
     },
     "file": {
         "uploadFile": "Datei hochladen",
@@ -326,5 +346,71 @@
         "uploadSuccess": "Datei(en) wurde(n) erfolgreich hochgeladen",
         "uploadFail": "Fehler beim Hochladen der Datei(en)",
         "noFileSelected": "Keine Datei ausgewählt"
+    },
+
+    "demand": {
+        "signal": "Schreiben Sie Ihre Anfrage",
+        "types": "Anfragetyp",
+        "selectType": "Wählen Sie den Typ aus",
+        "message": "Schreiben Sie Ihre Anfrage im Detail",
+        "placeholderMessage": "Schreiben Sie Ihre Anfrage so präzise wie möglich. Wenn Sie irgendwohin möchten, geben Sie an, wann wir Sie zu Hause abholen sollen und wohin und wann Sie möchten gehen.",
+        "submitBtn": "Senden"
+    },
+
+    "demands": {
+        "title": "Benutzeranfragen",
+        "type_name": "Anfragetyp",
+        "user_email": "Benutzer-E-Mail",
+        "description": "Beschreibung",
+        "status": "Status",
+        "isArchived": "Archiviert",
+        "demandDetails": "Anfragedetails",
+        "creationDate": "Erstellungsdatum"
+    },
+    "roles": {
+        "title": "Rollen",
+        "addBtn": "Rolle hinzufügen",
+        "name": "Name",
+        "reference": "Referenz",
+        "none": "Keine Referenz",
+        "isArchived": "Archiviert",
+        "roleDetails": "Rolleninformationen"
+    },
+
+    "annexes": {
+        "title": "Anhänge",
+        "addBtn": "Anhang hinzufügen",
+        "name": "Name",
+        "address": "Adresse",
+        "zipcode": "Postleitzahl",
+        "isArchived": "Archiviert",
+        "annexeDetails": "Anhangdetails"
+    },
+    "types": {
+        "title": "Typen",
+        "addBtn": "Typ hinzufügen",
+        "name": "Name",
+        "description": "Beschreibung",
+        "access_to_warehouse": "Zugang zum Lager",
+        "access_to_journey": "Zu einer verbundenen Reise",
+        "display": "Bild anzeigen",
+        "image": "Bild",
+        "isArchived": "Archiviert",
+        "typeDetails": "Typdetails",
+        "color": "Farbe (HEX)"
+    },
+    "pieces": {
+        "expired": "Ablaufdatum",
+        "count": "Menge",
+        "location": "Ort",
+        "product_name": "Produktname",
+        "warehouse_name": "Lagername",
+        "title": "Chargen",
+        "pieceDetails": "Chargendetails",
+        "measure": "Maßeinheit",
+        "isArchived": "Archiviert",
+        "qrCode": "QR-Code generieren",
+        "addPiece": "Charge hinzufügen",
+        "notSpace": "Maximale Lagerkapazität erreicht"
     }
 }

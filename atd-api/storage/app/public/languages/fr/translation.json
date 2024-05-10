@@ -249,6 +249,7 @@
         "refused": "refusé",
         "zipcode": "code postal",
         "donations": "Dons",
+        "totaldonations": "Le total",
         "male": "Homme",
         "female": "Femme",
         "ratherNot": "Non précisé",
@@ -297,7 +298,7 @@
         "archive": "Archivé",
         "conflictMessage":"Le nom de la recette existe déjà",
         "recipeDetails":  "Création d'une recette",
-        "ingrédients" : "ingrédients"
+        "ingredients" : "ingrédients"
     },
     "product": {
         "title": "Liste des produits",

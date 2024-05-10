@@ -132,6 +132,8 @@
     },
     "activity": {
         "titleActivity": "Nos activités",
+        "products": "Les produits",
+        "recipes": "Les recettes",
         "foodDistribution": "Distribution alimentaire",
         "administrativeDepartment": "Service administratif",
         "shuttles": "Navettes pour rendez-vous éloignés",

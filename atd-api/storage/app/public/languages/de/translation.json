@@ -183,17 +183,24 @@
     "activity": {
         "titleActivity": "Unsere Aktivitäten",
         "foodDistribution": "Lebensmittelausgabe",
-        "administrativeDepartment": "Verwaltungsdienst",
-        "shuttles": "Shuttles zu entfernten Terminen",
+        "products": "Die Produkte",
+        "recipes": "Die Rezepte",
+        "administrativeDepartment": "Verwaltungsabteilung",
+        "shuttles": "Shuttles für entfernte Termine",
         "courses": "Alphabetisierungskurse für Erwachsene",
         "tutoring": "Nachhilfe für Kinder",
         "event": "Organisation von Fundraising-Veranstaltungen",
-        "seniors": "Besuche und Aktivitäten für Senioren.",
+        "seniors": "Besuche und Aktivitäten für Senioren",
+        "files": "Dateien",
+        "journey": "Reise",
+        "addJourney": "Aktivität hinzufügen",
+        "journeyTitle": "Titel der Reise",
+        "waitValid": "Sie können sich nicht registrieren, Ihr Konto wartet auf Validierung.",
         "back": {
             "title": "Liste der Aktivitätstypen",
             "name": "Name",
-            "needsVehicle": "Fahrzeug erforderlich",
-            "needsWarehouse": "Lager erforderlich",
+            "needsVehicle": "Benötigt ein Fahrzeug",
+            "needsWarehouse": "Benötigt ein Lager",
             "addActivity": "Aktivität hinzufügen",
             "delete": "Löschen",
             "details": "Details",
@@ -455,173 +462,4 @@
         "addPiece": "Charge hinzufügen",
         "notSpace": "Maximale Lagerkapazität erreicht"
     }
-}
-},
-"ticket": {
-"reportProblem": "Problem melden",
-"problemType": "Problemart",
-"selectProblem": "Wählen Sie eine Problemart aus",
-"problemSubject": "Problemthema",
-"placeHolderSubject": "Beschreiben Sie das Problemthema",
-"message": "Ihre Nachricht",
-"placeHolderMsg": "Formulieren Sie Ihr Problem...",
-"submitBtn": "Nachricht senden",
-"successMessage": "Das Ticket wurde erfolgreich erstellt",
-"failureMessage": "Beim Erstellen des Tickets ist ein Fehler aufgetreten"
-},
-"activity": {
-"titleActivity": "Unsere Aktivitäten",
-"foodDistribution": "Lebensmittelverteilung",
-"administrativeDepartment": "Verwaltungsdienste",
-"shuttles": "Shuttles für entfernte Termine",
-"courses": "Erwachsenenbildungskurse",
-"tutoring": "Nachhilfe für Kinder",
-"event": "Organisation von Spendenevents",
-"seniors": "Besuche und Aktivitäten für Senioren",
-"back" : {
-"title": "Liste der Aktivitätstypen",
-"name": "Name",
-"needsVehicle": "Benötigt ein Fahrzeug",
-"needsWarehouse": "Benötigt ein Lager",
-"addActivity": "Aktivität hinzufügen",
-"delete": "Löschen",
-"details": "Details"
-},
-"add": {
-"title": "Aktivitätstyp hinzufügen",
-"name": "Name",
-"nameText": "Aktivitätsname...",
-"description": "Beschreibung",
-"needsVehicle": "Benötigt ein Fahrzeug",
-"needsWarehouse": "Benötigt ein Lager",
-"addBtn": "Hinzufügen",
-"descriptionText": "Beschreiben Sie die Aktivität...",
-"successMessage": "Der Aktivitätstyp wurde erstellt!",
-"success" : "Erfolg! "
-}
-},
-"footer": {
-"name": "Au Temps Donné",
-"signal": "Problem melden",
-"mention": "Impressum - Nutzungsbedingungen"
-},
-"header": {
-"activity": "Unsere Aktivitäten",
-"event": "Kommende Veranstaltungen",
-"local": "Unsere Standorte",
-"about": "Über uns",
-"login": "Einloggen"
-},
-"languages": {
-"fr" : "Französisch",
-"en" : "Englisch",
-"it" : "Italienisch",
-"de" : "Deutsch"
-},
-"visit": {
-"visitsDemand":"Besuchsanfragen älterer Menschen",
-"lastName":"Nachname",
-"name":"Vorname",
-"age":"Alter",
-"address":"Adresse",
-"zipcode":"Postleitzahl",
-"action":"Aktion",
-"accept":"Ich gehe!"
-},
-"list": {
-"search": "Suche",
-"searchPlaceHolder" : "Element suchen",
-"filter": "Sortieren nach"
-},
-"tracking": {
-"ticketId": "Ticket-ID",
-"date": "Datum",
-"type": "Typ",
-"title": "Titel",
-"action": "Aktion",
-"details": "Details",
-"ticketTrack": "Tickets"
-},
-"user": {
-"title" : "Benutzerliste",
-"lastName": "Nachname",
-"name": "Vorname",
-"role": "Rolle",
-"email": "E-Mail",
-"isArchived": "Archivierte Benutzerkonten",
-"isBan": "Konto gesperrt",
-"informations":"Informationen",
-"action": "Aktion",
-"downloadData": "Daten herunterladen",
-"partner": "Partner",
-"beneficiary": "Begünstigter",
-"volunteer": "Freiwilliger",
-"waitingValidation": "Status",
-"userDetails": "Benutzerdetails",
-"phone": "Telefonnummer",
-"gender": "Geschlecht",
-"birthdayDate": "Geburtsdatum",
-"address": "Adresse",
-"roles": "Rollen",
-"creationDate": "Erstellungsdatum",
-"file": "Dateien",
-"siretNumber": "SIRET-Nummer",
-"companyName": "Firmenname",
-"deleteMessage": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
-"banMessage": "Sind Sie sicher, dass Sie diesen Benutzer sperren möchten?",
-"onStandby": "in Bereitschaft",
-"validated": "validiert",
-"refused": "abgelehnt"
-
-},
-"vehicle": {
-"title": "Fahrzeugliste",
-"addBtn": "Ein Fahrzeug hinzufügen",
-"name": "Name",
-"registration": "Registrierung",
-"avgConsumption": "Durchschnittlicher Verbrauch (L/100km)",
-"annex": "Anhang",
-"delete": "Löschen",
-"details": "Details"
-},
-"warehouse": {
-"title": "Lagerliste",
-"name": "Name",
-"address": "Adresse",
-"capacity": "Kapazität",
-"addWarehouse": "Ein Lager hinzufügen",
-"delete": "Löschen",
-"details": "Details"
-},
-"recipe": {
-"title": "Rezeptliste",
-"titled": "Überschrieben",
-"numIngredients" : "Anzahl der Zutaten",
-"delete": "Löschen",
-"details": "Details",
-"isArchived": "Archivierte Lager",
-"addRecipe": "Ein Rezept hinzufügen"
-},
-"language": {
-"title": "Sprachenliste",
-"addLanguage": "Sprache hinzufügen",
-"language": "Sprache",
-"added": "Hinzugefügt am",
-"delete": "Löschen",
-"newFile": "Neue Datei"
-},
-
-"generic": {
-"success": "Das Element wurde erfolgreich gesendet!",
-"failure": "Ein Fehler ist aufgetreten!",
-"deleteMessage": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
-"acceptDelete": "Ja, ich bin sicher",
-"refuseDelete": "Nein, abbrechen",
-"deleteButton": "Löschen",
-"banButton": "Sperren",
-"editButton": "Bearbeiten",
-"saveButton": "Speichern",
-"yes": "Ja",
-"no": "Nein"
-}
 }

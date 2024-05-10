@@ -118,9 +118,10 @@ class ActivityController extends Controller
     {
         try {
             $activity = Activity::where("id",$id)
-                ->with('roles')
-                ->with('files')
-                ->where('archive',false)
+                ->with(['type', 'files', 'roles', 'products', 'recipes' => function ($query) {
+                    $query->with('products'); // Charger les produits associés à chaque recette
+                }])
+                ->where('activities.id', $id)
                 ->first();
 
             if(!$activity) {
@@ -213,6 +214,30 @@ class ActivityController extends Controller
                         'count' => $role->pivot->count,
                     ];
                 }),
+                'recipes' => $activity->recipes->map(function ($recipe) {
+                    return [
+                        'id' => $recipe->id,
+                        'name' => $recipe->name,
+                        'description' => $recipe->description,
+                        'count' => $recipe->pivot->count,
+                        'products' => $recipe->products->map(function ($product) {
+                            return [
+                                'id' => $product->id,
+                                'name' => $product->name,
+                                'measure' => $product->pivot->measure,
+                                'count' => $product->pivot->count
+                            ];
+                        }),
+                    ];
+                }),
+                'products' => $activity->products->map(function ($product){
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'measure' => $product->measure,
+                        'count' => $product->pivot->count,
+                    ];
+                }),
             ];
 
             return response()->json(['message' => "subscribe", 'activity' => $renamedActivity]);
@@ -232,8 +257,10 @@ class ActivityController extends Controller
         }
         $user = User::where('id', $request["user"])->first();
         $activity = Activity::where("id",$id)
-            ->with('roles')
-            ->where('archive',false)
+            ->with(['type', 'files', 'roles', 'products', 'recipes' => function ($query) {
+                $query->with('products'); // Charger les produits associés à chaque recette
+            }])
+            ->where('activities.id', $id)
             ->first();
 
         if (!$user) {
@@ -281,6 +308,30 @@ class ActivityController extends Controller
                         'max' => $role->pivot->max,
                     ],
                     'count' => $role->pivot->count,
+                ];
+            }),
+            'recipes' => $activity->recipes->map(function ($recipe) {
+                return [
+                    'id' => $recipe->id,
+                    'name' => $recipe->name,
+                    'description' => $recipe->description,
+                    'count' => $recipe->pivot->count,
+                    'products' => $recipe->products->map(function ($product) {
+                        return [
+                            'id' => $product->id,
+                            'name' => $product->name,
+                            'measure' => $product->pivot->measure,
+                            'count' => $product->pivot->count
+                        ];
+                    }),
+                ];
+            }),
+            'products' => $activity->products->map(function ($product){
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'measure' => $product->measure,
+                    'count' => $product->pivot->count,
                 ];
             }),
         ];
@@ -507,6 +558,14 @@ class ActivityController extends Controller
                     }),
                 ];
             }),
+            'users' => $activity->users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'forname' => $user->forname,
+                    'email' => $user->email,
+                ];
+            }),
             'files' => $activity->files->map(function ($file) {
                 return [
                     'id' => $file->id,
@@ -564,10 +623,9 @@ class ActivityController extends Controller
         }
 
         $activity = Activity::select('activities.id', 'activities.title', 'activities.description', 'activities.address', 'activities.zipcode', 'activities.start_date', 'activities.end_date', 'activities.donation', "activities.id_type", 'activities.archive')
-            ->with('type')
-            ->with('files')
-            ->with('roles')
-            ->with('journeys')
+            ->with(['type', 'files', 'roles', 'products', 'recipes' => function ($query) {
+                $query->with('products'); // Charger les produits associés à chaque recette
+            }])
             ->where('activities.id', $id)
             ->first();
 
@@ -616,6 +674,30 @@ class ActivityController extends Controller
                         'max' => $role->pivot->max,
                     ],
                     'count' => $role->pivot->count,
+                ];
+            }),
+            'recipes' => $activity->recipes->map(function ($recipe) {
+                return [
+                    'id' => $recipe->id,
+                    'name' => $recipe->name,
+                    'description' => $recipe->description,
+                    'count' => $recipe->pivot->count,
+                    'products' => $recipe->products->map(function ($product) {
+                        return [
+                            'id' => $product->id,
+                            'name' => $product->name,
+                            'measure' => $product->pivot->measure,
+                            'count' => $product->pivot->count
+                        ];
+                    }),
+                ];
+            }),
+            'products' => $activity->products->map(function ($product){
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'measure' => $product->measure,
+                    'count' => $product->pivot->count,
                 ];
             }),
         ];

@@ -18,14 +18,14 @@ class WarehouseController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:255',
                 'address' => 'required|string',
-                'zipcode' => 'required',
+                'zipcode' => 'required|digits:5',
                 'capacity' => 'required|integer'
             ]);
         }catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $exist = Warehouse::where('address', $validateData['address'])->where('zipcode', $validateData['zipcode'])->first();
+        $exist = Warehouse::where('address', $validateData['address'])->where('archive', false)->where('zipcode', $validateData['zipcode'])->first();
         if($exist)
             return response()->json(['message' => 'This annexe with this address already exist !'], 409);
 
@@ -136,7 +136,7 @@ class WarehouseController extends Controller
                 $requestData = $request->validate([
                     'name' => 'required|string|max:255',
                     'address' => 'required|string',
-                    'zipcode' => 'required|digits:5|integer',
+                    'zipcode' => 'required|digits:5',
                     'capacity' => 'required|integer',
                     'archive' => 'required|boolean'
                 ]);

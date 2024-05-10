@@ -154,7 +154,7 @@ class TypeController extends Controller
             $requestData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
-                'color' => ['nullable', 'string', 'max:7'],
+                'color' => ['nullable', 'string', 'min:7' ,'max:7'],
                 'display' => 'required|boolean',
                 'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'access_to_warehouse' => 'required|boolean',
@@ -164,13 +164,16 @@ class TypeController extends Controller
 
             $path = public_path() . '/storage/types/' . $type->id ;
             $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->where('archive',false)->whereNotIn('id', [$id])->first();
-            $color = Type::where('color', $requestData['color'])->where('archive', false)->whereNotIn('id', [$id])->first();
+            if (!empty($requestData['color'])) {
+                $color = Type::where('color', $requestData['color'])->where('archive', false)->whereNotIn('id', [$id])->first();
+                if ($color)
+                    return response()->json(['message' => 'This color is already used'], 409);
+            }
+
             if ($exist)
                 return response()->json(['message' => 'This type already exists!'], 409);
-            if ($color)
-                return response()->json(['message' => 'This color is already used'], 409);
             if($requestData['display'] == 1 && !is_dir($path) && !$request->type_image)
-                return response()->json(['message' => 'You have to put an image if you want to display the type'], 422);
+                return response()->json(['message' => 'You have to put an image if you want to display the type'], 400);
             if($requestData['display'] == 0){
                 if(is_dir($path)) {
                     $files = scandir($path);
@@ -182,7 +185,7 @@ class TypeController extends Controller
                     rmdir($path);
                 }
                 if ($request->hasFile('type_image'))
-                    return response()->json(['message' => "You can't put an image if you don't want to display the type"], 422);
+                    return response()->json(['message' => "You can't put an image if you don't want to display the type"], 400);
             }
 
 

@@ -16,7 +16,7 @@ class AnnexesController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:255',
                 'address' => 'required|string',
-                'zipcode' => 'required|digits:5|integer'
+                'zipcode' => 'required|digits:5'
             ]);
         }catch(ValidationException $e){
             return response()->json(['errors' => $e->errors()], 422);
@@ -118,7 +118,7 @@ class AnnexesController extends Controller
                 $requestData = $request->validate([
                     'name' => 'required|string|max:255',
                     'address' => 'required|string',
-                    'zipcode' => 'required|digits:5|integer',
+                    'zipcode' => 'required|digits:5',
                     'archive' => 'required|boolean'
                 ]);
             } catch (ValidationException $e) {

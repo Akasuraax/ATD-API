@@ -151,10 +151,6 @@ class VehicleController extends Controller
                 $requestData = $request->validate([
                     'name' => 'required','string|max:255',
                     'license_plate' => 'required|min:9|max:9',
-                    'string',
-                    'email',
-                    'max:9',
-                     Rule::unique('users')->ignore($id),
                     'partner' => 'required', 'boolean',
                     'average_consumption' => 'required','numeric',
                     'fuel_type' => 'required','string',

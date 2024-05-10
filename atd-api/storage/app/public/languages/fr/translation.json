@@ -253,7 +253,8 @@
         "female": "Femme",
         "ratherNot": "Non précisé",
         "yourActivities": "Activités auxquelles vous êtes inscrit",
-        "comingActivities": "Activités à venir"
+        "comingActivities": "Activités à venir",
+        "beforeActivity": "Activités passées"
     },
     "vehicle": {
         "title": "Liste des véhicules",

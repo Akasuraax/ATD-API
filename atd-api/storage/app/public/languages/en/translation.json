@@ -34,7 +34,9 @@
         "validation": "Validation",
         "createStartDate": "Start date and time",
         "createEndDate": "End date and time",
-        "createDonation": "Donations"
+        "createDonation": "Donations",
+        "outsideActivity": "Create an Activity Outside the Premises",
+        "local": "Create an Activity Within a Facility/Annex"
     },
     "error": {
         "Error404": "Page not found",
@@ -47,7 +49,7 @@
     "home": {
         "homeTextImage": "Your help can change lives",
         "registration": "I become a volunteer",
-        "homeText": "The association Au Temps Donné is a humanitarian organization, created in 1987 in the Aisne department, in Saint Quentin in response to the industrial crisis affecting the region. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "homeText": "Welcome to Au temps donné!\n\nAu temps donné is an association dedicated to helping those in need. Through our street outreach and support activities, we work every day to bring comfort and assistance to those who need it most. Whether it's providing hot meals, offering literacy classes, or supporting the elderly, our mission is to make a tangible difference in the lives of individuals and in our community.\n\nWe firmly believe in solidarity and empathy as drivers of social change. Join us in our commitment to making the world a better place, one act at a time.\n\n",
         "homeTitle": "Au Temps Donné",
         "infos": "Learn more"
     },
@@ -213,7 +215,7 @@
         "ticketTrack": "Tickets"
     },
     "user": {
-        "title": "User List",
+        "title": "List of Users",
         "lastName": "Last Name",
         "name": "First Name",
         "role": "Roles",
@@ -239,11 +241,18 @@
         "companyName": "Company Name",
         "deleteMessage": "Are you sure you want to delete this user?",
         "banMessage": "Are you sure you want to ban this user?",
-        "onStandby": "on standby",
-        "validated": "validated",
-        "refused": "refused",
-        "zipcode": "postal code",
-        "donations": "Donations"
+        "onStandby": "On standby",
+        "validated": "Validated",
+        "refused": "Refused",
+        "zipcode": "Zip Code",
+        "donations": "Donations",
+        "totaldonations": "Total",
+        "male": "Male",
+        "female": "Female",
+        "ratherNot": "Not specified",
+        "yourActivities": "Activities You're Enrolled In",
+        "comingActivities": "Upcoming Activities",
+        "beforeActivity": "Activities You've Participated In"
     },
     "vehicle": {
         "title": "Vehicle List",
@@ -259,7 +268,8 @@
         "fuel_type": "Fuel Type",
         "license_plate": "License Plate",
         "isArchived": "Archived Vehicle",
-        "annexe": "Annex"
+        "annexe": "Annex",
+        "partner": "Partner collection vehicle"
     },
     "warehouse": {
         "title": "Warehouse List",
@@ -284,7 +294,8 @@
         "products": "Products",
         "conflictMessage": "Recipe name already exists",
         "recipeDetails": "Create a Recipe",
-        "ingredients": "Ingredients"
+        "ingredients": "Ingredients",
+        "archive": "Archived"
     },
     "product": {
         "title": "Product List",
@@ -306,7 +317,7 @@
     "sidebar": {
         "menu": "Menu",
         "home": "Home",
-        "planner": "Planner",
+        "planner": "Planning",
         "activities": "Activities",
         "local": "Locations",
         "about": "About",

@@ -35,8 +35,8 @@
         "createStartDate": "Date et heure de début",
         "createEndDate": "Date de heure de fin",
         "createDonation": "Dons",
-        "local": "Locaux disponibles",
-        "outsideActivity": "Activité en dehors des locaux"
+        "outsideActivity": "Créer une activité hors des locaux",
+        "local": "Créer une activité dans un des locaux/annexes"
     },
     "error": {
         "Error404": "Page non trouvée",
@@ -49,7 +49,7 @@
     "home": {
         "homeTextImage": "Votre aide peut changer la vie d’autrui",
         "registration": "Je deviens bénévole",
-        "homeText": "L’association Au Temps Donné est une association humanitaire, créée en 1987 dans le département de l’Aisne, à Saint Quentin en réponse à la crise industrielle qui frappait la région. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "homeText": "Bienvenue à Au temps donné !\n\nAu temps donné est une association engagée dans l'aide aux personnes dans le besoin. À travers nos maraudes et nos actions de soutien, nous travaillons chaque jour pour apporter un peu de réconfort et d'aide à ceux qui en ont le plus besoin. Que ce soit en distribuant des repas chauds, en offrant des cours d'alphabétisation ou en accompagnant les personnes âgées, notre mission est de faire une différence tangible dans la vie des individus et dans notre communauté.\n\nNous croyons fermement en la solidarité et en l'empathie comme moteurs du changement social. Rejoignez-nous dans notre engagement à faire du monde un endroit meilleur, un geste à la fois.",
         "homeTitle": "Au temps donné",
         "infos": "En savoir plus"
     },
@@ -251,12 +251,13 @@
         "refused": "refusé",
         "zipcode": "code postal",
         "donations": "Dons",
+        "totaldonations": "Le total",
         "male": "Homme",
         "female": "Femme",
         "ratherNot": "Non précisé",
         "yourActivities": "Activités auxquelles vous êtes inscrit",
         "comingActivities": "Activités à venir",
-        "beforeActivity": "Activités passées"
+        "beforeActivity": "Activités auxquelles vous avez participé"
     },
     "vehicle": {
         "title": "Liste des véhicules",
@@ -300,7 +301,7 @@
         "archive": "Archivé",
         "conflictMessage":"Le nom de la recette existe déjà",
         "recipeDetails":  "Création d'une recette",
-        "ingrédients" : "ingrédients"
+        "ingredients" : "ingrédients"
     },
     "product": {
         "title": "Liste des produits",

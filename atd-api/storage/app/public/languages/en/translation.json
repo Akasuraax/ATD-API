@@ -34,7 +34,9 @@
         "validation": "Validation",
         "createStartDate": "Start date and time",
         "createEndDate": "End date and time",
-        "createDonation": "Donations"
+        "createDonation": "Donations",
+        "outsideActivity": "Create an Activity Outside the Premises",
+        "local": "Create an Activity Within a Facility/Annex"
     },
     "error": {
         "Error404": "Page not found",
@@ -213,7 +215,7 @@
         "ticketTrack": "Tickets"
     },
     "user": {
-        "title": "User List",
+        "title": "List of Users",
         "lastName": "Last Name",
         "name": "First Name",
         "role": "Roles",
@@ -239,12 +241,18 @@
         "companyName": "Company Name",
         "deleteMessage": "Are you sure you want to delete this user?",
         "banMessage": "Are you sure you want to ban this user?",
-        "onStandby": "on standby",
-        "validated": "validated",
-        "refused": "refused",
-        "zipcode": "postal code",
+        "onStandby": "On standby",
+        "validated": "Validated",
+        "refused": "Refused",
+        "zipcode": "Zip Code",
         "donations": "Donations",
-        "totaldonations": "The total"
+        "totaldonations": "Total",
+        "male": "Male",
+        "female": "Female",
+        "ratherNot": "Not specified",
+        "yourActivities": "Activities You're Enrolled In",
+        "comingActivities": "Upcoming Activities",
+        "beforeActivity": "Activities You've Participated In"
     },
     "vehicle": {
         "title": "Vehicle List",

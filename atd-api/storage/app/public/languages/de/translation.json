@@ -7,6 +7,35 @@
         "placeHolderMsg": "Formulieren Sie Ihre Anfrage...",
         "submitBtn": "Nachricht senden"
     },
+    "sidebar": {
+        "menu": "Menü",
+        "home": "Startseite",
+        "planner": "Planer",
+        "activities": "Aktivitäten",
+        "local": "Lokal",
+        "about": "Über uns",
+        "profile": "Profil",
+        "activityRequest": "Aktivitätsanfrage",
+        "admin": "Verwaltung",
+        "users": "Benutzer",
+        "types": "Typen",
+        "annexes": "Anhänge",
+        "roles": "Rollen",
+        "vehicles": "Fahrzeuge",
+        "warehouses": "Lager",
+        "recipes": "Rezepte",
+        "products": "Produkte",
+        "language": "Sprachen",
+        "ticket": "Support",
+        "signIn": "Anmelden",
+        "signUp": "Registrieren",
+        "logOut": "Abmelden",
+        "donation": "Spenden",
+        "pieces": "Chargen",
+        "demands": "Anfragen",
+        "volunteer": "Freiwillige",
+        "personVisit": "Besuchspersonen"
+    },
     "generic": {
         "success": "Das Element wurde erfolgreich gesendet!",
         "failure": "Ein Fehler ist aufgetreten!",
@@ -55,7 +84,9 @@
         "validation": "Validierung",
         "createStartDate": "Startdatum und -uhrzeit",
         "createEndDate": "Enddatum und -uhrzeit",
-        "createDonation": "Spenden"
+        "createDonation": "Spenden",
+        "outsideActivity": "Aktivität außerhalb der Räumlichkeiten erstellen",
+        "local": "Aktivität in einer Einrichtung/Anlage erstellen"
     },
     "error": {
         "Error404": "Seite nicht gefunden",
@@ -260,12 +291,23 @@
         "companyName": "Firmenname",
         "deleteMessage": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
         "banMessage": "Sind Sie sicher, dass Sie diesen Benutzer sperren möchten?",
-        "onStandby": "in Warteposition",
-        "validated": "validiert",
-        "refused": "abgelehnt",
+        "onStandby": "In Bereitschaft",
+        "validated": "Validiert",
+        "refused": "Abgelehnt",
         "zipcode": "Postleitzahl",
         "donations": "Spenden",
-        "totaldonations": "Gesamt"
+        "totaldonations": "Gesamt",
+        "male": "Männlich",
+        "female": "Weiblich",
+        "ratherNot": "Nicht angegeben",
+        "yourActivities": "Aktivitäten, an denen Sie teilnehmen",
+        "comingActivities": "Bevorstehende Aktivitäten",
+        "beforeActivity": "Aktivitäten, an denen Sie teilgenommen haben"
+    },
+    "donation": {
+        "donate": "Eine Spende machen",
+        "total": "Gesamtspenden gesammelt:",
+        "thanks": "Ihre Unterstützung berührt uns zutiefst. Vielen Dank, dass Sie eine Säule unserer Mission sind und einen spürbaren Unterschied im Leben derer machen, denen wir dienen."
     },
     "vehicle": {
         "title": "Fahrzeugliste",

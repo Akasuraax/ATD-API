@@ -34,7 +34,9 @@
         "validation": "Validation",
         "createStartDate": "Date et heure de début",
         "createEndDate": "Date de heure de fin",
-        "createDonation": "Dons"
+        "createDonation": "Dons",
+        "outsideActivity": "Créer une activité hors des locaux",
+        "local": "Créer une activité dans un des locaux/annexes"
     },
     "error": {
         "Error404": "Page non trouvée",
@@ -254,7 +256,8 @@
         "female": "Femme",
         "ratherNot": "Non précisé",
         "yourActivities": "Activités auxquelles vous êtes inscrit",
-        "comingActivities": "Activités à venir"
+        "comingActivities": "Activités à venir",
+        "beforeActivity": "Activités auxquelles vous avez participé"
     },
     "vehicle": {
         "title": "Liste des véhicules",

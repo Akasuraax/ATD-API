@@ -34,7 +34,9 @@
         "validation": "Validation",
         "createStartDate": "Date et heure de début",
         "createEndDate": "Date de heure de fin",
-        "createDonation": "Dons"
+        "createDonation": "Dons",
+        "local": "Locaux disponibles",
+        "outsideActivity": "Activité en dehors des locaux"
     },
     "error": {
         "Error404": "Page non trouvée",

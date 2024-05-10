@@ -23,7 +23,7 @@ class TypeSeeder extends Seeder
         ]);
 
         Type::create([
-            'name' => 'Services admnistratifs',
+            'name' => 'Services administratifs',
             'access_to_warehouse' => false,
             'access_to_journey' => false,
             'color' => '#f67c7c',
@@ -59,6 +59,13 @@ class TypeSeeder extends Seeder
             'access_to_warehouse' => false,
             'access_to_journey' => true,
             'color' => '#f6ec7c',
+            'display' => false
+        ]);
+
+        Type::create([
+            'name' => "Formation bénévole",
+            'access_to_warehouse' => false,
+            'access_to_journey' => false,
             'display' => false
         ]);
 

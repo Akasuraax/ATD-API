@@ -66,6 +66,7 @@ class TypeSeeder extends Seeder
             'name' => "Formation bénévole",
             'access_to_warehouse' => false,
             'access_to_journey' => false,
+            'color' => '#89cc9b',
             'display' => false
         ]);
 
@@ -73,28 +74,32 @@ class TypeSeeder extends Seeder
             'name' => 'Visite',
             'access_to_warehouse' => false,
             'access_to_journey' => false,
-            'display' => false
+            'display' => false,
+            'color' => '#58377a'
         ]);
 
         Type::create([
             'name' => 'Autre',
             'access_to_warehouse' => false,
             'access_to_journey' => false,
-            'display' => false
+            'display' => false,
+            'color' => '#e36b5b'
         ]);
 
         Type::create([
             'name' => 'Rôle',
             'access_to_warehouse' => false,
             'access_to_journey' => false,
-            'display' => false
+            'display' => false,
+            'color' => '#5be3b3'
         ]);
 
         Type::create([
             'name' => 'Récolte des produits',
             'access_to_warehouse' => true,
             'access_to_journey' => true,
-            'display' => false
+            'display' => false,
+            'color' => '#3f67b5'
         ]);
     }
 }

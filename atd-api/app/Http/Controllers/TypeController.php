@@ -16,7 +16,7 @@ class TypeController extends Controller
             $validateData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
-                'color' => ['nullable', 'string', 'min:7', 'max:7', Rule::unique('types', 'color')],
+                'color' => ['required', 'string', 'min:7', 'max:7'],
                 'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'display' => 'required|boolean',
                 'access_to_warehouse' => 'required|boolean',
@@ -25,6 +25,10 @@ class TypeController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
+
+        $color = Type::where('color', $validateData['color'])->where('archive', false)->first();
+        if ($color)
+            return response()->json(['message' => 'This color is already used'], 409);
 
         $exist = Type::where('name', ucfirst(strtolower($validateData['name'])))->where('archive',false)->first();
         if($exist)
@@ -154,7 +158,7 @@ class TypeController extends Controller
             $requestData = $request->validate([
                 'name' => 'required|string|max:128',
                 'description' => 'nullable|string',
-                'color' => ['nullable', 'string', 'min:7' ,'max:7'],
+                'color' => ['required', 'string', 'min:7' ,'max:7'],
                 'display' => 'required|boolean',
                 'type_image' => 'nullable|mimes:png,jpg,jpeg|max:20000',
                 'access_to_warehouse' => 'required|boolean',
@@ -164,12 +168,10 @@ class TypeController extends Controller
 
             $path = public_path() . '/storage/types/' . $type->id ;
             $exist = Type::where('name', ucfirst(strtolower($requestData['name'])))->where('archive',false)->whereNotIn('id', [$id])->first();
-            if (!empty($requestData['color'])) {
-                $color = Type::where('color', $requestData['color'])->where('archive', false)->whereNotIn('id', [$id])->first();
-                if ($color)
-                    return response()->json(['message' => 'This color is already used'], 409);
-            }
 
+            $color = Type::where('color', $requestData['color'])->where('archive', false)->whereNotIn('id', [$id])->first();
+            if ($color)
+                return response()->json(['message' => 'This color is already used'], 409);
             if ($exist)
                 return response()->json(['message' => 'This type already exists!'], 409);
             if($requestData['display'] == 1 && !is_dir($path) && !$request->type_image)
@@ -200,7 +202,6 @@ class TypeController extends Controller
 
             try{
                 $type->update($requestData);
-                $type->save();
             } catch (ModelNotFoundException $e) {
                 return response()->json(['error' => 'The type you selected is not found'], 404);
             }

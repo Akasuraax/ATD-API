@@ -205,7 +205,8 @@
         "address": "Address",
         "zipcode": "Postal Code",
         "action": "Action",
-        "accept": "I'll go!"
+        "accept": "I'll go!",
+        "text": "Visit to the person on "
     },
     "list": {
         "search": "Search",

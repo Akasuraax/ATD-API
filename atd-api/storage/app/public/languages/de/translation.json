@@ -255,7 +255,8 @@
         "address": "Adresse",
         "zipcode": "Postleitzahl",
         "action": "Aktion",
-        "accept": "Ich gehe!"
+        "accept": "Ich gehe!",
+        "text": "Besuch bei der Person am "
     },
     "list": {
         "search": "Suchen",
@@ -461,5 +462,14 @@
         "qrCode": "QR-Code generieren",
         "addPiece": "Charge hinzufügen",
         "notSpace": "Maximale Lagerkapazität erreicht"
+    },
+    "week": {
+        "monday": "Montag",
+        "tuesday": "Dienstag",
+        "wednesday": "Mittwoch",
+        "thursday": "Donnerstag",
+        "friday": "Freitag",
+        "saturday": "Samstag",
+        "sunday": "Sonntag"
     }
 }

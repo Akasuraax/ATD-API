@@ -362,7 +362,12 @@
         "reference": "Référence",
         "none": "Pas de référence",
         "isArchived": "Archivé",
-        "roleDetails": "Détails du rôle"
+        "roleDetails": "Détails du rôle",
+        "empty" : "Pas de role",
+        "remove": "Vous devez avoir au moins 1 role",
+        "addroleactivity": "Ajout d'un role",
+        "limit": "Limite",
+        "role": "Role"
     },
     "types": {
         "title": "Types",
@@ -384,7 +389,9 @@
         "address": "Adresse",
         "zipcode": "Code postal",
         "isArchived": "Archivé",
-        "annexeDetails": "Détails de l'annexe"
+        "annexeDetails": "Détails de l'annexe",
+        "addressAlreadyUsed" : "Cette adresse est déjà utilisée",
+        "emptyfield" : "Veuillez remplir tous les champs"
     },
     "donation": {
         "donate": "Faire une donation",

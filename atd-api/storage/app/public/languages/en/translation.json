@@ -322,6 +322,10 @@
         "delete": "Delete",
         "newFile": "New file"
     },
+    "file" : {
+        "addFile": "Add a File",
+        "successAddFiles": "File Added"
+    },
     "sidebar": {
         "menu": "Menu",
         "home": "Home",
@@ -358,7 +362,12 @@
         "reference": "Reference",
         "none": "None",
         "isArchived": "Archived",
-        "roleDetails": "Role Details"
+        "roleDetails": "Role Details",
+        "empty": "You didn't select a role",
+        "remove": "You must have at least 1 role",
+        "addroleactivity": "Add a role",
+        "limit": "Limit",
+        "role": "Role"
     },
     "types": {
         "title": "Types",
@@ -380,7 +389,9 @@
         "address": "Address",
         "zipcode": "Postal Code",
         "isArchived": "Archived",
-        "annexeDetails": "Annex Details"
+        "annexeDetails": "Annex Details",
+        "addressAlreadyUsed" : "This adress is already used",
+        "emptyfield": "Please fill in all fields"
     },
     "donation": {
         "donate": "Make a Donation",
@@ -411,7 +422,7 @@
         "creationDate": "Creation Date"
     },
     "generic": {
-        "success": "The element has been successfully sent!",
+        "success": "The item has been successfully sent!",
         "failure": "An error occurred!",
         "deleteMessage": "Are you sure you want to delete this item?",
         "acceptDelete": "Yes, I'm sure",
@@ -429,6 +440,7 @@
         "timetable": "Passage Schedule",
         "cancel": "Cancel",
         "register": "Register",
+        "unregister": "Unregister",
         "fillMessage": "You must fill in all required fields"
     },
     "week": {

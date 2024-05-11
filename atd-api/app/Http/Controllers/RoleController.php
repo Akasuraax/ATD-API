@@ -28,7 +28,7 @@ class RoleController extends Controller
             return response()->json(['errors' => $e->errors()], 422);
         }
 
-        $exist = Role::where('name', strtolower($validateData['name']))->first();
+        $exist = Role::where('name', strtolower($validateData['name']))->where('archive', false)->first();
         if($exist)
             return response()->json(['message' => 'This role already exist !'], 409);
 
@@ -141,7 +141,7 @@ class RoleController extends Controller
             if($validateData['role_id'] && !in_array($validateData['role_id'], $this->restrictedArray))
                 return response()->json(['message' => 'You didn\'t reference a valid role.'], 401);
 
-            $exist = Role::where('name', strtolower($validateData['name']))->whereNotIn('id', [$id])->first();
+            $exist = Role::where('name', strtolower($validateData['name']))->where('archive', false)->whereNotIn('id', [$id])->first();
             if($exist)
                 return response()->json(['message' => 'This role already exist !'], 409);
 

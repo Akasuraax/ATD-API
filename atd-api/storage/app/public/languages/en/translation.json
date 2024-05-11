@@ -36,7 +36,11 @@
         "createEndDate": "End date and time",
         "createDonation": "Donations",
         "outsideActivity": "Create an Activity Outside the Premises",
-        "local": "Create an Activity Within a Facility/Annex"
+        "local": "Create an Activity Within a Facility/Annex",
+        "filesTooHeavy": "The file size exceeds 20 MB",
+        "filesType": "Unsupported file type",
+        "filesNameUsed": "The file name is already in use",
+        "planningToday" : "Today"
     },
     "error": {
         "Error404": "Page not found",
@@ -44,7 +48,8 @@
         "Error403": "Access forbidden",
         "Description403": "Sorry, you are not authorized to access this page. Please contact support if you think this is an error.",
         "textButton": "Return to homepage",
-        "contact": "Contact support"
+        "contact": "Contact support",
+        "mistake": "An error has occurred"
     },
     "home": {
         "homeTextImage": "Your help can change lives",
@@ -143,8 +148,9 @@
         "seniors": "Visits and Activities for Seniors",
         "files": "Files",
         "journey": "Journey",
-        "addJourney": "Add Activity",
+        "addJourney": "Add a journey",
         "journeyTitle": "Journey Title",
+        "journeyback": "Return to the starting address",
         "waitValid": "You cannot register, your account is pending validation.",
         "back": {
             "title": "List of Activity Types",
@@ -262,7 +268,8 @@
         "yourActivities": "Activities You're Enrolled In",
         "comingActivities": "Upcoming Activities",
         "beforeActivity": "Activities You've Participated In",
-        "scheduleInfos": "Check the days when we can collect products (between 8am and 6pm)"
+        "scheduleInfos": "Check the days when we can collect products (between 8am and 6pm)",
+        "removeUser": "This User has been removed"
     },
     "vehicle": {
         "title": "Vehicle List",

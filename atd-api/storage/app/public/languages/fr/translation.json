@@ -36,7 +36,11 @@
         "createEndDate": "Date de heure de fin",
         "createDonation": "Dons",
         "outsideActivity": "Créer une activité hors des locaux",
-        "local": "Créer une activité dans un des locaux/annexes"
+        "local": "Créer une activité dans un des locaux/annexes",
+        "filesTooHeavy" : "La taille du fichier dépasse 20Mo",
+        "filesType": "Type de fichier non pris en charge",
+        "filesNameUsed" : "Le nom du fichier est déja pris",
+        "planningToday" : "Aujourd hui"
     },
     "error": {
         "Error404": "Page non trouvée",
@@ -44,7 +48,8 @@
         "Error403": "Accès interdit",
         "Description403": "Désolé, vous n'avez pas l'autorisation d'accéder à cette page. Veuillez contacter le support si vous pensez qu'il s'agit d'une erreur.",
         "textButton": "Retourner à l'accueil",
-        "contact": "Contacter le support"
+        "contact": "Contacter le support",
+        "mistake": "Une erreur est survenue"
     },
     "home": {
         "homeTextImage": "Votre aide peut changer la vie d’autrui",
@@ -143,8 +148,9 @@
         "seniors": "Visites et activités pour personnes âgées.",
         "files": "Fichiers",
         "journey": "Trajet",
-        "addJourney": "Ajouter l'activité",
+        "addJourney": "Ajouter le trajet",
         "journeyTitle": "Titre du trajet",
+        "journeyback": "Retournez à l'adresse de départ",
         "waitValid": "Vous ne pouvez pas vous inscrire, votre compte est en attente de validation.",
         "back": {
             "title": "Liste des types activités",
@@ -262,7 +268,8 @@
         "yourActivities": "Activités auxquelles vous êtes inscrit",
         "comingActivities": "Activités à venir",
         "beforeActivity": "Activités auxquelles vous avez participé",
-        "scheduleInfos": "Cochez les jours où nous pouvons récolter des produits (entre 8h et 18h)"
+        "scheduleInfos": "Cochez les jours où nous pouvons récolter des produits (entre 8h et 18h)",
+        "removeUser": "L'utilisateur a été retiré"
     },
     "vehicle": {
         "title": "Liste des véhicules",

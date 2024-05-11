@@ -87,7 +87,11 @@
         "createEndDate": "Enddatum und -uhrzeit",
         "createDonation": "Spenden",
         "outsideActivity": "Aktivität außerhalb der Räumlichkeiten erstellen",
-        "local": "Aktivität in einer Einrichtung/Anlage erstellen"
+        "local": "Aktivität in einer Einrichtung/Anlage erstellen",
+        "filesTooHeavy": "Die Dateigröße überschreitet 20 MB",
+        "filesType": "Dateityp wird nicht unterstützt",
+        "filesNameUsed": "Der Dateiname wird bereits verwendet",
+        "planningToday" : "Heute"
     },
     "error": {
         "Error404": "Seite nicht gefunden",
@@ -95,7 +99,8 @@
         "Error403": "Zugriff verweigert",
         "Description403": "Entschuldigung, Sie haben keine Berechtigung für den Zugriff auf diese Seite. Bitte wenden Sie sich an den Support, wenn Sie glauben, dass dies ein Fehler ist.",
         "textButton": "Zurück zur Startseite",
-        "contact": "Support kontaktieren"
+        "contact": "Support kontaktieren",
+        "mistake": "Ein Fehler ist aufgetreten"
     },
     "home": {
         "homeTextImage": "Ihre Hilfe kann das Leben anderer verändern",
@@ -194,7 +199,8 @@
         "seniors": "Besuche und Aktivitäten für Senioren",
         "files": "Dateien",
         "journey": "Reise",
-        "addJourney": "Aktivität hinzufügen",
+        "addJourney": "Eine Reise hinzufügen",
+        "journeyback": "Zurück zur Startadresse",
         "journeyTitle": "Titel der Reise",
         "waitValid": "Sie können sich nicht registrieren, Ihr Konto wartet auf Validierung.",
         "back": {
@@ -313,7 +319,8 @@
         "yourActivities": "Aktivitäten, an denen Sie teilnehmen",
         "comingActivities": "Bevorstehende Aktivitäten",
         "beforeActivity": "Aktivitäten, an denen Sie teilgenommen haben",
-        "scheduleInfos": "Kreuzen Sie die Tage an, an denen wir Produkte sammeln können (zwischen 8:00 Uhr und 18:00 Uhr)"
+        "scheduleInfos": "Kreuzen Sie die Tage an, an denen wir Produkte sammeln können (zwischen 8:00 Uhr und 18:00 Uhr)",
+        "removeUser": "Dieser Benutzer wurde entfernt"
     },
     "donation": {
         "donate": "Eine Spende machen",

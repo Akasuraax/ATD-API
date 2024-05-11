@@ -74,36 +74,43 @@ class ScheduleController extends Controller
             ]);
 
             $updatedSchedules = [];
-            foreach ($fields['schedule'] as $scheduleData) {
-                $scheduleDay = $scheduleData['day'];
-                $startHour = $scheduleData['start_hour'];
-                $endHour = $scheduleData['end_hour'];
+            if (!empty($fields['schedule'])) {
+                foreach ($fields['schedule'] as $scheduleData) {
+                    $scheduleDay = $scheduleData['day'];
+                    $startHour = $scheduleData['start_hour'];
+                    $endHour = $scheduleData['end_hour'];
 
-                $schedule = Schedule::where('user_id', $userId)
-                    ->where('day', $scheduleDay)
-                    ->first();
+                    $schedule = Schedule::where('user_id', $userId)
+                        ->where('day', $scheduleDay)
+                        ->first();
 
-                if ($schedule) {
-                    $schedule->start_hour = $startHour;
-                    $schedule->end_hour = $endHour;
-                    $schedule->save();
-                } else {
-                    $schedule = new Schedule([
-                        'user_id' => $userId,
+                    if ($schedule) {
+                        $schedule->start_hour = $startHour;
+                        $schedule->end_hour = $endHour;
+                        $schedule->save();
+                    } else {
+                        $schedule = new Schedule([
+                            'user_id' => $userId,
+                            'day' => $scheduleDay,
+                            'start_hour' => $startHour,
+                            'end_hour' => $endHour
+                        ]);
+                        $schedule->save();
+                    }
+
+                    $updatedSchedules[] = [
                         'day' => $scheduleDay,
-                        'start_hour' => $startHour ,
-                        'end_hour' => $endHour
-                    ]);
-                    $schedule->save();
+                        'start_hour' => $startHour,
+                        'end_hour' => $endHour,
+                        'user' => $schedule->user
+                    ];
                 }
-
-                $updatedSchedules[] = [
-                    'day' => $scheduleDay,
-                    'start_hour' => $startHour,
-                    'end_hour' => $endHour,
-                    'user' => $schedule->user
-                ];
             }
+
+            Schedule::where('user_id', $userId)
+                ->whereNotIn('day', array_column($updatedSchedules, 'day'))
+                ->delete();
+
 
             return response()->json(['schedules' => $updatedSchedules], 200);
         } catch (ValidationException $e) {

@@ -266,6 +266,15 @@ use App\Http\Controllers\ScheduleController;
         Route::post('/', [AddressController::class, 'address']);
     });
 
+    /*
     Route::prefix('schedule')->group(function(){
         Route::post('/', [ScheduleController::class, 'planJourneyFromSchedule']);
+    });*/
+
+    /*
+    Route::prefix('archivePiece')->group(function (){
+        Route::post('/', [PieceController::class, 'archivePassed']);
     });
+    */
+
+

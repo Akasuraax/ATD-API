@@ -9,6 +9,7 @@ use App\Services\DeleteService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
 
 class PieceController extends Controller
 {
@@ -163,5 +164,14 @@ class PieceController extends Controller
     public function getPieceStockCount($warehouseId){
         return Piece::where('id_warehouse', $warehouseId)->where('archive', false)->sum('count');
     }
+
+    /*
+    public function archivePassed(){
+        $pieces = Piece::where('expired_date', '<', Carbon::today())->where('archive', false)->get();
+
+        foreach($pieces as $piece)
+            $piece->archive();
+    }
+    */
 
 }

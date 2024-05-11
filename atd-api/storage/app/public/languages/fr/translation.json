@@ -205,7 +205,8 @@
         "address": "Adresse",
         "zipcode": "Code postal",
         "action": "Action",
-        "accept": "J'y vais !"
+        "accept": "J'y vais !",
+        "text" : "Visite à la personne du "
     },
     "list": {
         "search": "Rechercher",
@@ -259,7 +260,8 @@
         "ratherNot": "Non précisé",
         "yourActivities": "Activités auxquelles vous êtes inscrit",
         "comingActivities": "Activités à venir",
-        "beforeActivity": "Activités auxquelles vous avez participé"
+        "beforeActivity": "Activités auxquelles vous avez participé",
+        "scheduleInfos": "Cochez les jours où nous pouvons récolter des produits (entre 8h et 18h)"
     },
     "vehicle": {
         "title": "Liste des véhicules",
@@ -361,7 +363,12 @@
         "reference": "Référence",
         "none": "Pas de référence",
         "isArchived": "Archivé",
-        "roleDetails": "Détails du rôle"
+        "roleDetails": "Détails du rôle",
+        "empty" : "Pas de role",
+        "remove": "Vous devez avoir au moins 1 role",
+        "addroleactivity": "Ajout d'un role",
+        "limit": "Limite",
+        "role": "Role"
     },
     "types": {
         "title": "Types",
@@ -383,7 +390,9 @@
         "address": "Adresse",
         "zipcode": "Code postal",
         "isArchived": "Archivé",
-        "annexeDetails": "Détails de l'annexe"
+        "annexeDetails": "Détails de l'annexe",
+        "addressAlreadyUsed" : "Cette adresse est déjà utilisée",
+        "emptyfield" : "Veuillez remplir tous les champs"
     },
     "donation": {
         "donate": "Faire une donation",
@@ -432,7 +441,7 @@
         "previous": "Précédent",
         "timetable": "Horaire de passage",
         "cancel": "Annuler",
-        "register": "Enregistrer",
+        "register": "S'inscrire",
         "unregister": "Me désincrire",
         "fillMessage": "Vous devez remplir tous les champs nécéssaires"
     },

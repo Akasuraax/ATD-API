@@ -39,22 +39,23 @@
     "generic": {
         "success": "Das Element wurde erfolgreich gesendet!",
         "failure": "Ein Fehler ist aufgetreten!",
-        "deleteMessage": "Möchten Sie dieses Element wirklich löschen?",
+        "deleteMessage": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
         "acceptDelete": "Ja, ich bin sicher",
         "refuseDelete": "Nein, abbrechen",
         "deleteButton": "Löschen",
-        "banButton": "Verbannen",
+        "banButton": "Sperren",
         "editButton": "Bearbeiten",
         "saveButton": "Speichern",
         "signOut": "Abmelden",
         "yes": "Ja",
         "no": "Nein",
         "unit": "Einheit",
-        "next": "Weiter",
-        "previous": "Zurück",
+        "next": "Nächster",
+        "previous": "Vorheriger",
         "timetable": "Fahrplan",
         "cancel": "Abbrechen",
         "register": "Registrieren",
+        "unregister": "Abmelden",
         "fillMessage": "Sie müssen alle erforderlichen Felder ausfüllen"
     },
     "createActivity": {
@@ -255,7 +256,8 @@
         "address": "Adresse",
         "zipcode": "Postleitzahl",
         "action": "Aktion",
-        "accept": "Ich gehe!"
+        "accept": "Ich gehe!",
+        "text": "Besuch bei der Person am "
     },
     "list": {
         "search": "Suchen",
@@ -309,7 +311,8 @@
         "ratherNot": "Nicht angegeben",
         "yourActivities": "Aktivitäten, an denen Sie teilnehmen",
         "comingActivities": "Bevorstehende Aktivitäten",
-        "beforeActivity": "Aktivitäten, an denen Sie teilgenommen haben"
+        "beforeActivity": "Aktivitäten, an denen Sie teilgenommen haben",
+        "scheduleInfos": "Kreuzen Sie die Tage an, an denen wir Produkte sammeln können (zwischen 8:00 Uhr und 18:00 Uhr)"
     },
     "donation": {
         "donate": "Eine Spende machen",
@@ -394,7 +397,9 @@
         "add": "Hinzufügen",
         "uploadSuccess": "Datei(en) wurde(n) erfolgreich hochgeladen",
         "uploadFail": "Fehler beim Hochladen der Datei(en)",
-        "noFileSelected": "Keine Datei ausgewählt"
+        "noFileSelected": "Keine Datei ausgewählt",
+        "addFile": "Eine Datei hinzufügen",
+        "successAddFiles": "Datei hinzugefügt"
     },
 
     "demand": {
@@ -423,7 +428,12 @@
         "reference": "Referenz",
         "none": "Keine Referenz",
         "isArchived": "Archiviert",
-        "roleDetails": "Rolleninformationen"
+        "roleDetails": "Rolleninformationen",
+        "empty": "Sie haben keine Rolle ausgewählt",
+        "remove": "Sie müssen mindestens 1 Rolle haben",
+        "addroleactivity": "Rolle hinzufügen",
+        "limit": "Grenze",
+        "role": "Rolle"
     },
 
     "annexes": {
@@ -433,7 +443,9 @@
         "address": "Adresse",
         "zipcode": "Postleitzahl",
         "isArchived": "Archiviert",
-        "annexeDetails": "Anhangdetails"
+        "annexeDetails": "Anhangdetails",
+        "addressAlreadyUsed": "Diese Adresse wird bereits verwendet",
+        "emptyfield": "Bitte füllen Sie alle Felder aus"
     },
     "types": {
         "title": "Typen",
@@ -461,5 +473,14 @@
         "qrCode": "QR-Code generieren",
         "addPiece": "Charge hinzufügen",
         "notSpace": "Maximale Lagerkapazität erreicht"
+    },
+    "week": {
+        "monday": "Montag",
+        "tuesday": "Dienstag",
+        "wednesday": "Mittwoch",
+        "thursday": "Donnerstag",
+        "friday": "Freitag",
+        "saturday": "Samstag",
+        "sunday": "Sonntag"
     }
 }

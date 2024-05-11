@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Annexe;
 use App\Services\DeleteService;
 use App\Models\Vehicle;
@@ -23,21 +24,21 @@ class VehicleController extends Controller
                 'fuel_type' => 'string|required',
                 'id_annexe' => 'required|int'
             ]);
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
 
         $exist = Vehicle::where('license_plate', strtoupper($validateData['license_plate']))->first();
-        if($exist)
+        if ($exist)
             return response()->json(['message' => 'This product already exist !'], 409);
 
         $annexe = Annexe::findOrFail($validateData['id_annexe']);
-        if($annexe->archive)
+        if ($annexe->archive)
             return response()->json(['message' => 'The annexe you selected is archived.'], 405);
 
-        if($validateData['partner']) {
+        if ($validateData['partner']) {
             $partnerVehicle = Vehicle::where('partner', true)->first();
-            if($partnerVehicle) {
+            if ($partnerVehicle) {
                 $partnerVehicle->partner = false;
                 $partnerVehicle->save();
             }
@@ -56,7 +57,8 @@ class VehicleController extends Controller
         return Response(['vehicle' => $vehicle], 201);
     }
 
-    public function getVehicles(Request $request){
+    public function getVehicles(Request $request)
+    {
 
         $perPage = $request->input('pageSize', 10);
         $page = $request->input('page', 1);
@@ -69,7 +71,7 @@ class VehicleController extends Controller
 
         $field = "vehicles." . $field;
 
-        $vehicle = Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.partner'  ,'vehicles.average_consumption', 'vehicles.fuel_type', 'annexes.name as annexe_name','vehicles.archive')
+        $vehicle = Vehicle::select('vehicles.id', 'vehicles.name', 'vehicles.license_plate', 'vehicles.partner', 'vehicles.average_consumption', 'vehicles.fuel_type', 'annexes.name as annexe_name', 'vehicles.archive')
             ->join('annexes', 'vehicles.id_annexe', '=', 'annexes.id')
             ->where(function ($query) use ($fieldFilter, $operator, $value) {
                 if ($fieldFilter && $operator && $value !== '*') {
@@ -105,7 +107,8 @@ class VehicleController extends Controller
         return response()->json($vehicle);
     }
 
-    public function getAllVehicles() {
+    public function getAllVehicles()
+    {
         $vehicle = Vehicle::where('archive', false)
             ->with('annexe')
             ->get();
@@ -117,7 +120,57 @@ class VehicleController extends Controller
         }
     }
 
-    public function getVehicle($id){
+    public function getAllVehiclesFree(Request $request)
+    {
+
+        try {
+            $validateData = $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date',
+                'activityId' => 'required|int'
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $requestStartDate = $request->input('start_date');
+        $requestEndDate = $request->input('end_date');
+        $activityId = $request->input('activityId');
+
+
+        $activities = Activity::select()
+            ->where('archive', false)
+            ->whereNot('id',$activityId )
+            ->with(['journeys' => function ($query) {
+                $query->with('vehicles');
+            }])
+            ->where(function ($query) use ($requestStartDate, $requestEndDate) {
+                $query->whereBetween('activities.start_date', [$requestStartDate, $requestEndDate])
+                    ->whereNot('activities.start_date', $requestEndDate)
+                    ->orWhereBetween('activities.end_date', [$requestStartDate, $requestEndDate])
+                    ->whereNot('activities.end_date', $requestStartDate);
+            })
+            ->get();
+
+        $vehicleIds = [];
+        foreach ($activities as $activity) {
+            foreach ($activity->journeys as $journey) {
+                foreach ($journey->vehicles as $vehicle) {
+                    $vehicleIds[] = $vehicle->id;
+                }
+            }
+        }
+
+        $vehicles = Vehicle::where('archive', false)
+            ->with('annexe')
+            ->whereNotIn('id', $vehicleIds)
+            ->get();
+
+        return response()->json([ 'vehicles' => $vehicles]);
+    }
+
+    public function getVehicle($id)
+    {
         $vehicle = Vehicle::where('id', $id)
             ->with('annexe')
             ->first();
@@ -128,7 +181,9 @@ class VehicleController extends Controller
         }
     }
 
-    public function deleteVehicle($id){
+    public
+    function deleteVehicle($id)
+    {
         $vehicle = Vehicle::find($id);
 
         if ($vehicle) {
@@ -144,34 +199,36 @@ class VehicleController extends Controller
         }
     }
 
-    public function updateVehicle($id, Request $request){
-        try{
+    public
+    function updateVehicle($id, Request $request)
+    {
+        try {
             $vehicle = Vehicle::findOrFail($id);
-            try{
+            try {
                 $requestData = $request->validate([
-                    'name' => 'required','string|max:255',
+                    'name' => 'required', 'string|max:255',
                     'license_plate' => 'required|min:9|max:9',
                     'partner' => 'required', 'boolean',
-                    'average_consumption' => 'required','numeric',
-                    'fuel_type' => 'required','string',
-                    'annexe.id' => 'required','int',
-                    'archive' => 'required','boolean'
+                    'average_consumption' => 'required', 'numeric',
+                    'fuel_type' => 'required', 'string',
+                    'annexe.id' => 'required', 'int',
+                    'archive' => 'required', 'boolean'
                 ]);
-            }catch(ValidationException $e){
+            } catch (ValidationException $e) {
                 return response()->json(['errors' => $e->errors()], 422);
             }
 
             $exist = Vehicle::where('license_plate', strtoupper($request['license_plate']))->whereNotIn('id', [$id])->first();
-            if($exist)
+            if ($exist)
                 return response()->json(['message' => 'This product already exist !'], 409);
 
             $annexe = Annexe::findOrFail($requestData['annexe']['id']);
-            if($annexe->archive)
+            if ($annexe->archive)
                 return response()->json(['message' => 'The annexe you selected is archived.'], 405);
 
-            if($requestData['partner']) {
+            if ($requestData['partner']) {
                 $partnerVehicle = Vehicle::where('partner', true)->first();
-                if($partnerVehicle) {
+                if ($partnerVehicle) {
                     $partnerVehicle->partner = false;
                     $partnerVehicle->save();
                 }
@@ -190,7 +247,7 @@ class VehicleController extends Controller
             }
 
             return response()->json(['vehicle' => $vehicle], 200);
-        }catch(ValidationException $e){
+        } catch (ValidationException $e) {
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }

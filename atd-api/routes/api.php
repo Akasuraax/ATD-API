@@ -135,6 +135,7 @@ use App\Http\Controllers\ScheduleController;
         Route::post('/', [VehicleController::class, 'createVehicle'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [VehicleController::class, 'getVehicles']);
         Route::get('/all', [VehicleController::class, 'getAllVehicles']);
+        Route::get('/allFree', [VehicleController::class, 'getAllVehiclesFree']);
         Route::get('/{id}', [VehicleController::class, 'getVehicle']);
         Route::delete('/{id}', [VehicleController::class, 'deleteVehicle'])->middleware('authorization:' . serialize([1]));
         Route::patch('/{id}', [VehicleController::class, 'updateVehicle'])->middleware('authorization:' . serialize([1]));

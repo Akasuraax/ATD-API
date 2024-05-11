@@ -229,6 +229,7 @@
         "role": "Roles",
         "email": "Email",
         "isArchived": "Archived Account",
+        "visited": "User to visit",
         "isBan": "Banned Account",
         "informations": "Information",
         "action": "Action",

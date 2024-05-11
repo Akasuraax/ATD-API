@@ -232,6 +232,7 @@ class UserController extends Controller
                 'phone_number' => 'nullable|string|max:15',
                 'gender' => 'nullable|int|max:2',
                 'birth_date' => 'nullable|date',
+                'visited' => 'required|boolean',
                 'address' => 'required|string',
                 'zipcode' => 'required|string|max:5',
                 'siret_number' => 'nullable|string|max:14',

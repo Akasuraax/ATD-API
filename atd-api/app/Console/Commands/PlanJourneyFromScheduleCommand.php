@@ -57,7 +57,7 @@ class PlanJourneyFromScheduleCommand extends Command
             'start_date' => Carbon::now()->addDay()->setTime(8,0,0),
             'end_date' => Carbon::now()->addDay()->setTime(20, 0, 0),
             'donation' => null,
-            'id_type' => 10
+            'id_type' => 11
         ]);
 
         $activity->roles()->attach(7, ['archive' => false, 'min' => 1, 'max' => 1, 'count' => 0]);

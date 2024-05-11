@@ -83,7 +83,7 @@ class JourneyController extends Controller
             'id_activity' => $activity->id ?? null
         ]);
 
-        $file = $this->pdfService->generatePdf($steps, $activity, $journey->id);
+        $file = $this->pdfService->generatePdf($steps, $activity, $journey, $vehicle);
         $newFile = File::create([
             'name' => $activity->id . '-' .'journey' . '.pdf',
             'link' => '/' . $file,

@@ -311,7 +311,8 @@
         "ratherNot": "Nicht angegeben",
         "yourActivities": "Aktivitäten, an denen Sie teilnehmen",
         "comingActivities": "Bevorstehende Aktivitäten",
-        "beforeActivity": "Aktivitäten, an denen Sie teilgenommen haben"
+        "beforeActivity": "Aktivitäten, an denen Sie teilgenommen haben",
+        "scheduleInfos": "Kreuzen Sie die Tage an, an denen wir Produkte sammeln können (zwischen 8:00 Uhr und 18:00 Uhr)"
     },
     "donation": {
         "donate": "Eine Spende machen",

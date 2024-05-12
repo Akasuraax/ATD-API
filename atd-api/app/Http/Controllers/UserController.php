@@ -30,7 +30,7 @@ class UserController extends Controller
                 'birth_date' => 'nullable|date',
                 'address' => 'required|string',
                 'zipcode' => 'required|string|max:5',
-                'siret_number' => 'nullable|int|max:14',
+                'siret_number' => 'nullable',
                 'compagny' => 'nullable|string'
             ]);
         } catch (ValidationException $e) {

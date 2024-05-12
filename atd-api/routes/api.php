@@ -162,6 +162,7 @@ use App\Http\Controllers\ScheduleController;
         Route::post('/', [ProductController::class, 'createProduct'])->middleware('authorization:' . serialize([1]));
         Route::get('/', [ProductController::class, 'getProducts']);
         Route::get('/max/{id}', [ProductController::class, 'getNbProductProduct']);
+        Route::get('/all', [ProductController::class, 'getAllProducts']);
         Route::get('/filter', [ProductController::class, 'getProductsFilter']);
         Route::get('/{id}', [ProductController::class, 'getProduct']);
         Route::delete('/{id}', [ProductController::class, 'deleteProduct'])->middleware('authorization:' . serialize([1]));

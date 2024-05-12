@@ -178,4 +178,10 @@ class ProductController extends Controller
             return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
     }
+
+    public function getAllProducts(){
+        $products = Product::select('id', 'name')->where('archive', false)->get();
+
+        return $products;
+    }
 }
